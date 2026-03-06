@@ -40,6 +40,7 @@ export function useSessionState() {
       roundEndSound: null,
       switchBoxingSound: null,
       switchMuayThaiSound: null,
+      switchBothSound: null,
       repeatMode: "same", // same | reshuffle
       matchups: [],
       nextMatchups: [],
@@ -338,6 +339,7 @@ export function useSessionState() {
         roundEndSound: null,
         switchBoxingSound: null,
         switchMuayThaiSound: null,
+        switchBothSound: null,
         repeatMode: "same",
         matchups: [],
         nextMatchups: [],
