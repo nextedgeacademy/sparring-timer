@@ -16,19 +16,30 @@ import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 function HomeContent() {
+  const [isAuthed, setIsAuthed] = React.useState(null);
+
   useEffect(() => {
-    const initGym = async () => {
+    const checkAuth = async () => {
       try {
         const user = await base44.auth.me();
+        if (!user) {
+          base44.auth.redirectToLogin();
+          return;
+        }
         if (user?.gym_id) {
           localStorage.setItem("gym_id", user.gym_id);
         }
+        setIsAuthed(true);
       } catch (err) {
-        console.error("Failed to init gym:", err);
+        base44.auth.redirectToLogin();
       }
     };
-    initGym();
+    checkAuth();
   }, []);
+
+  if (isAuthed === null) {
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
+  }
 
   const { session, actions } = useSessionState();
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
