@@ -155,7 +155,7 @@ export default function SetupPanel({ session, actions }) {
         <Button
           variant="outline"
           size="lg"
-          className="border-white/20 text-white/70 hover:bg-white/10 gap-2"
+          className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-2"
           onClick={() => window.open(createPageUrl("TVMode"), "_blank")}
         >
           <Monitor className="w-5 h-5" /> Open TV Mode
@@ -163,7 +163,7 @@ export default function SetupPanel({ session, actions }) {
         <Button
           variant="outline"
           size="lg"
-          className="border-white/20 text-white/70 hover:bg-white/10 gap-2"
+          className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-2"
           onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
         >
           <Maximize className="w-5 h-5" /> Fullscreen TV
