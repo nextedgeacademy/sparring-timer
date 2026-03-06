@@ -61,13 +61,17 @@ export default function Home() {
     // Midpoint switch trigger
     if (session.phase === "round" && !prevMidpoint && session.midpointTriggered) {
       const playSwitch = async () => {
-        if (session.boxingGoalHasSwitch && session.switchBoxingSound) {
+        if (session.boxingGoalHasSwitch && session.muayThaiGoalHasSwitch && session.switchBothSound) {
+          try {
+            const audio = new Audio(session.switchBothSound);
+            await audio.play().catch(() => {});
+          } catch (e) {}
+        } else if (session.boxingGoalHasSwitch && session.switchBoxingSound) {
           try {
             const audio = new Audio(session.switchBoxingSound);
             await audio.play().catch(() => {});
           } catch (e) {}
-        }
-        if (session.muayThaiGoalHasSwitch && session.switchMuayThaiSound) {
+        } else if (session.muayThaiGoalHasSwitch && session.switchMuayThaiSound) {
           try {
             const audio = new Audio(session.switchMuayThaiSound);
             await audio.play().catch(() => {});
