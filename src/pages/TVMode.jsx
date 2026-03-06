@@ -74,7 +74,7 @@ export default function TVMode() {
   const displayMatchups = session.phase === "rest"
     ? (session.nextMatchups?.length > 0 ? session.nextMatchups : session.matchups)
     : session.matchups;
-  const displayGoals = session.phase === "rest" ? (Object.keys(session.nextGoals || {}).length > 0 ? session.nextGoals : session.goals) : session.goals;
+  const displayGoals = session.phase === "rest" ? session.nextGoals : session.goals;
   const displayRound = session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
 
   if (!isActive && !isComplete) {

@@ -56,7 +56,7 @@ export function useSessionState() {
     if (session.status === "running" || session.status === "rest" || session.status === "warmup") {
       timerRef.current = setInterval(() => {
         setSession(prev => {
-          if (prev.timeLeft <= 2) {
+          if (prev.timeLeft <= 1) {
             clearInterval(timerRef.current);
             if (prev.status === "warmup") {
               // Warmup ended - play start sound and begin round
