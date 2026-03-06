@@ -1,0 +1,168 @@
+import React, { useEffect, useState, useRef } from "react";
+import { useSessionState } from "../components/sparring/useSessionState";
+import MatchupGrid from "../components/sparring/MatchupGrid";
+import TimerDisplay from "../components/sparring/TimerDisplay";
+import GoalDisplay from "../components/sparring/GoalDisplay";
+import { Button } from "@/components/ui/button";
+import { Maximize, Minimize, Pause, Play } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function TVMode() {
+  const { session, actions } = useSessionState();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const containerRef = useRef(null);
+  const controlTimer = useRef(null);
+
+  // Auto-enter fullscreen if URL param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("fullscreen") === "true") {
+      enterFullscreen();
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  const enterFullscreen = () => {
+    const el = containerRef.current || document.documentElement;
+    el.requestFullscreen?.().catch(() => {});
+  };
+
+  const exitFullscreen = () => {
+    document.exitFullscreen?.().catch(() => {});
+  };
+
+  // Show controls on mouse move, auto-hide after 3s
+  const handleMouseMove = () => {
+    setShowControls(true);
+    if (controlTimer.current) clearTimeout(controlTimer.current);
+    controlTimer.current = setTimeout(() => setShowControls(false), 3000);
+  };
+
+  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused";
+  const isComplete = session.status === "complete";
+
+  const displayMatchups = session.phase === "rest"
+    ? (session.nextMatchups?.length > 0 ? session.nextMatchups : session.matchups)
+    : session.matchups;
+  const displayBoxing = session.phase === "rest" ? (session.nextBoxingGoal || session.boxingGoal) : session.boxingGoal;
+  const displayMuayThai = session.phase === "rest" ? (session.nextMuayThaiGoal || session.muayThaiGoal) : session.muayThaiGoal;
+  const displayRound = session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
+
+  if (!isActive && !isComplete) {
+    return (
+      <div
+        ref={containerRef}
+        className="min-h-screen bg-black flex flex-col items-center justify-center text-center p-8"
+      >
+        <h1 className="text-4xl font-black text-white/30 mb-6">WAITING FOR SESSION</h1>
+        <p className="text-white/20 text-lg mb-8">Start a session from the admin view</p>
+        {!isFullscreen && (
+          <Button onClick={enterFullscreen} className="bg-white/10 text-white border border-white/20 hover:bg-white/20 gap-2">
+            <Maximize className="w-4 h-4" /> Enter Fullscreen
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (isComplete) {
+    return (
+      <div ref={containerRef} className="min-h-screen bg-black flex items-center justify-center">
+        <h1 className="text-6xl font-black text-white">SESSION COMPLETE</h1>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="min-h-screen bg-black flex flex-col cursor-none select-none"
+      onMouseMove={handleMouseMove}
+      onClick={handleMouseMove}
+    >
+      {/* Header bar */}
+      <div className="px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <div className={`text-sm font-bold uppercase tracking-widest ${session.phase === "rest" ? "text-amber-400" : "text-white/50"}`}>
+            {session.phase === "rest" ? "REST — UP NEXT" : `Round ${displayRound}`}
+          </div>
+          {session.status === "paused" && (
+            <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-sm font-bold rounded-full animate-pulse">
+              PAUSED
+            </span>
+          )}
+        </div>
+        <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} large />
+      </div>
+
+      {/* Goals */}
+      <div className="px-6 pb-3">
+        <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large />
+      </div>
+
+      {/* Matchups - takes most space */}
+      <div className="flex-1 px-6 pb-6 flex items-center">
+        <AnimatePresence mode="wait">
+          <MatchupGrid matchups={displayMatchups} large />
+        </AnimatePresence>
+      </div>
+
+      {/* Minimal overlay controls (on hover) */}
+      <AnimatePresence>
+        {showControls && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed bottom-4 right-4 flex gap-2 cursor-default"
+          >
+            {isFullscreen ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={exitFullscreen}
+                className="bg-black/80 border-white/20 text-white/70 hover:bg-black gap-1"
+              >
+                <Minimize className="w-3 h-3" /> Exit Fullscreen
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={enterFullscreen}
+                className="bg-black/80 border-white/20 text-white/70 hover:bg-black gap-1"
+              >
+                <Maximize className="w-3 h-3" /> Fullscreen
+              </Button>
+            )}
+            {session.status === "paused" ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={actions.resume}
+                className="bg-green-900/80 border-green-700 text-green-300 hover:bg-green-800 gap-1"
+              >
+                <Play className="w-3 h-3" /> Resume
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={actions.pause}
+                className="bg-black/80 border-white/20 text-white/70 hover:bg-black gap-1"
+              >
+                <Pause className="w-3 h-3" /> Pause
+              </Button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
