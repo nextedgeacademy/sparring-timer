@@ -152,22 +152,6 @@ export default function SetupPanel({ session, actions }) {
         <Button onClick={handleCreateBrackets} size="lg" className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 gap-2">
           <Play className="w-5 h-5" /> Create Brackets
         </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-2"
-          onClick={() => window.open(createPageUrl("TVMode"), "_blank")}
-        >
-          <Monitor className="w-5 h-5" /> Open TV Mode
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-2"
-          onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
-        >
-          <Maximize className="w-5 h-5" /> Fullscreen TV
-        </Button>
       </div>
     </div>
   );

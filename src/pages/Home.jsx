@@ -8,7 +8,7 @@ import GoalDisplay from "../components/sparring/GoalDisplay";
 import SoundUploader from "../components/sparring/SoundUploader";
 import BracketsPreview from "../components/sparring/BracketsPreview";
 import { Button } from "@/components/ui/button";
-import { Settings, Monitor, Maximize, RotateCcw } from "lucide-react";
+import { Settings, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -113,42 +113,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      {/* Header with Goals and TV Buttons */}
-      <div className="p-4 flex items-center justify-between border-b border-white/5">
-        <div className="flex-1 mx-6">
-          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
+      {/* Header - Round, Timer, and Goals all on one row */}
+      <div className="p-4 flex items-center justify-between gap-4 border-b border-white/5 whitespace-nowrap">
+        <div className="text-2xl md:text-3xl font-black text-white">
+          {isWarmup ? "WARMING UP" : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
+        </div>
+        <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
+        <div className="flex-1 mx-4">
+          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={false} />
         </div>
         {session.status === "paused" && (
-          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse mr-4">
+          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse">
             PAUSED
           </span>
         )}
-        <div className="flex gap-2">
-         <Button
-           variant="outline"
-           size="sm"
-           className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1"
-           onClick={() => window.open(createPageUrl("TVMode"), "_blank")}
-         >
-           <Monitor className="w-3 h-3" /> TV
-         </Button>
-         <Button
-           variant="outline"
-           size="sm"
-           className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1"
-           onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
-         >
-           <Maximize className="w-3 h-3" /> Fullscreen
-         </Button>
-        </div>
-      </div>
-
-      {/* Timer with Round */}
-      <div className="flex justify-center items-center py-4 gap-8">
-        <div className="text-4xl md:text-5xl font-black text-white">
-          {isWarmup ? "WARMING UP..." : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
-        </div>
-        <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
       </div>
 
       {/* Matchups */}
