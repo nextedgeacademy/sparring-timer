@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import React from "react";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
@@ -8,47 +7,21 @@ import TimerDisplay from "../components/sparring/TimerDisplay";
 import GoalDisplay from "../components/sparring/GoalDisplay";
 import SoundUploader from "../components/sparring/SoundUploader";
 import BracketsPreview from "../components/sparring/BracketsPreview";
-
 import { Button } from "@/components/ui/button";
-import { Settings, Monitor, Maximize, RotateCcw, LogOut } from "lucide-react";
+import { Settings, Monitor, Maximize, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-function HomeContent() {
-  const [isAuthed, setIsAuthed] = useState(null);
+export default function Home() {
   const { session, actions } = useSessionState();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await base44.auth.me();
-        if (!user) {
-          base44.auth.redirectToLogin();
-          return;
-        }
-        if (user?.gym_id) {
-          localStorage.setItem("gym_id", user.gym_id);
-        }
-        setIsAuthed(true);
-      } catch (err) {
-        base44.auth.redirectToLogin();
-      }
-    };
-    checkAuth();
-  }, []);
-
-  if (isAuthed === null) {
-    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
-  }
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
 
   if (isComplete) {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6 flex flex-col items-center">
-          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-48 h-48" />
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6">
           <h1 className="text-5xl font-black text-white">SESSION COMPLETE</h1>
           <p className="text-white/50 text-lg">Great work today!</p>
           <Button onClick={actions.clearSession} size="lg" className="bg-white text-gray-950 hover:bg-gray-100 font-bold gap-2">
@@ -67,15 +40,12 @@ function HomeContent() {
     return (
       <div className="min-h-screen bg-gray-950">
         <div className="flex justify-end p-4 gap-2">
-           <Link to={createPageUrl("GoalSettings")}>
-            <Button variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1">
-              <Settings className="w-3 h-3" /> Goals & Settings
-            </Button>
-           </Link>
-           <Button variant="outline" size="sm" className="bg-red-700 border-red-600 text-white hover:bg-red-600 font-semibold gap-1" onClick={() => base44.auth.logout()}>
-            <LogOut className="w-3 h-3" /> Logout
+          <Link to={createPageUrl("GoalSettings")}>
+           <Button variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1">
+             <Settings className="w-3 h-3" /> Goals & Settings
            </Button>
-         </div>
+          </Link>
+        </div>
         {/* Sound Uploader in setup */}
         <div className="max-w-4xl mx-auto px-6">
           <SetupPanel session={session} actions={actions} />
@@ -91,7 +61,8 @@ function HomeContent() {
   // Active session view (Admin/Control) or Warmup
   const isWarmup = session.status === "warmup";
   const displayMatchups = session.phase === "rest" ? (session.nextMatchups.length > 0 ? session.nextMatchups : session.matchups) : session.matchups;
-  const displayGoals = session.phase === "rest" ? session.nextGoals : session.goals;
+  const displayBoxing = session.phase === "rest" ? (session.nextBoxingGoal || session.boxingGoal) : session.boxingGoal;
+  const displayMuayThai = session.phase === "rest" ? (session.nextMuayThaiGoal || session.muayThaiGoal) : session.muayThaiGoal;
   const displayRound = session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
 
   return (
@@ -99,7 +70,7 @@ function HomeContent() {
       {/* Header with Goals and TV Buttons */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <div className="flex-1 mx-6">
-          <GoalDisplay goals={displayGoals} large={true} />
+          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
         </div>
         {session.status === "paused" && (
           <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse mr-4">
@@ -122,14 +93,6 @@ function HomeContent() {
            onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
          >
            <Maximize className="w-3 h-3" /> Fullscreen
-         </Button>
-         <Button
-           variant="outline"
-           size="sm"
-           className="bg-red-700 border-red-600 text-white hover:bg-red-600 font-semibold gap-1"
-           onClick={() => base44.auth.logout()}
-         >
-           <LogOut className="w-3 h-3" /> Logout
          </Button>
         </div>
       </div>
@@ -155,8 +118,4 @@ function HomeContent() {
       </div>
     </div>
   );
-}
-
-export default function Home() {
-  return <HomeContent />;
 }

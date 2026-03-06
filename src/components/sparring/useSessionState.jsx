@@ -30,15 +30,15 @@ export function useSessionState() {
       restTime: 60,
       timeLeft: 180,
       phase: "round", // round | rest
-      selectedSparringTypes: [], // array of selected sparring types
-      goals: {}, // { "boxing": "Jabs Only", "muay_thai": "Body Kicks Only" }
-      nextGoals: {},
+      boxingGoal: "",
+      muayThaiGoal: "",
+      nextBoxingGoal: "",
+      nextMuayThaiGoal: "",
       roundStartSound: null,
       roundEndSound: null,
       repeatMode: "same", // same | reshuffle
       matchups: [],
       nextMatchups: [],
-      divisionNames: ["Division 1", "Division 2", "Division 3"],
     };
   });
 
@@ -63,7 +63,6 @@ export function useSessionState() {
               if (prev.roundStartSound) {
                 try {
                   const audio = new Audio(prev.roundStartSound);
-                  audio.currentTime = 0;
                   audio.play().catch(() => {});
                 } catch (e) {}
               }
@@ -79,7 +78,6 @@ export function useSessionState() {
               if (prev.roundEndSound) {
                 try {
                   const audio = new Audio(prev.roundEndSound);
-                  audio.currentTime = 0;
                   audio.play().catch(() => {});
                 } catch (e) {}
               }
@@ -95,13 +93,14 @@ export function useSessionState() {
                 phase: "rest",
                 timeLeft: prev.restTime,
                 nextMatchups: nextData.matchups,
+                nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal,
+                nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal,
               };
             } else {
               // Rest ended - play start sound, begin next round
               if (prev.roundStartSound) {
                 try {
                   const audio = new Audio(prev.roundStartSound);
-                  audio.currentTime = 0;
                   audio.play().catch(() => {});
                 } catch (e) {}
               }
@@ -129,7 +128,7 @@ export function useSessionState() {
       }
     });
     const matchups = getMergedRound(state.schedules, newIndices);
-    return { matchups, roundIndices: newIndices };
+    return { matchups, roundIndices: newIndices, boxingGoal: "", muayThaiGoal: "" };
   }, []);
 
   function advanceRound(prev) {
@@ -176,8 +175,8 @@ export function useSessionState() {
       globalRound: prev.globalRound + 1,
       matchups,
       schedules,
-      goals: prev.nextGoals,
-      nextGoals: {},
+      boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
+      muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
       nextMatchups: [],
     };
   }
@@ -187,7 +186,7 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, ...updates }));
     },
 
-    createBrackets: (divisions, divisionCount, goals, selectedTypes) => {
+    createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -212,9 +211,8 @@ export function useSessionState() {
         globalRound: 1,
         timeLeft: 20, // 20 second warmup
         matchups,
-        goals,
-        selectedSparringTypes: selectedTypes,
-        nextGoals: {},
+        boxingGoal,
+        muayThaiGoal,
         nextMatchups: [],
       }));
     },
@@ -257,23 +255,6 @@ export function useSessionState() {
     nextRound: () => {
       setSession(prev => {
         if (timerRef.current) clearInterval(timerRef.current);
-        // If currently on a live round, go to rest first
-        if (prev.phase === "round") {
-          if (prev.restTime === 0) {
-            // No rest configured, go directly to next live round
-            return advanceRound(prev);
-          }
-          // Prepare next round matchups during rest
-          const nextData = getNextRoundData(prev);
-          return {
-            ...prev,
-            status: "running",
-            phase: "rest",
-            timeLeft: prev.restTime,
-            nextMatchups: nextData.matchups,
-          };
-        }
-        // If currently in rest phase, advance to next live round
         return advanceRound(prev);
       });
     },
@@ -281,42 +262,20 @@ export function useSessionState() {
     prevRound: () => {
       setSession(prev => {
         if (timerRef.current) clearInterval(timerRef.current);
-        // If currently on a live round, go to rest first
-        if (prev.phase === "round") {
-          if (prev.restTime === 0) {
-            // No rest configured, go directly to previous live round
-            const newIndices = { ...prev.roundIndices };
-            Object.keys(prev.schedules).forEach(div => {
-              newIndices[div] = Math.max(0, (prev.roundIndices[div] || 0) - 1);
-            });
-            const matchups = getMergedRound(prev.schedules, newIndices);
-            return {
-              ...prev,
-              status: "running",
-              phase: "round",
-              timeLeft: prev.roundTime,
-              roundIndices: newIndices,
-              globalRound: Math.max(1, prev.globalRound - 1),
-              matchups,
-            };
-          }
-          // Show rest round before previous live round
-          // Need to prepare previous round's matchups
-          const prevIndices = { ...prev.roundIndices };
-          Object.keys(prev.schedules).forEach(div => {
-            prevIndices[div] = Math.max(0, (prev.roundIndices[div] || 0) - 1);
-          });
-          const prevMatchups = getMergedRound(prev.schedules, prevIndices);
-          return {
-            ...prev,
-            status: "running",
-            phase: "rest",
-            timeLeft: prev.restTime,
-            nextMatchups: prevMatchups,
-          };
-        }
-        // If currently in rest phase, advance to the live round we were preparing for
-        return advanceRound(prev);
+        const newIndices = { ...prev.roundIndices };
+        Object.keys(prev.schedules).forEach(div => {
+          newIndices[div] = Math.max(0, (prev.roundIndices[div] || 0) - 1);
+        });
+        const matchups = getMergedRound(prev.schedules, newIndices);
+        return {
+          ...prev,
+          status: "running",
+          phase: "round",
+          timeLeft: prev.roundTime,
+          roundIndices: newIndices,
+          globalRound: Math.max(1, prev.globalRound - 1),
+          matchups,
+        };
       });
     },
 
@@ -340,8 +299,8 @@ export function useSessionState() {
       }));
     },
 
-    setGoals: (goals) => {
-      setSession(prev => ({ ...prev, nextGoals: goals }));
+    setGoals: (boxingGoal, muayThaiGoal) => {
+      setSession(prev => ({ ...prev, nextBoxingGoal: boxingGoal, nextMuayThaiGoal: muayThaiGoal }));
     },
 
     clearSession: () => {
@@ -357,15 +316,15 @@ export function useSessionState() {
         restTime: 60,
         timeLeft: 180,
         phase: "round",
-        selectedSparringTypes: [],
-        goals: {},
-        nextGoals: {},
+        boxingGoal: "",
+        muayThaiGoal: "",
+        nextBoxingGoal: "",
+        nextMuayThaiGoal: "",
         roundStartSound: null,
         roundEndSound: null,
         repeatMode: "same",
         matchups: [],
         nextMatchups: [],
-        divisionNames: ["Division 1", "Division 2", "Division 3"],
       });
     },
   };

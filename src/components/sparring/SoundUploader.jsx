@@ -50,14 +50,8 @@ export default function SoundUploader({ session, actions }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-white/50">Upload your own sounds or download and use the examples provided below.</p>
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-white/70">Round Start Sound</Label>
-          <a href="https://drive.google.com/file/d/16QcTwPfL0Zqs93fafEM1v8rQ_77cKjIm/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 underline">
-            Download Example
-          </a>
-        </div>
+        <Label className="text-white/70">Round Start Sound</Label>
         <div className="flex items-center gap-2">
           <input
             ref={startRef}
@@ -83,12 +77,7 @@ export default function SoundUploader({ session, actions }) {
         </div>
       </div>
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-white/70">Round End Sound</Label>
-          <a href="https://drive.google.com/file/d/1lNxGH_JUmQ4LV5VmNWQvF0Bks716SVfa/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 underline">
-            Download Example
-          </a>
-        </div>
+        <Label className="text-white/70">Round End Sound</Label>
         <div className="flex items-center gap-2">
           <input
             ref={endRef}

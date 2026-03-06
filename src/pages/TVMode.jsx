@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { base44 } from "@/api/base44Client";
 import { useSessionState } from "../components/sparring/useSessionState";
 import MatchupGrid from "../components/sparring/MatchupGrid";
 import TimerDisplay from "../components/sparring/TimerDisplay";
@@ -9,24 +8,6 @@ import { Maximize, Minimize, Pause, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TVMode() {
-  const [isAuthed, setIsAuthed] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await base44.auth.me();
-        if (!user) {
-          base44.auth.redirectToLogin(window.location.href);
-          return;
-        }
-        setIsAuthed(true);
-      } catch (err) {
-        base44.auth.redirectToLogin(window.location.href);
-      }
-    };
-    checkAuth();
-  }, []);
-
   const { session, actions } = useSessionState();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -63,10 +44,6 @@ export default function TVMode() {
     controlTimer.current = setTimeout(() => setShowControls(false), 3000);
   };
 
-  if (!isAuthed) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
-  }
-
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup" || session.status === "brackets_preview";
   const isComplete = session.status === "complete";
   const isWarmup = session.status === "warmup";
@@ -74,7 +51,8 @@ export default function TVMode() {
   const displayMatchups = session.phase === "rest"
     ? (session.nextMatchups?.length > 0 ? session.nextMatchups : session.matchups)
     : session.matchups;
-  const displayGoals = session.phase === "rest" ? session.nextGoals : session.goals;
+  const displayBoxing = session.phase === "rest" ? (session.nextBoxingGoal || session.boxingGoal) : session.boxingGoal;
+  const displayMuayThai = session.phase === "rest" ? (session.nextMuayThaiGoal || session.muayThaiGoal) : session.muayThaiGoal;
   const displayRound = session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
 
   if (!isActive && !isComplete) {
@@ -83,7 +61,6 @@ export default function TVMode() {
         ref={containerRef}
         className="min-h-screen bg-black flex flex-col items-center justify-center text-center p-8"
       >
-        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-64 h-64 mb-6" />
         <h1 className="text-4xl font-black text-white/30 mb-6">WAITING FOR SESSION</h1>
         <p className="text-white/20 text-lg mb-8">Start a session from the admin view</p>
         {!isFullscreen && (
@@ -97,8 +74,7 @@ export default function TVMode() {
 
   if (isComplete) {
     return (
-      <div ref={containerRef} className="min-h-screen bg-black flex flex-col items-center justify-center gap-8">
-        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-48 h-48" />
+      <div ref={containerRef} className="min-h-screen bg-black flex items-center justify-center">
         <h1 className="text-6xl font-black text-white">SESSION COMPLETE</h1>
       </div>
     );
@@ -122,7 +98,7 @@ export default function TVMode() {
           </span>
         )}
         <div className="flex items-center gap-6 flex-1 justify-center">
-          <GoalDisplay goals={displayGoals} large />
+          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large />
         </div>
         <div className="text-3xl font-black font-mono text-white" style={{ minWidth: "80px", textAlign: "right" }}>
           {Math.floor(session.timeLeft / 60)}:{(session.timeLeft % 60).toString().padStart(2, "0")}

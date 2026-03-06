@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -9,42 +9,19 @@ import { Trash2, Plus, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-
-function GoalSettingsContent() {
-  const [isAuthed, setIsAuthed] = useState(null);
+export default function GoalSettings() {
   const queryClient = useQueryClient();
-  const [newGoals, setNewGoals] = useState({
-    bjj: "",
-    boxing: "",
-    mma: "",
-    muay_thai: "",
-  });
+  const [newBoxingGoal, setNewBoxingGoal] = useState("");
+  const [newMuayThaiGoal, setNewMuayThaiGoal] = useState("");
 
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["sparring-goals"],
-    queryFn: async () => {
-      const user = await base44.auth.me();
-      if (!user) return [];
-      const gymId = localStorage.getItem("gym_id");
-      if (!gymId) return [];
-      return base44.entities.SparringGoal.filter({ gym_id: gymId });
-    },
+    queryFn: () => base44.entities.SparringGoal.list(),
   });
 
-  const [goalsPending, setGoalsPending] = useState({});
-
   const createMutation = useMutation({
-    mutationFn: async (data) => {
-      return base44.entities.SparringGoal.create(data);
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["sparring-goals"] });
-      setNewGoals(prev => ({ ...prev, [variables.sparringType]: "" }));
-      setGoalsPending(prev => ({ ...prev, [variables.sparringType]: false }));
-    },
-    onError: (_, variables) => {
-      setGoalsPending(prev => ({ ...prev, [variables.sparringType]: false }));
-    },
+    mutationFn: (data) => base44.entities.SparringGoal.create(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
   const deleteMutation = useMutation({
@@ -57,55 +34,13 @@ function GoalSettingsContent() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await base44.auth.me();
-        if (!user) {
-          base44.auth.redirectToLogin();
-          return;
-        }
-        if (user?.gym_id) {
-          localStorage.setItem("gym_id", user.gym_id);
-        }
-        setIsAuthed(true);
-      } catch (err) {
-        base44.auth.redirectToLogin();
-      }
-    };
-    checkAuth();
-  }, []);
+  const boxingGoals = goals.filter(g => g.type === "boxing");
+  const muayThaiGoals = goals.filter(g => g.type === "muay_thai");
 
-  if (isAuthed === null) {
-    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
-  }
-
-  const sparringTypes = [
-    { id: "bjj", label: "BJJ", emoji: "🥋", color: "purple" },
-    { id: "boxing", label: "Boxing", emoji: "🥊", color: "red" },
-    { id: "mma", label: "MMA", emoji: "🤜", color: "orange" },
-    { id: "muay_thai", label: "Muay Thai", emoji: "🦵", color: "blue" },
-  ];
-
-  const handleAdd = async (sparringType) => {
-    const text = newGoals[sparringType];
+  const handleAdd = (type, text, setter) => {
     if (!text.trim()) return;
-    
-    setGoalsPending(prev => ({ ...prev, [sparringType]: true }));
-    
-    const user = await base44.auth.me();
-    if (!user?.gym_id) {
-      // Create gym if user doesn't have one
-      const newGym = await base44.entities.Gym.create({ 
-        name: `${user.full_name}'s Gym`,
-        owner_name: user.full_name 
-      });
-      localStorage.setItem("gym_id", newGym.id);
-      createMutation.mutate({ text: text.trim(), sparringType, enabled: true, gym_id: newGym.id });
-    } else {
-      localStorage.setItem("gym_id", user.gym_id);
-      createMutation.mutate({ text: text.trim(), sparringType, enabled: true, gym_id: user.gym_id });
-    }
+    createMutation.mutate({ text: text.trim(), type, enabled: true });
+    setter("");
   };
 
   return (
@@ -121,75 +56,92 @@ function GoalSettingsContent() {
           <h1 className="text-3xl font-black text-white">Goal Management</h1>
         </div>
 
-        {sparringTypes.map(type => {
-          const typeGoals = goals.filter(g => g.sparringType === type.id);
-          return (
-            <div key={type.id} className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-              <h2 className="text-xl font-bold flex items-center gap-2" style={{
-                color: type.color === "purple" ? "#c084fc" : type.color === "red" ? "#f87171" : type.color === "orange" ? "#fb923c" : "#60a5fa"
-              }}>
-                {type.emoji} {type.label} Goals
-              </h2>
-              <div className="flex gap-2">
-                <Input
-                  placeholder={`Add a ${type.label} goal...`}
-                  value={newGoals[type.id]}
-                  onChange={e => setNewGoals(prev => ({ ...prev, [type.id]: e.target.value }))}
-                  onKeyDown={e => e.key === "Enter" && handleAdd(type.id)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
-                />
-                <Button 
-                  onClick={() => handleAdd(type.id)} 
-                  className="gap-1"
-                  disabled={!newGoals[type.id].trim() || goalsPending[type.id]}
-                  style={{
-                    backgroundColor: type.color === "purple" ? "#9333ea" : type.color === "red" ? "#dc2626" : type.color === "orange" ? "#ea580c" : "#2563eb",
-                    opacity: !newGoals[type.id].trim() || goalsPending[type.id] ? 0.5 : 1
-                  }}
-                >
-                  <Plus className="w-4 h-4" /> {goalsPending[type.id] ? "Adding..." : "Add"}
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {typeGoals.map(goal => (
-                  <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-                    <span className="text-white">{goal.text}</span>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={goal.enabled !== false}
-                          onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
-                        />
-                        <Label className="text-white/50 text-xs">
-                          {goal.enabled !== false ? "On" : "Off"}
-                        </Label>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        style={{
-                          color: type.color === "purple" ? "rgba(192, 132, 252, 0.5)" : type.color === "red" ? "rgba(248, 113, 113, 0.5)" : type.color === "orange" ? "rgba(251, 146, 60, 0.5)" : "rgba(96, 165, 250, 0.5)"
-                        }}
-                        onClick={() => deleteMutation.mutate(goal.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+        {/* Boxing Goals */}
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+          <h2 className="text-xl font-bold text-red-400 flex items-center gap-2">
+            🥊 Boxing Goals
+          </h2>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add a boxing goal..."
+              value={newBoxingGoal}
+              onChange={e => setNewBoxingGoal(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
+            />
+            <Button onClick={() => handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)} className="bg-red-600 hover:bg-red-700 gap-1">
+              <Plus className="w-4 h-4" /> Add
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {boxingGoals.map(goal => (
+              <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
+                <span className="text-white">{goal.text}</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={goal.enabled !== false}
+                      onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
+                    />
+                    <Label className="text-white/50 text-xs">
+                      {goal.enabled !== false ? "On" : "Off"}
+                    </Label>
                   </div>
-                ))}
-                {typeGoals.length === 0 && (
-                  <p className="text-white/30 text-sm text-center py-4">No {type.label} goals yet</p>
-                )}
+                  <Button variant="ghost" size="icon" className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8" onClick={() => deleteMutation.mutate(goal.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            ))}
+            {boxingGoals.length === 0 && (
+              <p className="text-white/30 text-sm text-center py-4">No boxing goals yet</p>
+            )}
+          </div>
+        </div>
+
+        {/* Muay Thai Goals */}
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+          <h2 className="text-xl font-bold text-blue-400 flex items-center gap-2">
+            🦵 Muay Thai Goals
+          </h2>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add a Muay Thai goal..."
+              value={newMuayThaiGoal}
+              onChange={e => setNewMuayThaiGoal(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
+            />
+            <Button onClick={() => handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)} className="bg-blue-600 hover:bg-blue-700 gap-1">
+              <Plus className="w-4 h-4" /> Add
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {muayThaiGoals.map(goal => (
+              <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
+                <span className="text-white">{goal.text}</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={goal.enabled !== false}
+                      onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
+                    />
+                    <Label className="text-white/50 text-xs">
+                      {goal.enabled !== false ? "On" : "Off"}
+                    </Label>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8" onClick={() => deleteMutation.mutate(goal.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {muayThaiGoals.length === 0 && (
+              <p className="text-white/30 text-sm text-center py-4">No Muay Thai goals yet</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
-}
-
-export default function GoalSettings() {
-  return <GoalSettingsContent />;
 }

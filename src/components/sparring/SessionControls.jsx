@@ -62,9 +62,7 @@ export default function SessionControls({ session, actions }) {
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: session.divisionCount }, (_, i) => (
-                  <SelectItem key={i} value={String(i)}>
-                    {session.divisionNames?.[i] || `Division ${i + 1}`}
-                  </SelectItem>
+                  <SelectItem key={i} value={String(i)}>Division {i + 1}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
