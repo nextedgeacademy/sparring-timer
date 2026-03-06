@@ -71,7 +71,9 @@ export function useSessionState() {
 
   // Timer logic
   useEffect(() => {
-    if (session.status === "running" || session.status === "rest" || session.status === "warmup") {
+    const isTimerActive = session.status === "running" || session.status === "rest" || session.status === "warmup";
+    
+    if (isTimerActive) {
       timerRef.current = setInterval(() => {
         setSession(prev => {
           if (prev.timeLeft <= 2) {
@@ -131,7 +133,7 @@ export function useSessionState() {
       }, 1000);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [session.status, session.phase]);
+  }, [session.status]);
 
   const getNextRoundData = useCallback((state) => {
     const newIndices = { ...state.roundIndices };
