@@ -34,11 +34,16 @@ export function useSessionState() {
       muayThaiGoal: "",
       nextBoxingGoal: "",
       nextMuayThaiGoal: "",
+      boxingGoalHasSwitch: false,
+      muayThaiGoalHasSwitch: false,
       roundStartSound: null,
       roundEndSound: null,
+      switchBoxingSound: null,
+      switchMuayThaiSound: null,
       repeatMode: "same", // same | reshuffle
       matchups: [],
       nextMatchups: [],
+      midpointTriggered: false,
     };
   });
 
@@ -56,6 +61,23 @@ export function useSessionState() {
     if (session.status === "running" || session.status === "rest" || session.status === "warmup") {
       timerRef.current = setInterval(() => {
         setSession(prev => {
+          // Check for midpoint trigger during round
+          const midpoint = Math.floor(prev.roundTime / 2);
+          const timePassedInRound = prev.roundTime - prev.timeLeft;
+          if (
+            prev.phase === "round" &&
+            prev.status === "running" &&
+            !prev.midpointTriggered &&
+            timePassedInRound >= midpoint &&
+            timePassedInRound < midpoint + 1
+          ) {
+            return {
+              ...prev,
+              midpointTriggered: true,
+              // Signal to Home component via timeLeft being at midpoint
+            };
+          }
+
           if (prev.timeLeft <= 1) {
             clearInterval(timerRef.current);
             if (prev.status === "warmup") {
@@ -64,6 +86,7 @@ export function useSessionState() {
                 status: "running",
                 phase: "round",
                 timeLeft: prev.roundTime,
+                midpointTriggered: false,
               };
             }
             if (prev.phase === "round") {
@@ -79,6 +102,7 @@ export function useSessionState() {
                 nextMatchups: nextData.matchups,
                 nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal,
                 nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal,
+                midpointTriggered: false,
               };
             } else {
               return advanceRound(prev);
@@ -154,7 +178,10 @@ export function useSessionState() {
       schedules,
       boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
       muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
+      boxingGoalHasSwitch: prev.nextBoxingGoalHasSwitch || false,
+      muayThaiGoalHasSwitch: prev.nextMuayThaiGoalHasSwitch || false,
       nextMatchups: [],
+      midpointTriggered: false,
     };
   }
 
@@ -276,8 +303,14 @@ export function useSessionState() {
       }));
     },
 
-    setGoals: (boxingGoal, muayThaiGoal) => {
-      setSession(prev => ({ ...prev, nextBoxingGoal: boxingGoal, nextMuayThaiGoal: muayThaiGoal }));
+    setGoals: (boxingGoal, muayThaiGoal, boxingHasSwitch = false, muayThaiHasSwitch = false) => {
+      setSession(prev => ({
+        ...prev,
+        nextBoxingGoal: boxingGoal,
+        nextMuayThaiGoal: muayThaiGoal,
+        nextBoxingGoalHasSwitch: boxingHasSwitch,
+        nextMuayThaiGoalHasSwitch: muayThaiHasSwitch,
+      }));
     },
 
     clearSession: () => {
@@ -297,11 +330,16 @@ export function useSessionState() {
         muayThaiGoal: "",
         nextBoxingGoal: "",
         nextMuayThaiGoal: "",
+        boxingGoalHasSwitch: false,
+        muayThaiGoalHasSwitch: false,
         roundStartSound: null,
         roundEndSound: null,
+        switchBoxingSound: null,
+        switchMuayThaiSound: null,
         repeatMode: "same",
         matchups: [],
         nextMatchups: [],
+        midpointTriggered: false,
       });
     },
   };
