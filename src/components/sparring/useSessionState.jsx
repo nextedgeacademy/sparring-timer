@@ -51,7 +51,7 @@ export function useSessionState() {
     saveToStorage(session);
   }, [session]);
 
-  // Timer logic
+  // Timer logic (no sound - will be played from Home component only)
   useEffect(() => {
     if (session.status === "running" || session.status === "rest" || session.status === "warmup") {
       timerRef.current = setInterval(() => {
@@ -59,13 +59,6 @@ export function useSessionState() {
           if (prev.timeLeft <= 1) {
             clearInterval(timerRef.current);
             if (prev.status === "warmup") {
-              // Warmup ended - play start sound and begin round
-              if (prev.roundStartSound) {
-                try {
-                  const audio = new Audio(prev.roundStartSound);
-                  audio.play().catch(() => {});
-                } catch (e) {}
-              }
               return {
                 ...prev,
                 status: "running",
@@ -74,18 +67,9 @@ export function useSessionState() {
               };
             }
             if (prev.phase === "round") {
-              // Round ended - play end sound, switch to rest or next round
-              if (prev.roundEndSound) {
-                try {
-                  const audio = new Audio(prev.roundEndSound);
-                  audio.play().catch(() => {});
-                } catch (e) {}
-              }
               if (prev.restTime === 0) {
-                // No rest - go directly to next round
                 return advanceRound(prev);
               }
-              // Prepare next round matchups during rest
               const nextData = getNextRoundData(prev);
               return {
                 ...prev,
@@ -97,13 +81,6 @@ export function useSessionState() {
                 nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal,
               };
             } else {
-              // Rest ended - play start sound, begin next round
-              if (prev.roundStartSound) {
-                try {
-                  const audio = new Audio(prev.roundStartSound);
-                  audio.play().catch(() => {});
-                } catch (e) {}
-              }
               return advanceRound(prev);
             }
           }
