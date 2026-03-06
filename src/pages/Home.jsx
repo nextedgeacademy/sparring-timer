@@ -48,9 +48,7 @@ export default function Home() {
         </div>
         {/* Logo and Title */}
         <div className="flex flex-col items-center justify-center py-8 gap-4">
-          <div className="w-20 h-20 bg-black rounded-lg flex items-center justify-center border-2 border-white/20">
-            <div className="text-3xl font-black text-white">⚔️</div>
-          </div>
+          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/cb5e094d8_SparringTimerLogoBlackBackground.png" alt="Combat Sports Logo" className="w-32 h-32" />
           <h1 className="text-3xl font-black text-white text-center">Combat Sports Sparring Session</h1>
         </div>
         {/* Sound Uploader in setup */}
