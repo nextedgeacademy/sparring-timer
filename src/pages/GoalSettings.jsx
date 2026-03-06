@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Trash2, Plus, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import GymAuthGuard from "../components/GymAuthGuard";
+
 
 function GoalSettingsContent() {
   useEffect(() => {
@@ -144,9 +144,5 @@ function GoalSettingsContent() {
 }
 
 export default function GoalSettings() {
-  return (
-    <GymAuthGuard>
-      <GoalSettingsContent />
-    </GymAuthGuard>
-  );
+  return <GoalSettingsContent />;
 }
