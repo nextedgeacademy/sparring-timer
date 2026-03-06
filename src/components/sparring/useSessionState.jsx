@@ -43,18 +43,27 @@ export function useSessionState() {
         const storedSessionId = localStorage.getItem('sparringSessionId');
         if (storedSessionId) {
           console.log('Loading session from localStorage:', storedSessionId);
-          const dbSession = await base44.entities.SparringSession.read(storedSessionId);
-          setSessionId(storedSessionId);
-          setSession(dbSession);
+          try {
+            const dbSession = await base44.entities.SparringSession.read(storedSessionId);
+            setSessionId(storedSessionId);
+            setSession(dbSession);
+          } catch (e) {
+            console.log('Session not in DB yet, will sync when available');
+            setSessionId(storedSessionId);
+          }
         } else {
           console.log('No session in localStorage, checking list');
-          const sessions = await base44.entities.SparringSession.list('-updated_date', 1);
-          console.log('Loaded sessions:', sessions);
-          if (sessions.length > 0) {
-            const dbSession = sessions[0];
-            setSessionId(dbSession.id);
-            setSession(dbSession);
-            localStorage.setItem('sparringSessionId', dbSession.id);
+          try {
+            const sessions = await base44.entities.SparringSession.list('-updated_date', 1);
+            console.log('Loaded sessions:', sessions);
+            if (sessions.length > 0) {
+              const dbSession = sessions[0];
+              setSessionId(dbSession.id);
+              setSession(dbSession);
+              localStorage.setItem('sparringSessionId', dbSession.id);
+            }
+          } catch (e) {
+            console.log('Cannot fetch sessions');
           }
         }
       } catch (e) {
