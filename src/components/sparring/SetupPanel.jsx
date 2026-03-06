@@ -12,15 +12,44 @@ import { createPageUrl } from "@/utils";
 export default function SetupPanel({ session, actions }) {
   const [divisionCount, setDivisionCount] = useState(session.divisionCount || 1);
   const [divTexts, setDivTexts] = useState(["", "", ""]);
+  const [divisionNames, setDivisionNames] = useState(["Division 1", "Division 2", "Division 3"]);
   const [roundTime, setRoundTime] = useState(Math.floor(session.roundTime / 60));
   const [restTime, setRestTime] = useState(Math.floor(session.restTime / 60));
   const [roundTimeSec, setRoundTimeSec] = useState(session.roundTime % 60);
   const [restTimeSec, setRestTimeSec] = useState(session.restTime % 60);
   const [selectedTypes, setSelectedTypes] = useState(session.selectedSparringTypes || []);
 
+  useEffect(() => {
+    const loadDivisionNames = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user) {
+          const gymId = localStorage.getItem("gym_id");
+          if (gymId) {
+            const divSettings = await base44.entities.DivisionSettings.filter({
+              gym_id: gymId,
+            });
+            if (divSettings.length > 0) {
+              setDivisionNames(divSettings[0].division_names);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load division names:", err);
+      }
+    };
+    loadDivisionNames();
+  }, []);
+
   const { data: goals = [] } = useQuery({
     queryKey: ["sparring-goals"],
-    queryFn: () => base44.entities.SparringGoal.list(),
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      if (!user) return [];
+      const gymId = localStorage.getItem("gym_id");
+      if (!gymId) return [];
+      return base44.entities.SparringGoal.filter({ gym_id: gymId });
+    },
   });
 
   const sparringTypes = [
@@ -47,7 +76,7 @@ export default function SetupPanel({ session, actions }) {
     return enabled[Math.floor(Math.random() * enabled.length)].text;
   };
 
-  const handleCreateBrackets = () => {
+  const handleCreateBrackets = async () => {
     if (selectedTypes.length === 0) return;
 
     const divisions = divTexts.map(text =>
@@ -57,10 +86,28 @@ export default function SetupPanel({ session, actions }) {
     const totalRoundTime = roundTime * 60 + (roundTimeSec || 0);
     const totalRestTime = restTime * 60 + (restTimeSec || 0);
 
+    // Save custom division names
+    try {
+      const gymId = localStorage.getItem("gym_id");
+      if (gymId) {
+        const divSettings = await base44.entities.DivisionSettings.filter({
+          gym_id: gymId,
+        });
+        if (divSettings.length > 0) {
+          await base44.entities.DivisionSettings.update(divSettings[0].id, {
+            division_names: divisionNames,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to save division names:", err);
+    }
+
     actions.updateSettings({
       roundTime: totalRoundTime,
       restTime: totalRestTime,
       repeatMode: session.repeatMode || "same",
+      divisionNames: divisionNames,
     });
 
     // Pick initial goals based on selected types
@@ -135,7 +182,18 @@ export default function SetupPanel({ session, actions }) {
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${divisionCount}, 1fr)` }}>
           {Array.from({ length: divisionCount }, (_, i) => (
             <div key={i} className="space-y-2">
-              <Label className="text-white/70">Division {i + 1} Athletes</Label>
+              <Label className="text-white/70">Division Name</Label>
+              <Input
+                value={divisionNames[i] || ""}
+                onChange={e => {
+                  const copy = [...divisionNames];
+                  copy[i] = e.target.value;
+                  setDivisionNames(copy);
+                }}
+                placeholder={`e.g., Kids Beginners`}
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 mb-3"
+              />
+              <Label className="text-white/70">Athletes</Label>
               <Textarea
                 placeholder={"One name per line...\nBruce Hoyer\nJohn Smith\nAdam Lee"}
                 value={divTexts[i]}
@@ -144,7 +202,7 @@ export default function SetupPanel({ session, actions }) {
                   copy[i] = e.target.value;
                   setDivTexts(copy);
                 }}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[200px] font-mono"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[150px] font-mono"
               />
               <p className="text-white/40 text-xs">
                 {divTexts[i].split("\n").filter(n => n.trim()).length} athletes
