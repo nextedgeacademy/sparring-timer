@@ -4,6 +4,7 @@ import { useSessionState } from "../components/sparring/useSessionState";
 import MatchupGrid from "../components/sparring/MatchupGrid";
 import TimerDisplay from "../components/sparring/TimerDisplay";
 import GoalDisplay from "../components/sparring/GoalDisplay";
+import BracketsPreview from "../components/sparring/BracketsPreview";
 import { Button } from "@/components/ui/button";
 import { Maximize, Minimize, Pause, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
