@@ -58,7 +58,7 @@ export default function SetupPanel({ session, actions }) {
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-black text-white tracking-tight">SPARRING SESSION</h1>
+        <h1 className="text-4xl font-black text-white tracking-tight">COMBAT SPORTS - SPARRING TIMER</h1>
         <p className="text-white/50 text-sm">Round Robin Timer</p>
       </div>
 
