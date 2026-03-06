@@ -7,36 +7,19 @@ import { base44 } from "@/api/base44Client";
 export default function SoundUploader({ session, actions }) {
   const startRef = useRef(null);
   const endRef = useRef(null);
-  const switchBoxingRef = useRef(null);
-  const switchMuayThaiRef = useRef(null);
-  const switchBothRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleUpload = async (file, type) => {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    const updates = {};
-    
     if (type === "start") {
-      updates.roundStartSound = file_url;
-    } else if (type === "end") {
-      updates.roundEndSound = file_url;
-    } else if (type === "switchBoxing") {
-      updates.switchBoxingSound = file_url;
-    } else if (type === "switchMuayThai") {
-      updates.switchMuayThaiSound = file_url;
-    } else if (type === "switchBoth") {
-      updates.switchBothSound = file_url;
+      actions.updateSettings({ roundStartSound: file_url });
+    } else {
+      actions.updateSettings({ roundEndSound: file_url });
     }
-    
-    actions.updateSettings(updates);
-    
     // Save to user profile
     await base44.auth.updateMe({
       roundStartSound: type === "start" ? file_url : session.roundStartSound,
-      roundEndSound: type === "end" ? file_url : session.roundEndSound,
-      switchBoxingSound: type === "switchBoxing" ? file_url : session.switchBoxingSound,
-      switchMuayThaiSound: type === "switchMuayThai" ? file_url : session.switchMuayThaiSound,
-      switchBothSound: type === "switchBoth" ? file_url : session.switchBothSound
+      roundEndSound: type === "end" ? file_url : session.roundEndSound
     });
   };
 
@@ -55,13 +38,10 @@ export default function SoundUploader({ session, actions }) {
   useEffect(() => {
     const loadUserSounds = async () => {
       const user = await base44.auth.me();
-      if (user?.roundStartSound || user?.roundEndSound || user?.switchBoxingSound || user?.switchMuayThaiSound || user?.switchBothSound) {
+      if (user?.roundStartSound || user?.roundEndSound) {
         actions.updateSettings({
           roundStartSound: user.roundStartSound,
-          roundEndSound: user.roundEndSound,
-          switchBoxingSound: user.switchBoxingSound,
-          switchMuayThaiSound: user.switchMuayThaiSound,
-          switchBothSound: user.switchBothSound
+          roundEndSound: user.roundEndSound
         });
       }
     };
@@ -121,87 +101,6 @@ export default function SoundUploader({ session, actions }) {
             </>
           )}
           </div>
-          </div>
-
-          <div className="space-y-2 pt-4 border-t border-white/10">
-            <Label className="text-white/70">Boxing Switch Sound</Label>
-            <div className="flex items-center gap-2">
-              <input
-                ref={switchBoxingRef}
-                type="file"
-                accept="audio/*"
-                className="hidden"
-                onChange={e => {
-                  if (e.target.files[0]) handleUpload(e.target.files[0], "switchBoxing");
-                }}
-              />
-              <Button size="sm" variant="outline" onClick={() => switchBoxingRef.current?.click()} className="bg-white/5 border-white/20 text-white/70 gap-1">
-                <Upload className="w-3 h-3" /> Upload
-              </Button>
-              {session.switchBoxingSound && (
-                <>
-                  <Volume2 className="w-4 h-4 text-green-400" />
-                  <span className="text-green-400 text-xs">Uploaded</span>
-                  <Button size="icon" variant="ghost" className="h-6 w-6 text-white/40" onClick={() => actions.updateSettings({ switchBoxingSound: null })}>
-                    <X className="w-3 h-3" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-white/70">Muay Thai Switch Sound</Label>
-            <div className="flex items-center gap-2">
-              <input
-                ref={switchMuayThaiRef}
-                type="file"
-                accept="audio/*"
-                className="hidden"
-                onChange={e => {
-                  if (e.target.files[0]) handleUpload(e.target.files[0], "switchMuayThai");
-                }}
-              />
-              <Button size="sm" variant="outline" onClick={() => switchMuayThaiRef.current?.click()} className="bg-white/5 border-white/20 text-white/70 gap-1">
-                <Upload className="w-3 h-3" /> Upload
-              </Button>
-              {session.switchMuayThaiSound && (
-                <>
-                  <Volume2 className="w-4 h-4 text-green-400" />
-                  <span className="text-green-400 text-xs">Uploaded</span>
-                  <Button size="icon" variant="ghost" className="h-6 w-6 text-white/40" onClick={() => actions.updateSettings({ switchMuayThaiSound: null })}>
-                    <X className="w-3 h-3" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-white/70">Both Switch Sound</Label>
-            <div className="flex items-center gap-2">
-              <input
-                ref={switchBothRef}
-                type="file"
-                accept="audio/*"
-                className="hidden"
-                onChange={e => {
-                  if (e.target.files[0]) handleUpload(e.target.files[0], "switchBoth");
-                }}
-              />
-              <Button size="sm" variant="outline" onClick={() => switchBothRef.current?.click()} className="bg-white/5 border-white/20 text-white/70 gap-1">
-                <Upload className="w-3 h-3" /> Upload
-              </Button>
-              {session.switchBothSound && (
-                <>
-                  <Volume2 className="w-4 h-4 text-green-400" />
-                  <span className="text-green-400 text-xs">Uploaded</span>
-                  <Button size="icon" variant="ghost" className="h-6 w-6 text-white/40" onClick={() => actions.updateSettings({ switchBothSound: null })}>
-                    <X className="w-3 h-3" />
-                  </Button>
-                </>
-              )}
-            </div>
           </div>
 
           <div className="pt-4 border-t border-white/10 flex gap-2">

@@ -1,6 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
@@ -19,29 +17,14 @@ export default function Home() {
   const { session, actions } = useSessionState();
   const prevStatusRef = useRef(session.status);
   const prevPhaseRef = useRef(session.phase);
-  const prevMidpointRef = useRef(session.midpointTriggered);
-  const prevRoundRef = useRef(session.globalRound);
-  
-  const { data: goals = [] } = useQuery({
-    queryKey: ["sparring-goals"],
-    queryFn: () => base44.entities.SparringGoal.list(),
-  });
   
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
-
-  const pickRandomGoal = (type) => {
-    const enabled = goals.filter(g => g.type === type && g.enabled !== false);
-    if (enabled.length === 0) return { text: "", hasSwitch: false };
-    const goal = enabled[Math.floor(Math.random() * enabled.length)];
-    return { text: goal.text, hasSwitch: goal.hasSwitch || false };
-  };
 
   // Sound playback on state changes
   useEffect(() => {
     const prevStatus = prevStatusRef.current;
     const prevPhase = prevPhaseRef.current;
-    const prevMidpoint = prevMidpointRef.current;
 
     // Warmup ended -> round started
     if (prevStatus === "warmup" && session.status === "running") {
@@ -73,47 +56,9 @@ export default function Home() {
       }
     }
 
-    // Midpoint switch trigger
-    if (session.phase === "round" && !prevMidpoint && session.midpointTriggered) {
-      const playSwitch = async () => {
-        console.log("Midpoint triggered - Boxing switch:", session.boxingGoalHasSwitch, "Muay Thai switch:", session.muayThaiGoalHasSwitch);
-        if (session.boxingGoalHasSwitch && session.muayThaiGoalHasSwitch && session.switchBothSound) {
-          console.log("Playing both sound");
-          try {
-            const audio = new Audio(session.switchBothSound);
-            await audio.play().catch((err) => console.error("Both sound play error:", err));
-          } catch (e) { console.error("Both sound error:", e); }
-        } else if (session.boxingGoalHasSwitch && session.switchBoxingSound) {
-          console.log("Playing boxing sound");
-          try {
-            const audio = new Audio(session.switchBoxingSound);
-            await audio.play().catch((err) => console.error("Boxing sound play error:", err));
-          } catch (e) { console.error("Boxing sound error:", e); }
-        } else if (session.muayThaiGoalHasSwitch && session.switchMuayThaiSound) {
-          console.log("Playing muay thai sound");
-          try {
-            const audio = new Audio(session.switchMuayThaiSound);
-            await audio.play().catch((err) => console.error("Muay Thai sound play error:", err));
-          } catch (e) { console.error("Muay Thai sound error:", e); }
-        } else {
-          console.log("No sound to play - missing switches or URLs");
-        }
-      };
-      playSwitch();
-    }
-
-    // Randomize goals for next round when entering rest
-    if (session.phase === "rest" && prevPhaseRef.current === "round") {
-      const nextBoxing = pickRandomGoal("boxing");
-      const nextMuayThai = pickRandomGoal("muay_thai");
-      actions.setGoals(nextBoxing.text, nextMuayThai.text, nextBoxing.hasSwitch, nextMuayThai.hasSwitch);
-    }
-
     prevStatusRef.current = session.status;
     prevPhaseRef.current = session.phase;
-    prevMidpointRef.current = session.midpointTriggered;
-    prevRoundRef.current = session.globalRound;
-  }, [session.status, session.phase, session.midpointTriggered, session.roundStartSound, session.roundEndSound, session.boxingGoalHasSwitch, session.muayThaiGoalHasSwitch, session.switchBoxingSound, session.switchMuayThaiSound, session.switchBothSound, session.globalRound, goals]);
+  }, [session.status, session.phase, session.roundStartSound, session.roundEndSound]);
 
   if (isComplete) {
     return (
