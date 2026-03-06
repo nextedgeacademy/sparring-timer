@@ -106,6 +106,10 @@ export default function TVMode() {
     );
   }
 
+  if (showBracketsPreview) {
+    return <BracketsPreview session={session} actions={actions} />;
+  }
+
   return (
     <div
       ref={containerRef}
