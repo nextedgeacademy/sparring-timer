@@ -85,8 +85,16 @@ function GoalSettingsContent() {
   const handleAdd = (sparringType) => {
     const text = newGoals[sparringType];
     if (!text.trim()) return;
-    createMutation.mutate({ text: text.trim(), sparringType, enabled: true });
-    setNewGoals(prev => ({ ...prev, [sparringType]: "" }));
+    const gymId = localStorage.getItem("gym_id");
+    if (!gymId) {
+      console.error("No gym_id found");
+      return;
+    }
+    createMutation.mutate({ text: text.trim(), sparringType, enabled: true }, {
+      onSuccess: () => {
+        setNewGoals(prev => ({ ...prev, [sparringType]: "" }));
+      }
+    });
   };
 
   return (
@@ -122,11 +130,13 @@ function GoalSettingsContent() {
                 <Button 
                   onClick={() => handleAdd(type.id)} 
                   className="gap-1"
+                  disabled={!newGoals[type.id].trim() || createMutation.isPending}
                   style={{
-                    backgroundColor: type.color === "purple" ? "#9333ea" : type.color === "red" ? "#dc2626" : type.color === "orange" ? "#ea580c" : "#2563eb"
+                    backgroundColor: type.color === "purple" ? "#9333ea" : type.color === "red" ? "#dc2626" : type.color === "orange" ? "#ea580c" : "#2563eb",
+                    opacity: !newGoals[type.id].trim() || createMutation.isPending ? 0.5 : 1
                   }}
                 >
-                  <Plus className="w-4 h-4" /> Add
+                  <Plus className="w-4 h-4" /> {createMutation.isPending ? "Adding..." : "Add"}
                 </Button>
               </div>
               <div className="space-y-2">
