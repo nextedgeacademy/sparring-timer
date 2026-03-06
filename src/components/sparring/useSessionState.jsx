@@ -30,10 +30,9 @@ export function useSessionState() {
       restTime: 60,
       timeLeft: 180,
       phase: "round", // round | rest
-      boxingGoal: "",
-      muayThaiGoal: "",
-      nextBoxingGoal: "",
-      nextMuayThaiGoal: "",
+      selectedSparringTypes: [], // array of selected sparring types
+      goals: {}, // { "boxing": "Jabs Only", "muay_thai": "Body Kicks Only" }
+      nextGoals: {},
       roundStartSound: null,
       roundEndSound: null,
       repeatMode: "same", // same | reshuffle
@@ -93,8 +92,6 @@ export function useSessionState() {
                 phase: "rest",
                 timeLeft: prev.restTime,
                 nextMatchups: nextData.matchups,
-                nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal,
-                nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal,
               };
             } else {
               // Rest ended - play start sound, begin next round
@@ -128,7 +125,7 @@ export function useSessionState() {
       }
     });
     const matchups = getMergedRound(state.schedules, newIndices);
-    return { matchups, roundIndices: newIndices, boxingGoal: "", muayThaiGoal: "" };
+    return { matchups, roundIndices: newIndices };
   }, []);
 
   function advanceRound(prev) {
@@ -175,8 +172,8 @@ export function useSessionState() {
       globalRound: prev.globalRound + 1,
       matchups,
       schedules,
-      boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
-      muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
+      goals: prev.nextGoals,
+      nextGoals: {},
       nextMatchups: [],
     };
   }
@@ -186,7 +183,7 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, ...updates }));
     },
 
-    createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal) => {
+    createBrackets: (divisions, divisionCount, goals, selectedTypes) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -211,8 +208,9 @@ export function useSessionState() {
         globalRound: 1,
         timeLeft: 20, // 20 second warmup
         matchups,
-        boxingGoal,
-        muayThaiGoal,
+        goals,
+        selectedSparringTypes: selectedTypes,
+        nextGoals: {},
         nextMatchups: [],
       }));
     },
@@ -299,8 +297,8 @@ export function useSessionState() {
       }));
     },
 
-    setGoals: (boxingGoal, muayThaiGoal) => {
-      setSession(prev => ({ ...prev, nextBoxingGoal: boxingGoal, nextMuayThaiGoal: muayThaiGoal }));
+    setGoals: (goals) => {
+      setSession(prev => ({ ...prev, nextGoals: goals }));
     },
 
     clearSession: () => {
@@ -316,10 +314,9 @@ export function useSessionState() {
         restTime: 60,
         timeLeft: 180,
         phase: "round",
-        boxingGoal: "",
-        muayThaiGoal: "",
-        nextBoxingGoal: "",
-        nextMuayThaiGoal: "",
+        selectedSparringTypes: [],
+        goals: {},
+        nextGoals: {},
         roundStartSound: null,
         roundEndSound: null,
         repeatMode: "same",
