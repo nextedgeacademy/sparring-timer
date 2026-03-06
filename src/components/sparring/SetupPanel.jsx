@@ -24,8 +24,9 @@ export default function SetupPanel({ session, actions }) {
 
   const pickRandomGoal = (type) => {
     const enabled = goals.filter(g => g.type === type && g.enabled !== false);
-    if (enabled.length === 0) return "";
-    return enabled[Math.floor(Math.random() * enabled.length)].text;
+    if (enabled.length === 0) return { text: "", hasSwitch: false };
+    const goal = enabled[Math.floor(Math.random() * enabled.length)];
+    return { text: goal.text, hasSwitch: goal.hasSwitch || false };
   };
 
   const handleCreateBrackets = () => {
@@ -47,10 +48,15 @@ export default function SetupPanel({ session, actions }) {
     const nextBoxing = pickRandomGoal("boxing");
     const nextMuayThai = pickRandomGoal("muay_thai");
 
-    actions.updateSettings({ nextBoxingGoal: nextBoxing, nextMuayThaiGoal: nextMuayThai });
+    actions.updateSettings({
+      nextBoxingGoal: nextBoxing.text,
+      nextMuayThaiGoal: nextMuayThai.text,
+      nextBoxingGoalHasSwitch: nextBoxing.hasSwitch,
+      nextMuayThaiGoalHasSwitch: nextMuayThai.hasSwitch,
+    });
 
     setTimeout(() => {
-      actions.createBrackets(divisions, divisionCount, boxingGoal, muayThaiGoal);
+      actions.createBrackets(divisions, divisionCount, boxingGoal.text, muayThaiGoal.text, boxingGoal.hasSwitch, muayThaiGoal.hasSwitch);
     }, 50);
   };
 
