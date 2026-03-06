@@ -252,11 +252,14 @@ export function useSessionState() {
 
       try {
         const created = await base44.entities.SparringSession.create(newSessionData);
+        console.log('Session created:', created.id);
         setSessionId(created.id);
         setSession(created);
         localStorage.setItem('sparringSessionId', created.id);
+        console.log('localStorage updated with:', created.id);
       } catch (e) {
         console.error('Failed to create session:', e);
+        // Fallback to local state
         setSession(prev => ({ ...prev, ...newSessionData }));
       }
     },
