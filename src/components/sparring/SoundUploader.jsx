@@ -108,13 +108,11 @@ export default function SoundUploader({ session, actions }) {
           size="sm"
           variant="outline"
           onClick={saveDefaults}
+          disabled={isSaving}
           className="bg-blue-600/20 border-blue-500/50 text-blue-400 hover:bg-blue-600/30 gap-1"
           >
-          <Volume className="w-3 h-3" /> Save as Defaults
+          {isSaving ? "Saving..." : "Save to Profile"}
           </Button>
-          {(defaults.startSound || defaults.endSound) && (
-          <span className="text-blue-400 text-xs flex items-center">Defaults saved</span>
-          )}
           </div>
           </div>
           );
