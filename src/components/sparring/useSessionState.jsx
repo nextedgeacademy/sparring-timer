@@ -292,10 +292,21 @@ export function useSessionState() {
       };
 
       try {
-        const created = await base44.entities.SparringSession.create(newSessionData);
+        // Stringify complex fields for storage
+        const dataToCreate = {
+          ...newSessionData,
+          divisions: JSON.stringify(newSessionData.divisions),
+          schedules: JSON.stringify(newSessionData.schedules),
+          roundIndices: JSON.stringify(newSessionData.roundIndices),
+          goals: JSON.stringify(newSessionData.goals),
+          nextGoals: JSON.stringify(newSessionData.nextGoals),
+          matchups: JSON.stringify(newSessionData.matchups),
+          nextMatchups: JSON.stringify(newSessionData.nextMatchups),
+        };
+        const created = await base44.entities.SparringSession.create(dataToCreate);
         console.log('Session created:', created.id);
         setSessionId(created.id);
-        setSession(created);
+        setSession(newSessionData);
         localStorage.setItem('sparringSessionId', created.id);
         console.log('localStorage updated with:', created.id);
       } catch (e) {
