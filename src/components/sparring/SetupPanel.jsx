@@ -71,8 +71,11 @@ export default function SetupPanel({ session, actions }) {
   };
 
   const pickRandomGoal = (sparringType) => {
-    const enabled = goals.filter(g => g.sparringType === sparringType && g.enabled !== false);
-    if (enabled.length === 0) return null;
+    const enabled = goals.filter(g => g.sparringType === sparringType && g.enabled);
+    if (enabled.length === 0) {
+      console.warn(`No goals found for ${sparringType}. Available goals:`, goals);
+      return null;
+    }
     return enabled[Math.floor(Math.random() * enabled.length)].text;
   };
 
@@ -114,7 +117,9 @@ export default function SetupPanel({ session, actions }) {
     const initialGoals = {};
     selectedTypes.forEach(type => {
       const goal = pickRandomGoal(type);
-      initialGoals[type] = goal || `${type.toUpperCase()}: No Goal Selected`;
+      if (goal) {
+        initialGoals[type] = goal;
+      }
     });
 
     setTimeout(() => {
