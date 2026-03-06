@@ -60,8 +60,19 @@ function GoalSettingsContent() {
           base44.auth.redirectToLogin();
           return;
         }
-        if (user?.gym_id) {
-          localStorage.setItem("gym_id", user.gym_id);
+        // Try to get or create gym_id
+        let gymId = localStorage.getItem("gym_id");
+        if (!gymId && user?.gym_id) {
+          gymId = user.gym_id;
+          localStorage.setItem("gym_id", gymId);
+        }
+        if (!gymId) {
+          // Create a default gym if user doesn't have one
+          const gyms = await base44.entities.Gym.filter({ owner_name: user.full_name });
+          if (gyms.length > 0) {
+            gymId = gyms[0].id;
+            localStorage.setItem("gym_id", gymId);
+          }
         }
         setIsAuthed(true);
       } catch (err) {
