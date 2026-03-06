@@ -115,7 +115,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-950 flex flex-col">
       {/* Header - Round, Timer, and Goals all on one row */}
       <div className="p-4 flex items-center justify-between gap-4 border-b border-white/5 whitespace-nowrap">
-        <div className="text-4xl md:text-5xl font-black text-white">
+        <div className="text-3xl md:text-4xl font-black text-white">
           {isWarmup ? "WARMING UP" : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
         </div>
         <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
