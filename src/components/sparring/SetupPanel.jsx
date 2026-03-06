@@ -154,6 +154,27 @@ export default function SetupPanel({ session, actions }) {
         </div>
       </div>
 
+      {/* Sparring Types */}
+      <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white">Sparring Types Today</h2>
+        <p className="text-white/50 text-sm">Select 1-2 types (required)</p>
+        <div className="grid grid-cols-2 gap-3">
+          {sparringTypes.map(type => (
+            <button
+              key={type.id}
+              onClick={() => toggleType(type.id)}
+              className={`p-4 rounded-xl border-2 transition font-semibold ${
+                selectedTypes.includes(type.id)
+                  ? "bg-white/20 border-white/50 text-white"
+                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10"
+              }`}
+            >
+              {type.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Repeat Mode */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
         <h2 className="text-lg font-bold text-white">Schedule Loop</h2>
@@ -170,7 +191,7 @@ export default function SetupPanel({ session, actions }) {
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3 justify-center">
-        <Button onClick={handleCreateBrackets} size="lg" className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 gap-2">
+        <Button onClick={handleCreateBrackets} disabled={selectedTypes.length === 0} size="lg" className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold text-lg px-8 gap-2">
           <Play className="w-5 h-5" /> Create Brackets
         </Button>
         <Button
