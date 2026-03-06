@@ -9,9 +9,48 @@ export default function SessionControls({ session, actions }) {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerDiv, setNewPlayerDiv] = useState("0");
+  const [nextClickState, setNextClickState] = useState(null); // null | "next" | "prev"
 
   const isPaused = session.status === "paused";
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused";
+
+  const handleNext = () => {
+    if (nextClickState === "next") {
+      // Second click - advance to next round
+      actions.nextRound();
+      setNextClickState(null);
+    } else {
+      // First click - go to rest
+      if (session.phase === "round") {
+        // Manually transition to rest
+        const newIndices = { ...session.roundIndices };
+        Object.keys(session.schedules).forEach(div => {
+          newIndices[div] = (session.roundIndices[div] || 0) + 1;
+          const divSchedule = session.schedules[div];
+          if (divSchedule && newIndices[div] >= divSchedule.length) {
+            newIndices[div] = newIndices[div] % divSchedule.length;
+          }
+        });
+        const { getMergedRound } = require("../sparring/roundRobinEngine");
+        const matchups = getMergedRound(session.schedules, newIndices);
+        // Just go to rest, don't advance yet
+        setNextClickState("next");
+      }
+    }
+  };
+
+  const handlePrev = () => {
+    if (nextClickState === "prev") {
+      // Second click - go back to prev round
+      actions.prevRound();
+      setNextClickState(null);
+    } else {
+      // First click - go to rest
+      if (session.phase === "round") {
+        setNextClickState("prev");
+      }
+    }
+  };
 
   if (!isActive) return null;
 
@@ -30,13 +69,13 @@ export default function SessionControls({ session, actions }) {
         <Button size="sm" variant="outline" onClick={actions.stop} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
           <Square className="w-3 h-3" /> Stop
         </Button>
-        <Button size="sm" variant="outline" onClick={actions.prevRound} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
-          <SkipBack className="w-3 h-3" /> Prev
+        <Button size="sm" variant="outline" onClick={handlePrev} className="gap-1 bg-amber-900/50 border-amber-700 text-amber-300 hover:bg-amber-800">
+          <SkipBack className="w-3 h-3" /> {nextClickState === "prev" ? "Confirm Prev" : "Prev"}
         </Button>
-        <Button size="sm" variant="outline" onClick={actions.nextRound} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
-          <SkipForward className="w-3 h-3" /> Next
+        <Button size="sm" variant="outline" onClick={handleNext} className="gap-1 bg-amber-900/50 border-amber-700 text-amber-300 hover:bg-amber-800">
+          <SkipForward className="w-3 h-3" /> {nextClickState === "next" ? "Confirm Next" : "Next"}
         </Button>
-        <Button size="sm" variant="outline" onClick={() => setShowAddPlayer(true)} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+        <Button size="sm" variant="outline" onClick={() => setShowAddPlayer(true)} className="gap-1 bg-blue-900/50 border-blue-700 text-blue-300 hover:bg-blue-800">
           <UserPlus className="w-3 h-3" /> Add Player
         </Button>
         <Button size="sm" variant="outline" onClick={actions.complete} className="gap-1 bg-red-900/50 border-red-700 text-red-300 hover:bg-red-800">
