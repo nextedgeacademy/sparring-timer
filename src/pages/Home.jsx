@@ -102,8 +102,8 @@ export default function Home() {
       playSwitch();
     }
 
-    // Randomize goals for next round
-    if (session.phase === "rest" && prevPhaseRef.current === "round" && prevRoundRef.current !== session.globalRound) {
+    // Randomize goals for next round when entering rest
+    if (session.phase === "rest" && prevPhaseRef.current === "round") {
       const nextBoxing = pickRandomGoal("boxing");
       const nextMuayThai = pickRandomGoal("muay_thai");
       actions.setGoals(nextBoxing.text, nextMuayThai.text, nextBoxing.hasSwitch, nextMuayThai.hasSwitch);
