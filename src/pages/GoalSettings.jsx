@@ -106,7 +106,9 @@ function GoalSettingsContent() {
           const typeGoals = goals.filter(g => g.sparringType === type.id);
           return (
             <div key={type.id} className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-              <h2 className={`text-xl font-bold text-${type.color}-400 flex items-center gap-2`}>
+              <h2 className="text-xl font-bold flex items-center gap-2" style={{
+                color: type.color === "purple" ? "#c084fc" : type.color === "red" ? "#f87171" : type.color === "orange" ? "#fb923c" : "#60a5fa"
+              }}>
                 {type.emoji} {type.label} Goals
               </h2>
               <div className="flex gap-2">
@@ -117,7 +119,13 @@ function GoalSettingsContent() {
                   onKeyDown={e => e.key === "Enter" && handleAdd(type.id)}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
                 />
-                <Button onClick={() => handleAdd(type.id)} className={`bg-${type.color}-600 hover:bg-${type.color}-700 gap-1`}>
+                <Button 
+                  onClick={() => handleAdd(type.id)} 
+                  className="gap-1"
+                  style={{
+                    backgroundColor: type.color === "purple" ? "#9333ea" : type.color === "red" ? "#dc2626" : type.color === "orange" ? "#ea580c" : "#2563eb"
+                  }}
+                >
                   <Plus className="w-4 h-4" /> Add
                 </Button>
               </div>
@@ -135,7 +143,15 @@ function GoalSettingsContent() {
                           {goal.enabled !== false ? "On" : "Off"}
                         </Label>
                       </div>
-                      <Button variant="ghost" size="icon" className={`text-${type.color}-400/50 hover:text-${type.color}-400 hover:bg-${type.color}-500/10 h-8 w-8`} onClick={() => deleteMutation.mutate(goal.id)}>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        style={{
+                          color: type.color === "purple" ? "rgba(192, 132, 252, 0.5)" : type.color === "red" ? "rgba(248, 113, 113, 0.5)" : type.color === "orange" ? "rgba(251, 146, 60, 0.5)" : "rgba(96, 165, 250, 0.5)"
+                        }}
+                        onClick={() => deleteMutation.mutate(goal.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
