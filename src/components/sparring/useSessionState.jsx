@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { base44 } from "@/api/base44Client";
 import { generateRoundRobin, getMergedRound, addLateArrival, shuffleArray } from "./roundRobinEngine";
 
 const STORAGE_KEY = "sparring_session";
@@ -39,12 +40,35 @@ export function useSessionState() {
       repeatMode: "same", // same | reshuffle
       matchups: [],
       nextMatchups: [],
+      allBoxingGoals: [],
+      allMuayThaiGoals: [],
     };
   });
 
   const timerRef = useRef(null);
   const roundEndAudioRef = useRef(null);
   const roundStartAudioRef = useRef(null);
+
+  // Fetch goals on mount
+  useEffect(() => {
+    const fetchGoals = async () => {
+      try {
+        const boxingGoals = await base44.entities.SparringGoal.filter({ type: "boxing", enabled: true });
+        const muayThaiGoals = await base44.entities.SparringGoal.filter({ type: "muay_thai", enabled: true });
+        setSession(prev => ({
+          ...prev,
+          allBoxingGoals: boxingGoals.map(g => g.text),
+          allMuayThaiGoals: muayThaiGoals.map(g => g.text),
+        }));
+      } catch (e) { /* ignore */ }
+    };
+    fetchGoals();
+  }, []);
+
+  const getRandomGoal = useCallback((goals) => {
+    if (!goals || goals.length === 0) return "";
+    return goals[Math.floor(Math.random() * goals.length)];
+  }, []);
 
   // Persist state
   useEffect(() => {
@@ -105,8 +129,13 @@ export function useSessionState() {
       }
     });
     const matchups = getMergedRound(state.schedules, newIndices);
-    return { matchups, roundIndices: newIndices, boxingGoal: "", muayThaiGoal: "" };
-  }, []);
+    return {
+      matchups,
+      roundIndices: newIndices,
+      boxingGoal: getRandomGoal(state.allBoxingGoals),
+      muayThaiGoal: getRandomGoal(state.allMuayThaiGoals),
+    };
+  }, [getRandomGoal]);
 
   function advanceRound(prev) {
     const newIndices = { ...prev.roundIndices };
@@ -152,8 +181,8 @@ export function useSessionState() {
       globalRound: prev.globalRound + 1,
       matchups,
       schedules,
-      boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
-      muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
+      boxingGoal: prev.nextBoxingGoal || getRandomGoal(prev.allBoxingGoals),
+      muayThaiGoal: prev.nextMuayThaiGoal || getRandomGoal(prev.allMuayThaiGoals),
       nextMatchups: [],
     };
   }
@@ -176,6 +205,8 @@ export function useSessionState() {
       });
 
       const matchups = getMergedRound(schedules, roundIndices);
+      const randomBoxingGoal = getRandomGoal(session.allBoxingGoals) || boxingGoal;
+      const randomMuayThaiGoal = getRandomGoal(session.allMuayThaiGoals) || muayThaiGoal;
       
       setSession(prev => ({
         ...prev,
@@ -188,8 +219,8 @@ export function useSessionState() {
         globalRound: 1,
         timeLeft: 20, // 20 second warmup
         matchups,
-        boxingGoal,
-        muayThaiGoal,
+        boxingGoal: randomBoxingGoal,
+        muayThaiGoal: randomMuayThaiGoal,
         nextMatchups: [],
       }));
     },
