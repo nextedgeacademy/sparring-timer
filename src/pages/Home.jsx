@@ -61,8 +61,7 @@ export default function Home() {
   // Active session view (Admin/Control) or Warmup
   const isWarmup = session.status === "warmup";
   const displayMatchups = session.phase === "rest" ? (session.nextMatchups.length > 0 ? session.nextMatchups : session.matchups) : session.matchups;
-  const displayBoxing = session.phase === "rest" ? (session.nextBoxingGoal || session.boxingGoal) : session.boxingGoal;
-  const displayMuayThai = session.phase === "rest" ? (session.nextMuayThaiGoal || session.muayThaiGoal) : session.muayThaiGoal;
+  const displayGoals = session.phase === "rest" ? session.nextGoals : session.goals;
   const displayRound = session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
 
   return (
@@ -70,7 +69,7 @@ export default function Home() {
       {/* Header with Goals and TV Buttons */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <div className="flex-1 mx-6">
-          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
+          <GoalDisplay goals={displayGoals} large={true} />
         </div>
         {session.status === "paused" && (
           <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse mr-4">
