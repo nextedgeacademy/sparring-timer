@@ -24,7 +24,7 @@ export default function Home() {
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6">
           <h1 className="text-5xl font-black text-white">SESSION COMPLETE</h1>
           <p className="text-white/50 text-lg">Great work today!</p>
-          <Button onClick={actions.clearSession} size="lg" className="bg-white text-black hover:bg-gray-200 gap-2">
+          <Button onClick={actions.clearSession} size="lg" className="bg-white text-gray-950 hover:bg-gray-100 font-bold gap-2">
             <RotateCcw className="w-5 h-5" /> New Session
           </Button>
         </motion.div>
@@ -41,9 +41,9 @@ export default function Home() {
       <div className="min-h-screen bg-gray-950">
         <div className="flex justify-end p-4 gap-2">
           <Link to={createPageUrl("GoalSettings")}>
-            <Button variant="outline" size="sm" className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 gap-1">
-              <Settings className="w-3 h-3" /> Goals & Settings
-            </Button>
+           <Button variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1">
+             <Settings className="w-3 h-3" /> Goals & Settings
+           </Button>
           </Link>
         </div>
         {/* Sound Uploader in setup */}
@@ -70,6 +70,9 @@ export default function Home() {
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-4">
+          <div className="text-lg font-bold text-white">
+            Next Edge Sparring Timer
+          </div>
           <div className="text-white/40 text-sm font-medium">
             {isWarmup ? "WARMING UP..." : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
           </div>
@@ -80,22 +83,22 @@ export default function Home() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 gap-1"
-            onClick={() => window.open(createPageUrl("TVMode"), "_blank")}
-          >
-            <Monitor className="w-3 h-3" /> TV
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 gap-1"
-            onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
-          >
-            <Maximize className="w-3 h-3" /> Fullscreen
-          </Button>
+         <Button
+           variant="outline"
+           size="sm"
+           className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1"
+           onClick={() => window.open(createPageUrl("TVMode"), "_blank")}
+         >
+           <Monitor className="w-3 h-3" /> TV
+         </Button>
+         <Button
+           variant="outline"
+           size="sm"
+           className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1"
+           onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
+         >
+           <Maximize className="w-3 h-3" /> Fullscreen
+         </Button>
         </div>
       </div>
 
