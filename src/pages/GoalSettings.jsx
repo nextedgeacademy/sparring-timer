@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,23 @@ import { Label } from "@/components/ui/label";
 import { Trash2, Plus, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import GymAuthGuard from "../components/GymAuthGuard";
 
-export default function GoalSettings() {
+function GoalSettingsContent() {
+  useEffect(() => {
+    const initGym = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user?.gym_id) {
+          localStorage.setItem("gym_id", user.gym_id);
+        }
+      } catch (err) {
+        console.error("Failed to init gym:", err);
+      }
+    };
+    initGym();
+  }, []);
+
   const queryClient = useQueryClient();
   const [newGoals, setNewGoals] = useState({
     bjj: "",
@@ -125,5 +140,13 @@ export default function GoalSettings() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function GoalSettings() {
+  return (
+    <GymAuthGuard>
+      <GoalSettingsContent />
+    </GymAuthGuard>
   );
 }
