@@ -1,22 +1,13 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Upload, Volume2, X, Volume } from "lucide-react";
+import { Upload, Volume2, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-
-const STORAGE_DEFAULTS_KEY = "sparring_sound_defaults";
 
 export default function SoundUploader({ session, actions }) {
   const startRef = useRef(null);
   const endRef = useRef(null);
-  const [defaults, setDefaults] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_DEFAULTS_KEY);
-      return saved ? JSON.parse(saved) : { startSound: "", endSound: "" };
-    } catch {
-      return { startSound: "", endSound: "" };
-    }
-  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleUpload = async (file, type) => {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -25,28 +16,36 @@ export default function SoundUploader({ session, actions }) {
     } else {
       actions.updateSettings({ roundEndSound: file_url });
     }
+    // Save to user profile
+    await base44.auth.updateMe({
+      roundStartSound: type === "start" ? file_url : session.roundStartSound,
+      roundEndSound: type === "end" ? file_url : session.roundEndSound
+    });
   };
 
-  const saveDefaults = () => {
-    const newDefaults = {
-      startSound: session.roundStartSound || "",
-      endSound: session.roundEndSound || ""
-    };
-    localStorage.setItem(STORAGE_DEFAULTS_KEY, JSON.stringify(newDefaults));
-    setDefaults(newDefaults);
-  };
-
-  const loadDefaults = () => {
-    if (defaults.startSound || defaults.endSound) {
-      actions.updateSettings({
-        roundStartSound: defaults.startSound,
-        roundEndSound: defaults.endSound
+  const saveDefaults = async () => {
+    setIsSaving(true);
+    try {
+      await base44.auth.updateMe({
+        roundStartSound: session.roundStartSound || "",
+        roundEndSound: session.roundEndSound || ""
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   useEffect(() => {
-    loadDefaults();
+    const loadUserSounds = async () => {
+      const user = await base44.auth.me();
+      if (user?.roundStartSound || user?.roundEndSound) {
+        actions.updateSettings({
+          roundStartSound: user.roundStartSound,
+          roundEndSound: user.roundEndSound
+        });
+      }
+    };
+    loadUserSounds();
   }, []);
 
   return (
