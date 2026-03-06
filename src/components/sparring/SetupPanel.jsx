@@ -125,9 +125,12 @@ export default function SetupPanel({ session, actions }) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-black text-white tracking-tight">COMBAT SPORTS SPARRING SESSION</h1>
-        <p className="text-white/50 text-sm">Round Robin Timer</p>
+      <div className="text-center space-y-4">
+        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-24 h-24 mx-auto" />
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-white tracking-tight">COMBAT SPORTS SPARRING SESSION</h1>
+          <p className="text-white/50 text-sm">Round Robin Timer</p>
+        </div>
       </div>
 
       {/* Timer Settings */}
