@@ -253,6 +253,23 @@ export function useSessionState() {
     nextRound: () => {
       setSession(prev => {
         if (timerRef.current) clearInterval(timerRef.current);
+        // If currently on a live round, go to rest first
+        if (prev.phase === "round") {
+          if (prev.restTime === 0) {
+            // No rest configured, go directly to next live round
+            return advanceRound(prev);
+          }
+          // Prepare next round matchups during rest
+          const nextData = getNextRoundData(prev);
+          return {
+            ...prev,
+            status: "running",
+            phase: "rest",
+            timeLeft: prev.restTime,
+            nextMatchups: nextData.matchups,
+          };
+        }
+        // If currently in rest phase, advance to next live round
         return advanceRound(prev);
       });
     },
@@ -260,20 +277,42 @@ export function useSessionState() {
     prevRound: () => {
       setSession(prev => {
         if (timerRef.current) clearInterval(timerRef.current);
-        const newIndices = { ...prev.roundIndices };
-        Object.keys(prev.schedules).forEach(div => {
-          newIndices[div] = Math.max(0, (prev.roundIndices[div] || 0) - 1);
-        });
-        const matchups = getMergedRound(prev.schedules, newIndices);
-        return {
-          ...prev,
-          status: "running",
-          phase: "round",
-          timeLeft: prev.roundTime,
-          roundIndices: newIndices,
-          globalRound: Math.max(1, prev.globalRound - 1),
-          matchups,
-        };
+        // If currently on a live round, go to rest first
+        if (prev.phase === "round") {
+          if (prev.restTime === 0) {
+            // No rest configured, go directly to previous live round
+            const newIndices = { ...prev.roundIndices };
+            Object.keys(prev.schedules).forEach(div => {
+              newIndices[div] = Math.max(0, (prev.roundIndices[div] || 0) - 1);
+            });
+            const matchups = getMergedRound(prev.schedules, newIndices);
+            return {
+              ...prev,
+              status: "running",
+              phase: "round",
+              timeLeft: prev.roundTime,
+              roundIndices: newIndices,
+              globalRound: Math.max(1, prev.globalRound - 1),
+              matchups,
+            };
+          }
+          // Show rest round before previous live round
+          // Need to prepare previous round's matchups
+          const prevIndices = { ...prev.roundIndices };
+          Object.keys(prev.schedules).forEach(div => {
+            prevIndices[div] = Math.max(0, (prev.roundIndices[div] || 0) - 1);
+          });
+          const prevMatchups = getMergedRound(prev.schedules, prevIndices);
+          return {
+            ...prev,
+            status: "running",
+            phase: "rest",
+            timeLeft: prev.restTime,
+            nextMatchups: prevMatchups,
+          };
+        }
+        // If currently in rest phase, advance to the live round we were preparing for
+        return advanceRound(prev);
       });
     },
 
