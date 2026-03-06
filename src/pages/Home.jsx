@@ -10,7 +10,7 @@ import SoundUploader from "../components/sparring/SoundUploader";
 import BracketsPreview from "../components/sparring/BracketsPreview";
 
 import { Button } from "@/components/ui/button";
-import { Settings, Monitor, Maximize, RotateCcw } from "lucide-react";
+import { Settings, Monitor, Maximize, RotateCcw, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
