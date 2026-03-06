@@ -166,7 +166,7 @@ export default function SetupPanel({ session, actions }) {
       {/* Division Setup */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">Divisions</h2>
+          <h2 className="text-lg font-bold text-white">Create Divisions - For Setup Only, Not Shown on Grid.</h2>
           <Select value={String(divisionCount)} onValueChange={v => setDivisionCount(parseInt(v))}>
             <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
               <SelectValue />
