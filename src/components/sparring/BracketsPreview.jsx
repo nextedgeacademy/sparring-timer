@@ -16,7 +16,7 @@ export default function BracketsPreview({ session, actions }) {
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <h1 className="text-xl font-bold text-white">ROUND 1 BRACKETS</h1>
         <div className="flex-1 mx-6">
-          <GoalDisplay boxingGoal={session.boxingGoal} muayThaiGoal={session.muayThaiGoal} large={true} />
+          <GoalDisplay goals={session.goals} large={true} />
         </div>
       </div>
 
