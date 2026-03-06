@@ -47,7 +47,7 @@ function HomeContent() {
   if (isComplete) {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6">
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6 flex flex-col items-center">
           <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-48 h-48" />
           <h1 className="text-5xl font-black text-white">SESSION COMPLETE</h1>
           <p className="text-white/50 text-lg">Great work today!</p>
