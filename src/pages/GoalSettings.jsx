@@ -30,7 +30,13 @@ export default function GoalSettings() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.SparringGoal.create(data),
+    mutationFn: async (data) => {
+      const gymId = localStorage.getItem("gym_id");
+      return base44.entities.SparringGoal.create({
+        ...data,
+        gym_id: gymId,
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
