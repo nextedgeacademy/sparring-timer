@@ -61,21 +61,27 @@ export default function Home() {
     // Midpoint switch trigger
     if (session.phase === "round" && !prevMidpoint && session.midpointTriggered) {
       const playSwitch = async () => {
+        console.log("Midpoint triggered - Boxing switch:", session.boxingGoalHasSwitch, "Muay Thai switch:", session.muayThaiGoalHasSwitch);
         if (session.boxingGoalHasSwitch && session.muayThaiGoalHasSwitch && session.switchBothSound) {
+          console.log("Playing both sound");
           try {
             const audio = new Audio(session.switchBothSound);
-            await audio.play().catch(() => {});
-          } catch (e) {}
+            await audio.play().catch((err) => console.error("Both sound play error:", err));
+          } catch (e) { console.error("Both sound error:", e); }
         } else if (session.boxingGoalHasSwitch && session.switchBoxingSound) {
+          console.log("Playing boxing sound");
           try {
             const audio = new Audio(session.switchBoxingSound);
-            await audio.play().catch(() => {});
-          } catch (e) {}
+            await audio.play().catch((err) => console.error("Boxing sound play error:", err));
+          } catch (e) { console.error("Boxing sound error:", e); }
         } else if (session.muayThaiGoalHasSwitch && session.switchMuayThaiSound) {
+          console.log("Playing muay thai sound");
           try {
             const audio = new Audio(session.switchMuayThaiSound);
-            await audio.play().catch(() => {});
-          } catch (e) {}
+            await audio.play().catch((err) => console.error("Muay Thai sound play error:", err));
+          } catch (e) { console.error("Muay Thai sound error:", e); }
+        } else {
+          console.log("No sound to play - missing switches or URLs");
         }
       };
       playSwitch();
