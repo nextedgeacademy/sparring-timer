@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
@@ -15,8 +15,50 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const { session, actions } = useSessionState();
+  const prevStatusRef = useRef(session.status);
+  const prevPhaseRef = useRef(session.phase);
+  
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
+
+  // Sound playback on state changes
+  useEffect(() => {
+    const prevStatus = prevStatusRef.current;
+    const prevPhase = prevPhaseRef.current;
+
+    // Warmup ended -> round started
+    if (prevStatus === "warmup" && session.status === "running") {
+      if (session.roundStartSound) {
+        try {
+          const audio = new Audio(session.roundStartSound);
+          audio.play().catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    // Round ended -> rest started
+    if (prevPhase === "round" && session.phase === "rest") {
+      if (session.roundEndSound) {
+        try {
+          const audio = new Audio(session.roundEndSound);
+          audio.play().catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    // Rest ended -> new round started
+    if (prevPhase === "rest" && session.phase === "round" && session.status === "running") {
+      if (session.roundStartSound) {
+        try {
+          const audio = new Audio(session.roundStartSound);
+          audio.play().catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    prevStatusRef.current = session.status;
+    prevPhaseRef.current = session.phase;
+  }, [session.status, session.phase, session.roundStartSound, session.roundEndSound]);
 
   if (isComplete) {
     return (
