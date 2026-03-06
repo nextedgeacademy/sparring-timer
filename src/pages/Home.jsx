@@ -84,7 +84,7 @@ export default function Home() {
     prevStatusRef.current = session.status;
     prevPhaseRef.current = session.phase;
     prevMidpointRef.current = session.midpointTriggered;
-  }, [session.status, session.phase, session.midpointTriggered, session.roundStartSound, session.roundEndSound, session.boxingGoalHasSwitch, session.muayThaiGoalHasSwitch, session.switchBoxingSound, session.switchMuayThaiSound]);
+  }, [session.status, session.phase, session.midpointTriggered, session.roundStartSound, session.roundEndSound, session.boxingGoalHasSwitch, session.muayThaiGoalHasSwitch, session.switchBoxingSound, session.switchMuayThaiSound, session.switchBothSound]);
 
   if (isComplete) {
     return (
