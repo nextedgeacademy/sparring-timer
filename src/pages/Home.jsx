@@ -6,6 +6,7 @@ import MatchupGrid from "../components/sparring/MatchupGrid";
 import TimerDisplay from "../components/sparring/TimerDisplay";
 import GoalDisplay from "../components/sparring/GoalDisplay";
 import SoundUploader from "../components/sparring/SoundUploader";
+import BracketsPreview from "../components/sparring/BracketsPreview";
 import { Button } from "@/components/ui/button";
 import { Settings, Monitor, Maximize, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -31,6 +32,10 @@ export default function Home() {
     );
   }
 
+  if (session.status === "brackets_preview") {
+    return <BracketsPreview session={session} actions={actions} />;
+  }
+
   if (!isActive) {
     return (
       <div className="min-h-screen bg-gray-950">
@@ -53,7 +58,8 @@ export default function Home() {
     );
   }
 
-  // Active session view (Admin/Control)
+  // Active session view (Admin/Control) or Warmup
+  const isWarmup = session.status === "warmup";
   const displayMatchups = session.phase === "rest" ? (session.nextMatchups.length > 0 ? session.nextMatchups : session.matchups) : session.matchups;
   const displayBoxing = session.phase === "rest" ? (session.nextBoxingGoal || session.boxingGoal) : session.boxingGoal;
   const displayMuayThai = session.phase === "rest" ? (session.nextMuayThaiGoal || session.muayThaiGoal) : session.muayThaiGoal;
@@ -65,7 +71,7 @@ export default function Home() {
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-4">
           <div className="text-white/40 text-sm font-medium">
-            {session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`}
+            {isWarmup ? "WARMING UP..." : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
           </div>
           {session.status === "paused" && (
             <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse">
