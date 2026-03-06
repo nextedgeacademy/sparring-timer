@@ -25,6 +25,7 @@ const defaultSession = {
 };
 
 export function useSessionState() {
+  console.log('useSessionState initialized');
   const [session, setSession] = useState(defaultSession);
   const [sessionId, setSessionId] = useState(null);
   const [loading, setLoading] = useState(true);
