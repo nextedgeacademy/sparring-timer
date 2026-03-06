@@ -67,21 +67,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      {/* Header with Round, Goals, and TV Buttons */}
+      {/* Header with Goals and TV Buttons */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
-        <div className="flex items-center gap-4">
-          <div className="text-white/40 text-sm font-medium">
-            {isWarmup ? "WARMING UP..." : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
-          </div>
-          {session.status === "paused" && (
-            <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse">
-              PAUSED
-            </span>
-          )}
-        </div>
         <div className="flex-1 mx-6">
           <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
         </div>
+        {session.status === "paused" && (
+          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse mr-4">
+            PAUSED
+          </span>
+        )}
         <div className="flex gap-2">
          <Button
            variant="outline"
@@ -102,8 +97,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Timer */}
-      <div className="flex justify-center py-4">
+      {/* Timer with Round */}
+      <div className="flex justify-center items-center py-4 gap-8">
+        <div className="text-4xl md:text-5xl font-black text-white">
+          {isWarmup ? "WARMING UP..." : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
+        </div>
         <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
       </div>
 

@@ -42,9 +42,6 @@ export default function BracketsPreview({ session, actions }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-center gap-3"
           >
-            <Button onClick={actions.stop} variant="outline" size="lg" className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 gap-2">
-              <ArrowLeft className="w-5 h-5" /> Back
-            </Button>
             <Button onClick={actions.startWarmup} size="lg" className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 gap-2">
               <Play className="w-5 h-5" /> Start (20s Warmup)
             </Button>
