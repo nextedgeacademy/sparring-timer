@@ -80,7 +80,18 @@ export function useSessionState() {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(async () => {
         try {
-          await base44.entities.SparringSession.update(sessionId, session);
+          // Stringify complex fields for storage
+          const dataToSave = {
+            ...session,
+            divisions: JSON.stringify(session.divisions),
+            schedules: JSON.stringify(session.schedules),
+            roundIndices: JSON.stringify(session.roundIndices),
+            goals: JSON.stringify(session.goals),
+            nextGoals: JSON.stringify(session.nextGoals),
+            matchups: JSON.stringify(session.matchups),
+            nextMatchups: JSON.stringify(session.nextMatchups),
+          };
+          await base44.entities.SparringSession.update(sessionId, dataToSave);
         } catch (e) {
           console.error('Failed to save session:', e);
         }
