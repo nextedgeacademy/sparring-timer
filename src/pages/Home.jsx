@@ -77,7 +77,7 @@ export default function Home() {
           <Button
             variant="outline"
             size="sm"
-            className="border-white/20 text-white/60 hover:bg-white/10 gap-1"
+            className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 gap-1"
             onClick={() => window.open(createPageUrl("TVMode"), "_blank")}
           >
             <Monitor className="w-3 h-3" /> TV
@@ -85,7 +85,7 @@ export default function Home() {
           <Button
             variant="outline"
             size="sm"
-            className="border-white/20 text-white/60 hover:bg-white/10 gap-1"
+            className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 gap-1"
             onClick={() => window.open(createPageUrl("TVMode") + "?fullscreen=true", "_blank")}
           >
             <Maximize className="w-3 h-3" /> Fullscreen
