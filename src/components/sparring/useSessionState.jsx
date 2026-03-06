@@ -45,8 +45,19 @@ export function useSessionState() {
           console.log('Loading session from localStorage:', storedSessionId);
           try {
             const dbSession = await base44.entities.SparringSession.read(storedSessionId);
+            // Parse JSON fields
+            const parsedSession = {
+              ...dbSession,
+              divisions: typeof dbSession.divisions === 'string' ? JSON.parse(dbSession.divisions) : dbSession.divisions,
+              schedules: typeof dbSession.schedules === 'string' ? JSON.parse(dbSession.schedules) : dbSession.schedules,
+              roundIndices: typeof dbSession.roundIndices === 'string' ? JSON.parse(dbSession.roundIndices) : dbSession.roundIndices,
+              goals: typeof dbSession.goals === 'string' ? JSON.parse(dbSession.goals) : dbSession.goals,
+              nextGoals: typeof dbSession.nextGoals === 'string' ? JSON.parse(dbSession.nextGoals) : dbSession.nextGoals,
+              matchups: typeof dbSession.matchups === 'string' ? JSON.parse(dbSession.matchups) : dbSession.matchups,
+              nextMatchups: typeof dbSession.nextMatchups === 'string' ? JSON.parse(dbSession.nextMatchups) : dbSession.nextMatchups,
+            };
             setSessionId(storedSessionId);
-            setSession(dbSession);
+            setSession(parsedSession);
           } catch (e) {
             console.log('Session not in DB yet, will sync when available');
             setSessionId(storedSessionId);
@@ -58,8 +69,18 @@ export function useSessionState() {
             console.log('Loaded sessions:', sessions);
             if (sessions.length > 0) {
               const dbSession = sessions[0];
+              const parsedSession = {
+                ...dbSession,
+                divisions: typeof dbSession.divisions === 'string' ? JSON.parse(dbSession.divisions) : dbSession.divisions,
+                schedules: typeof dbSession.schedules === 'string' ? JSON.parse(dbSession.schedules) : dbSession.schedules,
+                roundIndices: typeof dbSession.roundIndices === 'string' ? JSON.parse(dbSession.roundIndices) : dbSession.roundIndices,
+                goals: typeof dbSession.goals === 'string' ? JSON.parse(dbSession.goals) : dbSession.goals,
+                nextGoals: typeof dbSession.nextGoals === 'string' ? JSON.parse(dbSession.nextGoals) : dbSession.nextGoals,
+                matchups: typeof dbSession.matchups === 'string' ? JSON.parse(dbSession.matchups) : dbSession.matchups,
+                nextMatchups: typeof dbSession.nextMatchups === 'string' ? JSON.parse(dbSession.nextMatchups) : dbSession.nextMatchups,
+              };
               setSessionId(dbSession.id);
-              setSession(dbSession);
+              setSession(parsedSession);
               localStorage.setItem('sparringSessionId', dbSession.id);
             }
           } catch (e) {
