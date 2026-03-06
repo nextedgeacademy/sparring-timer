@@ -28,7 +28,7 @@ export default function SetupPanel({ session, actions }) {
     return enabled[Math.floor(Math.random() * enabled.length)].text;
   };
 
-  const handleStart = () => {
+  const handleCreateBrackets = () => {
     const divisions = divTexts.map(text =>
       text.split("\n").map(n => n.trim()).filter(n => n.length > 0)
     );
@@ -39,7 +39,6 @@ export default function SetupPanel({ session, actions }) {
     actions.updateSettings({
       roundTime: totalRoundTime,
       restTime: totalRestTime,
-      timeLeft: totalRoundTime,
       repeatMode: session.repeatMode || "same",
     });
 
@@ -51,7 +50,7 @@ export default function SetupPanel({ session, actions }) {
     actions.updateSettings({ nextBoxingGoal: nextBoxing, nextMuayThaiGoal: nextMuayThai });
 
     setTimeout(() => {
-      actions.startSession(divisions, divisionCount, boxingGoal, muayThaiGoal);
+      actions.createBrackets(divisions, divisionCount, boxingGoal, muayThaiGoal);
     }, 50);
   };
 
@@ -150,8 +149,8 @@ export default function SetupPanel({ session, actions }) {
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3 justify-center">
-        <Button onClick={handleStart} size="lg" className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 gap-2">
-          <Play className="w-5 h-5" /> Start Sparring
+        <Button onClick={handleCreateBrackets} size="lg" className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 gap-2">
+          <Play className="w-5 h-5" /> Create Brackets
         </Button>
         <Button
           variant="outline"
