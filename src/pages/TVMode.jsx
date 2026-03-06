@@ -88,22 +88,20 @@ export default function TVMode() {
       onClick={handleMouseMove}
     >
       {/* Header bar - all on one line */}
-      <div className="px-6 py-4 flex items-center justify-between gap-6">
-        <div className="flex items-center gap-6 flex-1">
-          <div className={`text-3xl font-bold uppercase tracking-widest ${isWarmup ? "text-yellow-400" : (session.phase === "rest" ? "text-amber-400" : "text-white/50")}`}>
-            {isWarmup ? "WARMING UP" : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
-          </div>
-          {session.status === "paused" && (
-            <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-sm font-bold rounded-full animate-pulse">
-              PAUSED
-            </span>
-          )}
+      <div className="px-6 py-3 flex items-center justify-between gap-4 whitespace-nowrap">
+        <div className={`text-2xl font-bold uppercase tracking-widest ${isWarmup ? "text-yellow-400" : (session.phase === "rest" ? "text-amber-400" : "text-white/50")}`}>
+          {isWarmup ? "WARMING UP" : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
         </div>
-        <div className="flex items-center gap-8">
+        {session.status === "paused" && (
+          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse">
+            PAUSED
+          </span>
+        )}
+        <div className="flex items-center gap-6 flex-1 justify-center">
           <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} />
-          <div className="text-4xl font-black font-mono text-white" style={{ minWidth: "120px", textAlign: "right" }}>
-            {Math.floor(session.timeLeft / 60)}:{(session.timeLeft % 60).toString().padStart(2, "0")}
-          </div>
+        </div>
+        <div className="text-3xl font-black font-mono text-white" style={{ minWidth: "80px", textAlign: "right" }}>
+          {Math.floor(session.timeLeft / 60)}:{(session.timeLeft % 60).toString().padStart(2, "0")}
         </div>
       </div>
 
