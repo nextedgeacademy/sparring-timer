@@ -23,20 +23,20 @@ export default function SessionControls({ session, actions }) {
             <Play className="w-3 h-3" /> Resume
           </Button>
         ) : (
-          <Button size="sm" variant="outline" onClick={actions.pause} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+          <Button size="sm" variant="outline" onClick={actions.pause} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/20 hover:text-white/90">
             <Pause className="w-3 h-3" /> Pause
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={actions.stop} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+        <Button size="sm" variant="outline" onClick={actions.stop} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/20 hover:text-white/90">
           <Square className="w-3 h-3" /> Stop
         </Button>
-        <Button size="sm" variant="outline" onClick={actions.prevRound} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+        <Button size="sm" variant="outline" onClick={actions.prevRound} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/20 hover:text-white/90">
           <SkipBack className="w-3 h-3" /> Prev
         </Button>
-        <Button size="sm" variant="outline" onClick={actions.nextRound} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+        <Button size="sm" variant="outline" onClick={actions.nextRound} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/20 hover:text-white/90">
           <SkipForward className="w-3 h-3" /> Next
         </Button>
-        <Button size="sm" variant="outline" onClick={() => setShowAddPlayer(true)} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+        <Button size="sm" variant="outline" onClick={() => setShowAddPlayer(true)} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/20 hover:text-white/90">
           <UserPlus className="w-3 h-3" /> Add Player
         </Button>
         <Button size="sm" variant="outline" onClick={actions.complete} className="gap-1 bg-red-900/50 border-red-700 text-red-300 hover:bg-red-800">
