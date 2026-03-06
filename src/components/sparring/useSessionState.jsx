@@ -63,6 +63,7 @@ export function useSessionState() {
               if (prev.roundStartSound) {
                 try {
                   const audio = new Audio(prev.roundStartSound);
+                  audio.currentTime = 0;
                   audio.play().catch(() => {});
                 } catch (e) {}
               }
@@ -78,6 +79,7 @@ export function useSessionState() {
               if (prev.roundEndSound) {
                 try {
                   const audio = new Audio(prev.roundEndSound);
+                  audio.currentTime = 0;
                   audio.play().catch(() => {});
                 } catch (e) {}
               }
@@ -99,6 +101,7 @@ export function useSessionState() {
               if (prev.roundStartSound) {
                 try {
                   const audio = new Audio(prev.roundStartSound);
+                  audio.currentTime = 0;
                   audio.play().catch(() => {});
                 } catch (e) {}
               }
