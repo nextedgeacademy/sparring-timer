@@ -102,10 +102,18 @@ export default function Home() {
       playSwitch();
     }
 
+    // Randomize goals for next round
+    if (session.phase === "rest" && prevPhaseRef.current === "round" && prevRoundRef.current !== session.globalRound) {
+      const nextBoxing = pickRandomGoal("boxing");
+      const nextMuayThai = pickRandomGoal("muay_thai");
+      actions.setGoals(nextBoxing.text, nextMuayThai.text, nextBoxing.hasSwitch, nextMuayThai.hasSwitch);
+    }
+
     prevStatusRef.current = session.status;
     prevPhaseRef.current = session.phase;
     prevMidpointRef.current = session.midpointTriggered;
-  }, [session.status, session.phase, session.midpointTriggered, session.roundStartSound, session.roundEndSound, session.boxingGoalHasSwitch, session.muayThaiGoalHasSwitch, session.switchBoxingSound, session.switchMuayThaiSound, session.switchBothSound]);
+    prevRoundRef.current = session.globalRound;
+  }, [session.status, session.phase, session.midpointTriggered, session.roundStartSound, session.roundEndSound, session.boxingGoalHasSwitch, session.muayThaiGoalHasSwitch, session.switchBoxingSound, session.switchMuayThaiSound, session.switchBothSound, session.globalRound, goals]);
 
   if (isComplete) {
     return (
