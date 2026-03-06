@@ -83,6 +83,7 @@ export default function TVMode() {
         ref={containerRef}
         className="min-h-screen bg-black flex flex-col items-center justify-center text-center p-8"
       >
+        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-64 h-64 mb-6" />
         <h1 className="text-4xl font-black text-white/30 mb-6">WAITING FOR SESSION</h1>
         <p className="text-white/20 text-lg mb-8">Start a session from the admin view</p>
         {!isFullscreen && (
@@ -96,7 +97,8 @@ export default function TVMode() {
 
   if (isComplete) {
     return (
-      <div ref={containerRef} className="min-h-screen bg-black flex items-center justify-center">
+      <div ref={containerRef} className="min-h-screen bg-black flex flex-col items-center justify-center gap-8">
+        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-48 h-48" />
         <h1 className="text-6xl font-black text-white">SESSION COMPLETE</h1>
       </div>
     );
