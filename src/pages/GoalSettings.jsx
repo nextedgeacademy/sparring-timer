@@ -20,7 +20,13 @@ export default function GoalSettings() {
 
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["sparring-goals"],
-    queryFn: () => base44.entities.SparringGoal.list(),
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      if (!user) return [];
+      const gymId = localStorage.getItem("gym_id");
+      if (!gymId) return [];
+      return base44.entities.SparringGoal.filter({ gym_id: gymId });
+    },
   });
 
   const createMutation = useMutation({
