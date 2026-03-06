@@ -122,6 +122,14 @@ function HomeContent() {
          >
            <Maximize className="w-3 h-3" /> Fullscreen
          </Button>
+         <Button
+           variant="outline"
+           size="sm"
+           className="bg-red-700 border-red-600 text-white hover:bg-red-600 font-semibold gap-1"
+           onClick={() => base44.auth.logout()}
+         >
+           <LogOut className="w-3 h-3" /> Logout
+         </Button>
         </div>
       </div>
 
