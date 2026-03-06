@@ -207,7 +207,7 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, ...updates }));
     },
 
-    createBrackets: (divisions, divisionCount, goals, selectedTypes) => {
+    createBrackets: async (divisions, divisionCount, goals, selectedTypes) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -221,8 +221,7 @@ export function useSessionState() {
 
       const matchups = getMergedRound(schedules, roundIndices);
       
-      setSession(prev => ({
-        ...prev,
+      const newSessionData = {
         status: "brackets_preview",
         phase: "round",
         divisions: divisions,
@@ -230,13 +229,22 @@ export function useSessionState() {
         schedules,
         roundIndices,
         globalRound: 1,
-        timeLeft: 20, // 20 second warmup
+        timeLeft: 20,
         matchups,
         goals,
         selectedSparringTypes: selectedTypes,
         nextGoals: {},
         nextMatchups: [],
-      }));
+      };
+
+      try {
+        const created = await base44.entities.SparringSession.create(newSessionData);
+        setSessionId(created.id);
+        setSession(created);
+      } catch (e) {
+        console.error('Failed to create session:', e);
+        setSession(prev => ({ ...prev, ...newSessionData }));
+      }
     },
 
     startWarmup: () => {
