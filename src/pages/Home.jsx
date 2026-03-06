@@ -17,7 +17,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 function HomeContent() {
   const [isAuthed, setIsAuthed] = useState(null);
-  const { session, actions, loading } = useSessionState();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,7 +37,14 @@ function HomeContent() {
     checkAuth();
   }, []);
 
-  if (isAuthed === null || loading) {
+  if (isAuthed === null) {
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
+  }
+
+  // Hook MUST be called after auth check but before all conditional returns
+  const { session, actions, loading } = useSessionState();
+
+  if (loading) {
     return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
   }
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
