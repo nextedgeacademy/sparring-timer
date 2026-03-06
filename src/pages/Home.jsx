@@ -115,12 +115,12 @@ export default function Home() {
     <div className="min-h-screen bg-gray-950 flex flex-col">
       {/* Header - Round, Timer, and Goals all on one row */}
       <div className="p-4 flex items-center justify-between gap-4 border-b border-white/5 whitespace-nowrap">
-        <div className="text-2xl md:text-3xl font-black text-white">
+        <div className="text-4xl md:text-5xl font-black text-white">
           {isWarmup ? "WARMING UP" : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
         </div>
         <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
         <div className="flex-1 mx-4">
-          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={false} />
+          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
         </div>
         {session.status === "paused" && (
           <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse">
