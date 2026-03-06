@@ -98,7 +98,7 @@ export default function TVMode() {
           </span>
         )}
         <div className="flex items-center gap-6 flex-1 justify-center">
-          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} />
+          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large />
         </div>
         <div className="text-3xl font-black font-mono text-white" style={{ minWidth: "80px", textAlign: "right" }}>
           {Math.floor(session.timeLeft / 60)}:{(session.timeLeft % 60).toString().padStart(2, "0")}
