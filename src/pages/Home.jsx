@@ -36,7 +36,7 @@ export default function Home() {
       <div className="min-h-screen bg-gray-950">
         <div className="flex justify-end p-4 gap-2">
           <Link to={createPageUrl("GoalSettings")}>
-            <Button variant="outline" size="sm" className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 gap-1">
+            <Button variant="outline" size="sm" className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700 gap-1">
               <Settings className="w-3 h-3" /> Goals & Settings
             </Button>
           </Link>
