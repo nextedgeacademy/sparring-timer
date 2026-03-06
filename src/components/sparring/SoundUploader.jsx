@@ -9,6 +9,7 @@ export default function SoundUploader({ session, actions }) {
   const endRef = useRef(null);
   const switchBoxingRef = useRef(null);
   const switchMuayThaiRef = useRef(null);
+  const switchBothRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleUpload = async (file, type) => {
@@ -23,6 +24,8 @@ export default function SoundUploader({ session, actions }) {
       updates.switchBoxingSound = file_url;
     } else if (type === "switchMuayThai") {
       updates.switchMuayThaiSound = file_url;
+    } else if (type === "switchBoth") {
+      updates.switchBothSound = file_url;
     }
     
     actions.updateSettings(updates);
@@ -32,7 +35,8 @@ export default function SoundUploader({ session, actions }) {
       roundStartSound: type === "start" ? file_url : session.roundStartSound,
       roundEndSound: type === "end" ? file_url : session.roundEndSound,
       switchBoxingSound: type === "switchBoxing" ? file_url : session.switchBoxingSound,
-      switchMuayThaiSound: type === "switchMuayThai" ? file_url : session.switchMuayThaiSound
+      switchMuayThaiSound: type === "switchMuayThai" ? file_url : session.switchMuayThaiSound,
+      switchBothSound: type === "switchBoth" ? file_url : session.switchBothSound
     });
   };
 
@@ -51,12 +55,13 @@ export default function SoundUploader({ session, actions }) {
   useEffect(() => {
     const loadUserSounds = async () => {
       const user = await base44.auth.me();
-      if (user?.roundStartSound || user?.roundEndSound || user?.switchBoxingSound || user?.switchMuayThaiSound) {
+      if (user?.roundStartSound || user?.roundEndSound || user?.switchBoxingSound || user?.switchMuayThaiSound || user?.switchBothSound) {
         actions.updateSettings({
           roundStartSound: user.roundStartSound,
           roundEndSound: user.roundEndSound,
           switchBoxingSound: user.switchBoxingSound,
-          switchMuayThaiSound: user.switchMuayThaiSound
+          switchMuayThaiSound: user.switchMuayThaiSound,
+          switchBothSound: user.switchBothSound
         });
       }
     };
@@ -165,6 +170,33 @@ export default function SoundUploader({ session, actions }) {
                   <Volume2 className="w-4 h-4 text-green-400" />
                   <span className="text-green-400 text-xs">Uploaded</span>
                   <Button size="icon" variant="ghost" className="h-6 w-6 text-white/40" onClick={() => actions.updateSettings({ switchMuayThaiSound: null })}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-white/70">Both Switch Sound</Label>
+            <div className="flex items-center gap-2">
+              <input
+                ref={switchBothRef}
+                type="file"
+                accept="audio/*"
+                className="hidden"
+                onChange={e => {
+                  if (e.target.files[0]) handleUpload(e.target.files[0], "switchBoth");
+                }}
+              />
+              <Button size="sm" variant="outline" onClick={() => switchBothRef.current?.click()} className="bg-white/5 border-white/20 text-white/70 gap-1">
+                <Upload className="w-3 h-3" /> Upload
+              </Button>
+              {session.switchBothSound && (
+                <>
+                  <Volume2 className="w-4 h-4 text-green-400" />
+                  <span className="text-green-400 text-xs">Uploaded</span>
+                  <Button size="icon" variant="ghost" className="h-6 w-6 text-white/40" onClick={() => actions.updateSettings({ switchBothSound: null })}>
                     <X className="w-3 h-3" />
                   </Button>
                 </>
