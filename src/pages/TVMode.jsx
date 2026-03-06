@@ -51,8 +51,7 @@ export default function TVMode() {
   const displayMatchups = session.phase === "rest"
     ? (session.nextMatchups?.length > 0 ? session.nextMatchups : session.matchups)
     : session.matchups;
-  const displayBoxing = session.phase === "rest" ? (session.nextBoxingGoal || session.boxingGoal) : session.boxingGoal;
-  const displayMuayThai = session.phase === "rest" ? (session.nextMuayThaiGoal || session.muayThaiGoal) : session.muayThaiGoal;
+  const displayGoals = session.phase === "rest" ? session.nextGoals : session.goals;
   const displayRound = session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
 
   if (!isActive && !isComplete) {
@@ -98,7 +97,7 @@ export default function TVMode() {
           </span>
         )}
         <div className="flex items-center gap-6 flex-1 justify-center">
-          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large />
+          <GoalDisplay goals={displayGoals} large />
         </div>
         <div className="text-3xl font-black font-mono text-white" style={{ minWidth: "80px", textAlign: "right" }}>
           {Math.floor(session.timeLeft / 60)}:{(session.timeLeft % 60).toString().padStart(2, "0")}
