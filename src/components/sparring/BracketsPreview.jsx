@@ -10,14 +10,12 @@ export default function BracketsPreview({ session, actions }) {
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      {/* Header */}
+      {/* Header with Goals */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <h1 className="text-xl font-bold text-white">ROUND 1 BRACKETS</h1>
-      </div>
-
-      {/* Goals */}
-      <div className="p-3 border-b border-white/5">
-        <GoalDisplay boxingGoal={session.boxingGoal} muayThaiGoal={session.muayThaiGoal} />
+        <div className="flex-1 mx-6">
+          <GoalDisplay boxingGoal={session.boxingGoal} muayThaiGoal={session.muayThaiGoal} large={true} />
+        </div>
       </div>
 
       {/* Matchups */}

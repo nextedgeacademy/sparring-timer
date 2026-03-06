@@ -16,7 +16,7 @@ export default function MatchupTile({ match, large = false }) {
         rounded-2xl border flex flex-col items-center justify-center p-4 text-center
         ${isRestDisplay
           ? "bg-amber-950/40 border-amber-700/30"
-          : "bg-white/5 border-white/10"
+          : "bg-green-950/30 border-green-600/50"
         }
         ${large ? "min-h-[120px]" : "min-h-[90px]"}
       `}
@@ -24,7 +24,7 @@ export default function MatchupTile({ match, large = false }) {
       <span className={`font-bold text-white leading-tight ${large ? "text-3xl md:text-4xl lg:text-5xl" : "text-xl md:text-2xl"}`}>
         {name1}
       </span>
-      <span className={`font-light tracking-widest uppercase my-1 ${large ? "text-lg" : "text-sm"} ${isRestDisplay ? "text-amber-400" : "text-red-400"}`}>
+      <span className={`font-light tracking-widest uppercase my-1 ${large ? "text-lg" : "text-sm"} ${isRestDisplay ? "text-amber-400" : "text-green-400"}`}>
         {isRestDisplay ? "" : "vs"}
       </span>
       <span className={`font-bold leading-tight ${large ? "text-3xl md:text-4xl lg:text-5xl" : "text-xl md:text-2xl"} ${isRestDisplay ? "text-amber-400 italic" : "text-white"}`}>
