@@ -190,7 +190,7 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, ...updates }));
     },
 
-    createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal) => {
+    createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, boxingHasSwitch = false, muayThaiHasSwitch = false) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -217,6 +217,8 @@ export function useSessionState() {
         matchups,
         boxingGoal,
         muayThaiGoal,
+        boxingGoalHasSwitch,
+        muayThaiGoalHasSwitch,
         nextMatchups: [],
       }));
     },
