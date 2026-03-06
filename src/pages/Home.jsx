@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
@@ -15,6 +16,20 @@ import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 function HomeContent() {
+  useEffect(() => {
+    const initGym = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user?.gym_id) {
+          localStorage.setItem("gym_id", user.gym_id);
+        }
+      } catch (err) {
+        console.error("Failed to init gym:", err);
+      }
+    };
+    initGym();
+  }, []);
+
   const { session, actions } = useSessionState();
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
@@ -117,5 +132,13 @@ function HomeContent() {
         <SessionControls session={session} actions={actions} />
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <GymAuthGuard>
+      <HomeContent />
+    </GymAuthGuard>
   );
 }
