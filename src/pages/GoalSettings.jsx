@@ -35,7 +35,10 @@ function GoalSettingsContent() {
     mutationFn: async (data) => {
       return base44.entities.SparringGoal.create(data);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["sparring-goals"] });
+      setNewGoals(prev => ({ ...prev, [variables.sparringType]: "" }));
+    },
   });
 
   const deleteMutation = useMutation({
@@ -95,7 +98,6 @@ function GoalSettingsContent() {
       localStorage.setItem("gym_id", user.gym_id);
       createMutation.mutate({ text: text.trim(), sparringType, enabled: true, gym_id: user.gym_id });
     }
-    setNewGoals(prev => ({ ...prev, [sparringType]: "" }));
   };
 
   return (
