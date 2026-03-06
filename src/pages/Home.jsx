@@ -17,6 +17,7 @@ export default function Home() {
   const { session, actions } = useSessionState();
   const prevStatusRef = useRef(session.status);
   const prevPhaseRef = useRef(session.phase);
+  const prevMidpointRef = useRef(session.midpointTriggered);
   
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
@@ -25,6 +26,7 @@ export default function Home() {
   useEffect(() => {
     const prevStatus = prevStatusRef.current;
     const prevPhase = prevPhaseRef.current;
+    const prevMidpoint = prevMidpointRef.current;
 
     // Warmup ended -> round started
     if (prevStatus === "warmup" && session.status === "running") {
@@ -56,9 +58,29 @@ export default function Home() {
       }
     }
 
+    // Midpoint switch trigger
+    if (session.phase === "round" && !prevMidpoint && session.midpointTriggered) {
+      const playSwitch = async () => {
+        if (session.boxingGoalHasSwitch && session.switchBoxingSound) {
+          try {
+            const audio = new Audio(session.switchBoxingSound);
+            await audio.play().catch(() => {});
+          } catch (e) {}
+        }
+        if (session.muayThaiGoalHasSwitch && session.switchMuayThaiSound) {
+          try {
+            const audio = new Audio(session.switchMuayThaiSound);
+            await audio.play().catch(() => {});
+          } catch (e) {}
+        }
+      };
+      playSwitch();
+    }
+
     prevStatusRef.current = session.status;
     prevPhaseRef.current = session.phase;
-  }, [session.status, session.phase, session.roundStartSound, session.roundEndSound]);
+    prevMidpointRef.current = session.midpointTriggered;
+  }, [session.status, session.phase, session.midpointTriggered, session.roundStartSound, session.roundEndSound, session.boxingGoalHasSwitch, session.muayThaiGoalHasSwitch, session.switchBoxingSound, session.switchMuayThaiSound]);
 
   if (isComplete) {
     return (
