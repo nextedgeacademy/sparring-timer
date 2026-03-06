@@ -33,11 +33,7 @@ function GoalSettingsContent() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const gymId = localStorage.getItem("gym_id");
-      return base44.entities.SparringGoal.create({
-        ...data,
-        gym_id: gymId,
-      });
+      return base44.entities.SparringGoal.create(data);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
@@ -60,19 +56,8 @@ function GoalSettingsContent() {
           base44.auth.redirectToLogin();
           return;
         }
-        // Try to get or create gym_id
-        let gymId = localStorage.getItem("gym_id");
-        if (!gymId && user?.gym_id) {
-          gymId = user.gym_id;
-          localStorage.setItem("gym_id", gymId);
-        }
-        if (!gymId) {
-          // Create a default gym if user doesn't have one
-          const gyms = await base44.entities.Gym.filter({ owner_name: user.full_name });
-          if (gyms.length > 0) {
-            gymId = gyms[0].id;
-            localStorage.setItem("gym_id", gymId);
-          }
+        if (user?.gym_id) {
+          localStorage.setItem("gym_id", user.gym_id);
         }
         setIsAuthed(true);
       } catch (err) {
@@ -93,19 +78,24 @@ function GoalSettingsContent() {
     { id: "muay_thai", label: "Muay Thai", emoji: "🦵", color: "blue" },
   ];
 
-  const handleAdd = (sparringType) => {
+  const handleAdd = async (sparringType) => {
     const text = newGoals[sparringType];
     if (!text.trim()) return;
-    const gymId = localStorage.getItem("gym_id");
-    if (!gymId) {
-      console.error("No gym_id found");
-      return;
+    
+    const user = await base44.auth.me();
+    if (!user?.gym_id) {
+      // Create gym if user doesn't have one
+      const newGym = await base44.entities.Gym.create({ 
+        name: `${user.full_name}'s Gym`,
+        owner_name: user.full_name 
+      });
+      localStorage.setItem("gym_id", newGym.id);
+      createMutation.mutate({ text: text.trim(), sparringType, enabled: true, gym_id: newGym.id });
+    } else {
+      localStorage.setItem("gym_id", user.gym_id);
+      createMutation.mutate({ text: text.trim(), sparringType, enabled: true, gym_id: user.gym_id });
     }
-    createMutation.mutate({ text: text.trim(), sparringType, enabled: true }, {
-      onSuccess: () => {
-        setNewGoals(prev => ({ ...prev, [sparringType]: "" }));
-      }
-    });
+    setNewGoals(prev => ({ ...prev, [sparringType]: "" }));
   };
 
   return (
