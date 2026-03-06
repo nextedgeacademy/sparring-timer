@@ -38,6 +38,7 @@ export function useSessionState() {
       repeatMode: "same", // same | reshuffle
       matchups: [],
       nextMatchups: [],
+      divisionNames: ["Division 1", "Division 2", "Division 3"],
     };
   });
 
@@ -361,6 +362,7 @@ export function useSessionState() {
         repeatMode: "same",
         matchups: [],
         nextMatchups: [],
+        divisionNames: ["Division 1", "Division 2", "Division 3"],
       });
     },
   };
