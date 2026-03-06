@@ -70,6 +70,7 @@ export default function TVMode() {
 
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup" || session.status === "brackets_preview";
   const isComplete = session.status === "complete";
+  const showBracketsPreview = session.status === "brackets_preview";
   const isWarmup = session.status === "warmup";
 
   const displayMatchups = session.phase === "rest"
