@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 function HomeContent() {
   const [isAuthed, setIsAuthed] = useState(null);
+  const { session, actions } = useSessionState();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -40,8 +41,6 @@ function HomeContent() {
   if (isAuthed === null) {
     return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
   }
-
-  const { session, actions } = useSessionState();
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
 
