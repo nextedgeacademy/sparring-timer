@@ -34,6 +34,11 @@ export default function GoalSettings() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
+  const toggleSwitchMutation = useMutation({
+    mutationFn: ({ id, hasSwitch }) => base44.entities.SparringGoal.update(id, { hasSwitch }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
+  });
+
   const boxingGoals = goals.filter(g => g.type === "boxing");
   const muayThaiGoals = goals.filter(g => g.type === "muay_thai");
 
@@ -80,6 +85,15 @@ export default function GoalSettings() {
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <Switch
+                      checked={goal.hasSwitch !== false}
+                      onCheckedChange={checked => toggleSwitchMutation.mutate({ id: goal.id, hasSwitch: checked })}
+                    />
+                    <Label className="text-white/50 text-xs">
+                      {goal.hasSwitch !== false ? "Switch" : "No Switch"}
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
                       checked={goal.enabled !== false}
                       onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
                     />
@@ -121,6 +135,15 @@ export default function GoalSettings() {
               <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
                 <span className="text-white">{goal.text}</span>
                 <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={goal.hasSwitch !== false}
+                      onCheckedChange={checked => toggleSwitchMutation.mutate({ id: goal.id, hasSwitch: checked })}
+                    />
+                    <Label className="text-white/50 text-xs">
+                      {goal.hasSwitch !== false ? "Switch" : "No Switch"}
+                    </Label>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={goal.enabled !== false}
