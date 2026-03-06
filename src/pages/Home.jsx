@@ -66,12 +66,15 @@ function HomeContent() {
     return (
       <div className="min-h-screen bg-gray-950">
         <div className="flex justify-end p-4 gap-2">
-          <Link to={createPageUrl("GoalSettings")}>
-           <Button variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1">
-             <Settings className="w-3 h-3" /> Goals & Settings
+           <Link to={createPageUrl("GoalSettings")}>
+            <Button variant="outline" size="sm" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1">
+              <Settings className="w-3 h-3" /> Goals & Settings
+            </Button>
+           </Link>
+           <Button variant="outline" size="sm" className="bg-red-700 border-red-600 text-white hover:bg-red-600 font-semibold gap-1" onClick={() => base44.auth.logout()}>
+            <LogOut className="w-3 h-3" /> Logout
            </Button>
-          </Link>
-        </div>
+         </div>
         {/* Sound Uploader in setup */}
         <div className="max-w-4xl mx-auto px-6">
           <SetupPanel session={session} actions={actions} />
