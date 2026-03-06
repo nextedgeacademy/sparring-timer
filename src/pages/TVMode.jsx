@@ -31,8 +31,20 @@ export default function TVMode() {
   const { session, actions } = useSessionState();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [sessionLoaded, setSessionLoaded] = useState(false);
   const containerRef = useRef(null);
   const controlTimer = useRef(null);
+
+  // Poll localStorage for session updates every 500ms
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const storedSessionId = localStorage.getItem('sparringSessionId');
+      if (storedSessionId) {
+        setSessionLoaded(true);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-enter fullscreen if URL param
   useEffect(() => {
