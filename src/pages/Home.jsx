@@ -46,6 +46,13 @@ export default function Home() {
            </Button>
           </Link>
         </div>
+        {/* Logo and Title */}
+        <div className="flex flex-col items-center justify-center py-8 gap-4">
+          <div className="w-20 h-20 bg-black rounded-lg flex items-center justify-center border-2 border-white/20">
+            <div className="text-3xl font-black text-white">⚔️</div>
+          </div>
+          <h1 className="text-3xl font-black text-white text-center">Combat Sports Sparring Session</h1>
+        </div>
         {/* Sound Uploader in setup */}
         <div className="max-w-4xl mx-auto px-6">
           <SetupPanel session={session} actions={actions} />

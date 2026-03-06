@@ -47,15 +47,15 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import GoalSettings from './pages/GoalSettings';
-import Home from './pages/Home';
 import TVMode from './pages/TVMode';
+import Home from './pages/Home';
+import GoalSettings from './pages/GoalSettings';
 
 
 export const PAGES = {
-    "GoalSettings": GoalSettings,
-    "Home": Home,
     "TVMode": TVMode,
+    "Home": Home,
+    "GoalSettings": GoalSettings,
 }
 
 export const pagesConfig = {
