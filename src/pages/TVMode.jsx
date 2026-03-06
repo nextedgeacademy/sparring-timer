@@ -44,8 +44,9 @@ export default function TVMode() {
     controlTimer.current = setTimeout(() => setShowControls(false), 3000);
   };
 
-  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused";
+  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
+  const isWarmup = session.status === "warmup";
 
   const displayMatchups = session.phase === "rest"
     ? (session.nextMatchups?.length > 0 ? session.nextMatchups : session.matchups)
@@ -89,8 +90,8 @@ export default function TVMode() {
       {/* Header bar */}
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <div className={`text-sm font-bold uppercase tracking-widest ${session.phase === "rest" ? "text-amber-400" : "text-white/50"}`}>
-            {session.phase === "rest" ? "REST — UP NEXT" : `Round ${displayRound}`}
+          <div className={`text-sm font-bold uppercase tracking-widest ${isWarmup ? "text-yellow-400" : (session.phase === "rest" ? "text-amber-400" : "text-white/50")}`}>
+            {isWarmup ? "Warming Up..." : (session.phase === "rest" ? "REST — UP NEXT" : `Round ${displayRound}`)}
           </div>
           {session.status === "paused" && (
             <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-sm font-bold rounded-full animate-pulse">
