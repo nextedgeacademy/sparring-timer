@@ -16,19 +16,40 @@ export default function SetupPanel({ session, actions }) {
   const [restTime, setRestTime] = useState(Math.floor(session.restTime / 60));
   const [roundTimeSec, setRoundTimeSec] = useState(session.roundTime % 60);
   const [restTimeSec, setRestTimeSec] = useState(session.restTime % 60);
+  const [selectedTypes, setSelectedTypes] = useState(session.selectedSparringTypes || []);
 
   const { data: goals = [] } = useQuery({
     queryKey: ["sparring-goals"],
     queryFn: () => base44.entities.SparringGoal.list(),
   });
 
-  const pickRandomGoal = (type) => {
-    const enabled = goals.filter(g => g.type === type && g.enabled !== false);
-    if (enabled.length === 0) return "";
+  const sparringTypes = [
+    { id: "bjj", label: "BJJ" },
+    { id: "boxing", label: "Boxing" },
+    { id: "mma", label: "MMA" },
+    { id: "muay_thai", label: "Muay Thai" },
+  ];
+
+  const toggleType = (typeId) => {
+    setSelectedTypes(prev => {
+      if (prev.includes(typeId)) {
+        return prev.filter(t => t !== typeId);
+      } else if (prev.length < 2) {
+        return [...prev, typeId];
+      }
+      return prev;
+    });
+  };
+
+  const pickRandomGoal = (sparringType) => {
+    const enabled = goals.filter(g => g.sparringType === sparringType && g.enabled !== false);
+    if (enabled.length === 0) return null;
     return enabled[Math.floor(Math.random() * enabled.length)].text;
   };
 
   const handleCreateBrackets = () => {
+    if (selectedTypes.length === 0) return;
+
     const divisions = divTexts.map(text =>
       text.split("\n").map(n => n.trim()).filter(n => n.length > 0)
     );
@@ -42,15 +63,15 @@ export default function SetupPanel({ session, actions }) {
       repeatMode: session.repeatMode || "same",
     });
 
-    const boxingGoal = pickRandomGoal("boxing");
-    const muayThaiGoal = pickRandomGoal("muay_thai");
-    const nextBoxing = pickRandomGoal("boxing");
-    const nextMuayThai = pickRandomGoal("muay_thai");
-
-    actions.updateSettings({ nextBoxingGoal: nextBoxing, nextMuayThaiGoal: nextMuayThai });
+    // Pick initial goals based on selected types
+    const initialGoals = {};
+    selectedTypes.forEach(type => {
+      const goal = pickRandomGoal(type);
+      initialGoals[type] = goal || `${type.toUpperCase()}: No Goal Selected`;
+    });
 
     setTimeout(() => {
-      actions.createBrackets(divisions, divisionCount, boxingGoal, muayThaiGoal);
+      actions.createBrackets(divisions, divisionCount, initialGoals, selectedTypes);
     }, 50);
   };
 
