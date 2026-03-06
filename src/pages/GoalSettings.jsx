@@ -31,6 +31,8 @@ function GoalSettingsContent() {
     },
   });
 
+  const [goalsPending, setGoalsPending] = useState({});
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       return base44.entities.SparringGoal.create(data);
@@ -38,6 +40,10 @@ function GoalSettingsContent() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["sparring-goals"] });
       setNewGoals(prev => ({ ...prev, [variables.sparringType]: "" }));
+      setGoalsPending(prev => ({ ...prev, [variables.sparringType]: false }));
+    },
+    onError: (_, variables) => {
+      setGoalsPending(prev => ({ ...prev, [variables.sparringType]: false }));
     },
   });
 
@@ -84,6 +90,8 @@ function GoalSettingsContent() {
   const handleAdd = async (sparringType) => {
     const text = newGoals[sparringType];
     if (!text.trim()) return;
+    
+    setGoalsPending(prev => ({ ...prev, [sparringType]: true }));
     
     const user = await base44.auth.me();
     if (!user?.gym_id) {
@@ -133,13 +141,13 @@ function GoalSettingsContent() {
                 <Button 
                   onClick={() => handleAdd(type.id)} 
                   className="gap-1"
-                  disabled={!newGoals[type.id].trim() || createMutation.isPending}
+                  disabled={!newGoals[type.id].trim() || goalsPending[type.id]}
                   style={{
                     backgroundColor: type.color === "purple" ? "#9333ea" : type.color === "red" ? "#dc2626" : type.color === "orange" ? "#ea580c" : "#2563eb",
-                    opacity: !newGoals[type.id].trim() || createMutation.isPending ? 0.5 : 1
+                    opacity: !newGoals[type.id].trim() || goalsPending[type.id] ? 0.5 : 1
                   }}
                 >
-                  <Plus className="w-4 h-4" /> {createMutation.isPending ? "Adding..." : "Add"}
+                  <Plus className="w-4 h-4" /> {goalsPending[type.id] ? "Adding..." : "Add"}
                 </Button>
               </div>
               <div className="space-y-2">
