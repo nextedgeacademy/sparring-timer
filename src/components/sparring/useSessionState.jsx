@@ -395,6 +395,7 @@ export function useSessionState() {
           console.error('Failed to delete session:', e);
         }
       }
+      localStorage.removeItem('sparringSessionId');
       setSession(defaultSession);
     },
   };
