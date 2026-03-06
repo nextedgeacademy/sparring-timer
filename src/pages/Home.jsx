@@ -20,9 +20,22 @@ export default function Home() {
   const prevStatusRef = useRef(session.status);
   const prevPhaseRef = useRef(session.phase);
   const prevMidpointRef = useRef(session.midpointTriggered);
+  const prevRoundRef = useRef(session.globalRound);
+  
+  const { data: goals = [] } = useQuery({
+    queryKey: ["sparring-goals"],
+    queryFn: () => base44.entities.SparringGoal.list(),
+  });
   
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
+
+  const pickRandomGoal = (type) => {
+    const enabled = goals.filter(g => g.type === type && g.enabled !== false);
+    if (enabled.length === 0) return { text: "", hasSwitch: false };
+    const goal = enabled[Math.floor(Math.random() * enabled.length)];
+    return { text: goal.text, hasSwitch: goal.hasSwitch || false };
+  };
 
   // Sound playback on state changes
   useEffect(() => {
