@@ -20,7 +20,7 @@ export function useSessionState() {
   const [session, setSession] = useState(() => {
     const saved = loadFromStorage();
     return saved || {
-      status: "idle", // idle | setup | running | paused | rest | complete
+      status: "idle", // idle | setup | brackets_preview | warmup | running | paused | rest | complete
       divisions: [[], [], []],
       divisionCount: 1,
       schedules: {},
@@ -53,11 +53,26 @@ export function useSessionState() {
 
   // Timer logic
   useEffect(() => {
-    if (session.status === "running" || session.status === "rest") {
+    if (session.status === "running" || session.status === "rest" || session.status === "warmup") {
       timerRef.current = setInterval(() => {
         setSession(prev => {
           if (prev.timeLeft <= 1) {
             clearInterval(timerRef.current);
+            if (prev.status === "warmup") {
+              // Warmup ended - play start sound and begin round
+              if (prev.roundStartSound) {
+                try {
+                  const audio = new Audio(prev.roundStartSound);
+                  audio.play().catch(() => {});
+                } catch (e) {}
+              }
+              return {
+                ...prev,
+                status: "running",
+                phase: "round",
+                timeLeft: prev.roundTime,
+              };
+            }
             if (prev.phase === "round") {
               // Round ended - play end sound, switch to rest or next round
               if (prev.roundEndSound) {
@@ -171,7 +186,7 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, ...updates }));
     },
 
-    startSession: (divisions, divisionCount, boxingGoal, muayThaiGoal) => {
+    createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -187,18 +202,27 @@ export function useSessionState() {
       
       setSession(prev => ({
         ...prev,
-        status: "running",
+        status: "brackets_preview",
         phase: "round",
         divisions: divisions,
         divisionCount,
         schedules,
         roundIndices,
         globalRound: 1,
-        timeLeft: prev.roundTime,
+        timeLeft: 20, // 20 second warmup
         matchups,
         boxingGoal,
         muayThaiGoal,
         nextMatchups: [],
+      }));
+    },
+
+    startWarmup: () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setSession(prev => ({
+        ...prev,
+        status: "warmup",
+        timeLeft: 20,
       }));
     },
 
