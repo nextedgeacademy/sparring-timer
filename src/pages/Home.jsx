@@ -16,7 +16,7 @@ import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 function HomeContent() {
-  const [isAuthed, setIsAuthed] = React.useState(null);
+  const [isAuthed, setIsAuthed] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
