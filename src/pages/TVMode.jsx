@@ -99,7 +99,7 @@ export default function TVMode() {
       >
         <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/bcad1fbfb_SparringTimerLogoBlackBackground.png" alt="SparringTimer" className="w-64 h-64 mb-6" />
         <h1 className="text-4xl font-black text-white/30 mb-6">WAITING FOR SESSION</h1>
-        <p className="text-white/20 text-lg mb-8">Start a session from the admin view</p>
+        <p className="text-white/20 text-lg mb-8">{sessionLoaded ? "Loading session..." : "Start a session from the admin view"}</p>
         {!isFullscreen && (
           <Button onClick={enterFullscreen} className="bg-white/10 text-white border border-white/20 hover:bg-white/20 gap-2">
             <Maximize className="w-4 h-4" /> Enter Fullscreen
