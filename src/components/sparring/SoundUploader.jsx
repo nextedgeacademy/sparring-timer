@@ -50,6 +50,7 @@ export default function SoundUploader({ session, actions }) {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs text-white/50">Upload your own sounds or download and use the examples provided below.</p>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-white/70">Round Start Sound</Label>
