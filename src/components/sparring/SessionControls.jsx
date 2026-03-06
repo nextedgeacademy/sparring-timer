@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Pause, Play, Square, SkipForward, SkipBack, UserPlus, Flag } from "lucide-react";
+import { getMergedRound } from "./roundRobinEngine";
 
 export default function SessionControls({ session, actions }) {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
@@ -20,22 +21,8 @@ export default function SessionControls({ session, actions }) {
       actions.nextRound();
       setNextClickState(null);
     } else {
-      // First click - go to rest
-      if (session.phase === "round") {
-        // Manually transition to rest
-        const newIndices = { ...session.roundIndices };
-        Object.keys(session.schedules).forEach(div => {
-          newIndices[div] = (session.roundIndices[div] || 0) + 1;
-          const divSchedule = session.schedules[div];
-          if (divSchedule && newIndices[div] >= divSchedule.length) {
-            newIndices[div] = newIndices[div] % divSchedule.length;
-          }
-        });
-        const { getMergedRound } = require("../sparring/roundRobinEngine");
-        const matchups = getMergedRound(session.schedules, newIndices);
-        // Just go to rest, don't advance yet
-        setNextClickState("next");
-      }
+      // First click - mark for confirmation
+      setNextClickState("next");
     }
   };
 
@@ -45,10 +32,8 @@ export default function SessionControls({ session, actions }) {
       actions.prevRound();
       setNextClickState(null);
     } else {
-      // First click - go to rest
-      if (session.phase === "round") {
-        setNextClickState("prev");
-      }
+      // First click - mark for confirmation
+      setNextClickState("prev");
     }
   };
 
