@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { base44 } from "@/api/base44Client";
 import { useSessionState } from "../components/sparring/useSessionState";
 import MatchupGrid from "../components/sparring/MatchupGrid";
 import TimerDisplay from "../components/sparring/TimerDisplay";
@@ -8,6 +9,24 @@ import { Maximize, Minimize, Pause, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TVMode() {
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (!user) {
+          base44.auth.redirectToLogin(window.location.href);
+          return;
+        }
+        setIsAuthed(true);
+      } catch (err) {
+        base44.auth.redirectToLogin(window.location.href);
+      }
+    };
+    checkAuth();
+  }, []);
+
   const { session, actions } = useSessionState();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -43,6 +62,10 @@ export default function TVMode() {
     if (controlTimer.current) clearTimeout(controlTimer.current);
     controlTimer.current = setTimeout(() => setShowControls(false), 3000);
   };
+
+  if (!isAuthed) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
+  }
 
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup" || session.status === "brackets_preview";
   const isComplete = session.status === "complete";
