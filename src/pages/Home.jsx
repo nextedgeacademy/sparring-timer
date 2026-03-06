@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
@@ -7,13 +7,14 @@ import TimerDisplay from "../components/sparring/TimerDisplay";
 import GoalDisplay from "../components/sparring/GoalDisplay";
 import SoundUploader from "../components/sparring/SoundUploader";
 import BracketsPreview from "../components/sparring/BracketsPreview";
+import GymAuthGuard from "../components/GymAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Settings, Monitor, Maximize, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Home() {
+function HomeContent() {
   const { session, actions } = useSessionState();
   const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
