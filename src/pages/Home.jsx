@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const { session, actions } = useSessionState();
-  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused";
+  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
   const isComplete = session.status === "complete";
 
   if (isComplete) {
