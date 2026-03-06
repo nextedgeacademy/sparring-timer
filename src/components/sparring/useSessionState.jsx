@@ -1,133 +1,59 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { base44 } from "@/api/base44Client";
 import { generateRoundRobin, getMergedRound, addLateArrival, shuffleArray } from "./roundRobinEngine";
 
-const defaultSession = {
-  status: "idle",
-  divisions: [[], [], []],
-  divisionCount: 1,
-  schedules: {},
-  roundIndices: {},
-  globalRound: 1,
-  roundTime: 180,
-  restTime: 60,
-  timeLeft: 180,
-  phase: "round",
-  selectedSparringTypes: [],
-  goals: {},
-  nextGoals: {},
-  roundStartSound: null,
-  roundEndSound: null,
-  repeatMode: "same",
-  matchups: [],
-  nextMatchups: [],
-  divisionNames: ["Division 1", "Division 2", "Division 3"],
-};
+const STORAGE_KEY = "sparring_session";
+
+function saveToStorage(state) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { /* ignore */ }
+}
+
+function loadFromStorage() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (e) { return null; }
+}
 
 export function useSessionState() {
-  console.log('useSessionState initialized');
-  const [session, setSession] = useState(defaultSession);
-  const [sessionId, setSessionId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(() => {
+    const saved = loadFromStorage();
+    return saved || {
+      status: "idle", // idle | setup | brackets_preview | warmup | running | paused | rest | complete
+      divisions: [[], [], []],
+      divisionCount: 1,
+      schedules: {},
+      roundIndices: {},
+      globalRound: 1,
+      roundTime: 180,
+      restTime: 60,
+      timeLeft: 180,
+      phase: "round", // round | rest
+      selectedSparringTypes: [], // array of selected sparring types
+      goals: {}, // { "boxing": "Jabs Only", "muay_thai": "Body Kicks Only" }
+      nextGoals: {},
+      roundStartSound: null,
+      roundEndSound: null,
+      repeatMode: "same", // same | reshuffle
+      matchups: [],
+      nextMatchups: [],
+      divisionNames: ["Division 1", "Division 2", "Division 3"],
+    };
+  });
 
   const timerRef = useRef(null);
   const roundEndAudioRef = useRef(null);
   const roundStartAudioRef = useRef(null);
-  const saveTimeoutRef = useRef(null);
 
-  // Load session on mount
+  // Persist state
   useEffect(() => {
-    const loadSession = async () => {
-      try {
-        // Check localStorage first
-        const storedSessionId = localStorage.getItem('sparringSessionId');
-        if (storedSessionId) {
-          console.log('Loading session from localStorage:', storedSessionId);
-          try {
-            const dbSession = await base44.entities.SparringSession.read(storedSessionId);
-            // Parse JSON fields
-            const parsedSession = {
-              ...dbSession,
-              divisions: typeof dbSession.divisions === 'string' ? JSON.parse(dbSession.divisions) : dbSession.divisions,
-              schedules: typeof dbSession.schedules === 'string' ? JSON.parse(dbSession.schedules) : dbSession.schedules,
-              roundIndices: typeof dbSession.roundIndices === 'string' ? JSON.parse(dbSession.roundIndices) : dbSession.roundIndices,
-              goals: typeof dbSession.goals === 'string' ? JSON.parse(dbSession.goals) : dbSession.goals,
-              nextGoals: typeof dbSession.nextGoals === 'string' ? JSON.parse(dbSession.nextGoals) : dbSession.nextGoals,
-              matchups: typeof dbSession.matchups === 'string' ? JSON.parse(dbSession.matchups) : dbSession.matchups,
-              nextMatchups: typeof dbSession.nextMatchups === 'string' ? JSON.parse(dbSession.nextMatchups) : dbSession.nextMatchups,
-            };
-            setSessionId(storedSessionId);
-            setSession(parsedSession);
-          } catch (e) {
-            console.log('Session not in DB yet, will sync when available');
-            setSessionId(storedSessionId);
-          }
-        } else {
-          console.log('No session in localStorage, checking list');
-          try {
-            const sessions = await base44.entities.SparringSession.list('-updated_date', 1);
-            console.log('Loaded sessions:', sessions);
-            if (sessions.length > 0) {
-              const dbSession = sessions[0];
-              const parsedSession = {
-                ...dbSession,
-                divisions: typeof dbSession.divisions === 'string' ? JSON.parse(dbSession.divisions) : dbSession.divisions,
-                schedules: typeof dbSession.schedules === 'string' ? JSON.parse(dbSession.schedules) : dbSession.schedules,
-                roundIndices: typeof dbSession.roundIndices === 'string' ? JSON.parse(dbSession.roundIndices) : dbSession.roundIndices,
-                goals: typeof dbSession.goals === 'string' ? JSON.parse(dbSession.goals) : dbSession.goals,
-                nextGoals: typeof dbSession.nextGoals === 'string' ? JSON.parse(dbSession.nextGoals) : dbSession.nextGoals,
-                matchups: typeof dbSession.matchups === 'string' ? JSON.parse(dbSession.matchups) : dbSession.matchups,
-                nextMatchups: typeof dbSession.nextMatchups === 'string' ? JSON.parse(dbSession.nextMatchups) : dbSession.nextMatchups,
-              };
-              setSessionId(dbSession.id);
-              setSession(parsedSession);
-              localStorage.setItem('sparringSessionId', dbSession.id);
-            }
-          } catch (e) {
-            console.log('Cannot fetch sessions');
-          }
-        }
-      } catch (e) {
-        console.error('Failed to load session:', e);
-      }
-      setLoading(false);
-    };
-    loadSession();
-  }, []);
-
-  // Sync state to backend with debounce
-  useEffect(() => {
-    if (!loading && sessionId) {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-      saveTimeoutRef.current = setTimeout(async () => {
-        try {
-          // Stringify complex fields for storage
-          const dataToSave = {
-            ...session,
-            divisions: JSON.stringify(session.divisions),
-            schedules: JSON.stringify(session.schedules),
-            roundIndices: JSON.stringify(session.roundIndices),
-            goals: JSON.stringify(session.goals),
-            nextGoals: JSON.stringify(session.nextGoals),
-            matchups: JSON.stringify(session.matchups),
-            nextMatchups: JSON.stringify(session.nextMatchups),
-          };
-          await base44.entities.SparringSession.update(sessionId, dataToSave);
-        } catch (e) {
-          console.error('Failed to save session:', e);
-        }
-      }, 500);
-    }
-    return () => {
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-    };
-  }, [session, sessionId, loading]);
+    saveToStorage(session);
+  }, [session]);
 
   // Timer logic
   useEffect(() => {
-    const isTimerActive = session.status === "running" || session.status === "rest" || session.status === "warmup";
-    
-    if (isTimerActive) {
+    if (session.status === "running" || session.status === "rest" || session.status === "warmup") {
       timerRef.current = setInterval(() => {
         setSession(prev => {
           if (prev.timeLeft <= 2) {
@@ -187,7 +113,7 @@ export function useSessionState() {
       }, 1000);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [session.status]);
+  }, [session.status, session.phase]);
 
   const getNextRoundData = useCallback((state) => {
     const newIndices = { ...state.roundIndices };
@@ -261,7 +187,7 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, ...updates }));
     },
 
-    createBrackets: async (divisions, divisionCount, goals, selectedTypes) => {
+    createBrackets: (divisions, divisionCount, goals, selectedTypes) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -275,7 +201,8 @@ export function useSessionState() {
 
       const matchups = getMergedRound(schedules, roundIndices);
       
-      const newSessionData = {
+      setSession(prev => ({
+        ...prev,
         status: "brackets_preview",
         phase: "round",
         divisions: divisions,
@@ -283,37 +210,13 @@ export function useSessionState() {
         schedules,
         roundIndices,
         globalRound: 1,
-        timeLeft: 20,
+        timeLeft: 20, // 20 second warmup
         matchups,
         goals,
         selectedSparringTypes: selectedTypes,
         nextGoals: {},
         nextMatchups: [],
-      };
-
-      try {
-        // Stringify complex fields for storage
-        const dataToCreate = {
-          ...newSessionData,
-          divisions: JSON.stringify(newSessionData.divisions),
-          schedules: JSON.stringify(newSessionData.schedules),
-          roundIndices: JSON.stringify(newSessionData.roundIndices),
-          goals: JSON.stringify(newSessionData.goals),
-          nextGoals: JSON.stringify(newSessionData.nextGoals),
-          matchups: JSON.stringify(newSessionData.matchups),
-          nextMatchups: JSON.stringify(newSessionData.nextMatchups),
-        };
-        const created = await base44.entities.SparringSession.create(dataToCreate);
-        console.log('Session created:', created.id);
-        setSessionId(created.id);
-        setSession(newSessionData);
-        localStorage.setItem('sparringSessionId', created.id);
-        console.log('localStorage updated with:', created.id);
-      } catch (e) {
-        console.error('Failed to create session:', e);
-        // Fallback to local state
-        setSession(prev => ({ ...prev, ...newSessionData }));
-      }
+      }));
     },
 
     startWarmup: () => {
@@ -441,19 +344,31 @@ export function useSessionState() {
       setSession(prev => ({ ...prev, nextGoals: goals }));
     },
 
-    clearSession: async () => {
-      if (sessionId) {
-        try {
-          await base44.entities.SparringSession.delete(sessionId);
-          setSessionId(null);
-        } catch (e) {
-          console.error('Failed to delete session:', e);
-        }
-      }
-      localStorage.removeItem('sparringSessionId');
-      setSession(defaultSession);
+    clearSession: () => {
+      localStorage.removeItem(STORAGE_KEY);
+      setSession({
+        status: "idle",
+        divisions: [[], [], []],
+        divisionCount: 1,
+        schedules: {},
+        roundIndices: {},
+        globalRound: 1,
+        roundTime: 180,
+        restTime: 60,
+        timeLeft: 180,
+        phase: "round",
+        selectedSparringTypes: [],
+        goals: {},
+        nextGoals: {},
+        roundStartSound: null,
+        roundEndSound: null,
+        repeatMode: "same",
+        matchups: [],
+        nextMatchups: [],
+        divisionNames: ["Division 1", "Division 2", "Division 3"],
+      });
     },
   };
 
-  return { session, actions, loading };
+  return { session, actions };
 }
