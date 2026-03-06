@@ -12,30 +12,6 @@ import { createPageUrl } from "@/utils";
 
 function GoalSettingsContent() {
   const [isAuthed, setIsAuthed] = useState(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await base44.auth.me();
-        if (!user) {
-          base44.auth.redirectToLogin();
-          return;
-        }
-        if (user?.gym_id) {
-          localStorage.setItem("gym_id", user.gym_id);
-        }
-        setIsAuthed(true);
-      } catch (err) {
-        base44.auth.redirectToLogin();
-      }
-    };
-    checkAuth();
-  }, []);
-
-  if (isAuthed === null) {
-    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
-  }
-
   const queryClient = useQueryClient();
   const [newGoals, setNewGoals] = useState({
     bjj: "",
@@ -75,6 +51,29 @@ function GoalSettingsContent() {
     mutationFn: ({ id, enabled }) => base44.entities.SparringGoal.update(id, { enabled }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (!user) {
+          base44.auth.redirectToLogin();
+          return;
+        }
+        if (user?.gym_id) {
+          localStorage.setItem("gym_id", user.gym_id);
+        }
+        setIsAuthed(true);
+      } catch (err) {
+        base44.auth.redirectToLogin();
+      }
+    };
+    checkAuth();
+  }, []);
+
+  if (isAuthed === null) {
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Loading...</div>;
+  }
 
   const sparringTypes = [
     { id: "bjj", label: "BJJ", emoji: "🥋", color: "purple" },
