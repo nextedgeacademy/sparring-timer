@@ -218,8 +218,8 @@ export function useSessionState() {
         matchups,
         boxingGoal,
         muayThaiGoal,
-        boxingGoalHasSwitch,
-        muayThaiGoalHasSwitch,
+        boxingGoalHasSwitch: boxingHasSwitch,
+        muayThaiGoalHasSwitch: muayThaiHasSwitch,
         nextMatchups: [],
       }));
     },
