@@ -11,8 +11,12 @@ import { createPageUrl } from "@/utils";
 
 export default function GoalSettings() {
   const queryClient = useQueryClient();
-  const [newBoxingGoal, setNewBoxingGoal] = useState("");
-  const [newMuayThaiGoal, setNewMuayThaiGoal] = useState("");
+  const [newGoals, setNewGoals] = useState({
+    bjj: "",
+    boxing: "",
+    mma: "",
+    muay_thai: "",
+  });
 
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ["sparring-goals"],
@@ -34,13 +38,18 @@ export default function GoalSettings() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
-  const boxingGoals = goals.filter(g => g.type === "boxing");
-  const muayThaiGoals = goals.filter(g => g.type === "muay_thai");
+  const sparringTypes = [
+    { id: "bjj", label: "BJJ", emoji: "🥋", color: "purple" },
+    { id: "boxing", label: "Boxing", emoji: "🥊", color: "red" },
+    { id: "mma", label: "MMA", emoji: "🤜", color: "orange" },
+    { id: "muay_thai", label: "Muay Thai", emoji: "🦵", color: "blue" },
+  ];
 
-  const handleAdd = (type, text, setter) => {
+  const handleAdd = (sparringType) => {
+    const text = newGoals[sparringType];
     if (!text.trim()) return;
-    createMutation.mutate({ text: text.trim(), type, enabled: true });
-    setter("");
+    createMutation.mutate({ text: text.trim(), sparringType, enabled: true });
+    setNewGoals(prev => ({ ...prev, [sparringType]: "" }));
   };
 
   return (
@@ -56,91 +65,52 @@ export default function GoalSettings() {
           <h1 className="text-3xl font-black text-white">Goal Management</h1>
         </div>
 
-        {/* Boxing Goals */}
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-          <h2 className="text-xl font-bold text-red-400 flex items-center gap-2">
-            🥊 Boxing Goals
-          </h2>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a boxing goal..."
-              value={newBoxingGoal}
-              onChange={e => setNewBoxingGoal(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
-            />
-            <Button onClick={() => handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)} className="bg-red-600 hover:bg-red-700 gap-1">
-              <Plus className="w-4 h-4" /> Add
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {boxingGoals.map(goal => (
-              <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-                <span className="text-white">{goal.text}</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={goal.enabled !== false}
-                      onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
-                    />
-                    <Label className="text-white/50 text-xs">
-                      {goal.enabled !== false ? "On" : "Off"}
-                    </Label>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8" onClick={() => deleteMutation.mutate(goal.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+        {sparringTypes.map(type => {
+          const typeGoals = goals.filter(g => g.sparringType === type.id);
+          return (
+            <div key={type.id} className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+              <h2 className={`text-xl font-bold text-${type.color}-400 flex items-center gap-2`}>
+                {type.emoji} {type.label} Goals
+              </h2>
+              <div className="flex gap-2">
+                <Input
+                  placeholder={`Add a ${type.label} goal...`}
+                  value={newGoals[type.id]}
+                  onChange={e => setNewGoals(prev => ({ ...prev, [type.id]: e.target.value }))}
+                  onKeyDown={e => e.key === "Enter" && handleAdd(type.id)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
+                />
+                <Button onClick={() => handleAdd(type.id)} className={`bg-${type.color}-600 hover:bg-${type.color}-700 gap-1`}>
+                  <Plus className="w-4 h-4" /> Add
+                </Button>
               </div>
-            ))}
-            {boxingGoals.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-4">No boxing goals yet</p>
-            )}
-          </div>
-        </div>
-
-        {/* Muay Thai Goals */}
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-          <h2 className="text-xl font-bold text-blue-400 flex items-center gap-2">
-            🦵 Muay Thai Goals
-          </h2>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a Muay Thai goal..."
-              value={newMuayThaiGoal}
-              onChange={e => setNewMuayThaiGoal(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
-            />
-            <Button onClick={() => handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)} className="bg-blue-600 hover:bg-blue-700 gap-1">
-              <Plus className="w-4 h-4" /> Add
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {muayThaiGoals.map(goal => (
-              <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-                <span className="text-white">{goal.text}</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={goal.enabled !== false}
-                      onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
-                    />
-                    <Label className="text-white/50 text-xs">
-                      {goal.enabled !== false ? "On" : "Off"}
-                    </Label>
+              <div className="space-y-2">
+                {typeGoals.map(goal => (
+                  <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
+                    <span className="text-white">{goal.text}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={goal.enabled !== false}
+                          onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
+                        />
+                        <Label className="text-white/50 text-xs">
+                          {goal.enabled !== false ? "On" : "Off"}
+                        </Label>
+                      </div>
+                      <Button variant="ghost" size="icon" className={`text-${type.color}-400/50 hover:text-${type.color}-400 hover:bg-${type.color}-500/10 h-8 w-8`} onClick={() => deleteMutation.mutate(goal.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8" onClick={() => deleteMutation.mutate(goal.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                ))}
+                {typeGoals.length === 0 && (
+                  <p className="text-white/30 text-sm text-center py-4">No {type.label} goals yet</p>
+                )}
               </div>
-            ))}
-            {muayThaiGoals.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-4">No Muay Thai goals yet</p>
-            )}
-          </div>
-        </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
