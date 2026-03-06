@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowLeft } from "lucide-react";
+import { Play, ChevronLeft } from "lucide-react";
 import MatchupGrid from "./MatchupGrid";
 import GoalDisplay from "./GoalDisplay";
 import { motion } from "framer-motion";
@@ -42,6 +42,9 @@ export default function BracketsPreview({ session, actions }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-center gap-3"
           >
+            <Button onClick={actions.clearSession} variant="outline" size="lg" className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-bold text-lg px-8 gap-2">
+              <ChevronLeft className="w-5 h-5" /> Back
+            </Button>
             <Button onClick={actions.startWarmup} size="lg" className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 gap-2">
               <Play className="w-5 h-5" /> Start (20s Warmup)
             </Button>
