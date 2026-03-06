@@ -8,7 +8,7 @@ import TimerDisplay from "../components/sparring/TimerDisplay";
 import GoalDisplay from "../components/sparring/GoalDisplay";
 import SoundUploader from "../components/sparring/SoundUploader";
 import BracketsPreview from "../components/sparring/BracketsPreview";
-import GymAuthGuard from "../components/GymAuthGuard";
+
 import { Button } from "@/components/ui/button";
 import { Settings, Monitor, Maximize, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -136,9 +136,5 @@ function HomeContent() {
 }
 
 export default function Home() {
-  return (
-    <GymAuthGuard>
-      <HomeContent />
-    </GymAuthGuard>
-  );
+  return <HomeContent />;
 }
