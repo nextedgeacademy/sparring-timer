@@ -39,6 +39,7 @@ export function useSessionState() {
     const loadSession = async () => {
       try {
         const sessions = await base44.entities.SparringSession.list('-updated_date', 1);
+        console.log('Loaded sessions:', sessions);
         if (sessions.length > 0) {
           const dbSession = sessions[0];
           setSessionId(dbSession.id);
