@@ -67,12 +67,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      {/* Header */}
+      {/* Header with Round, Goals, and TV Buttons */}
       <div className="p-4 flex items-center justify-between border-b border-white/5">
         <div className="flex items-center gap-4">
-          <div className="text-lg font-bold text-white">
-            Next Edge Sparring Timer
-          </div>
           <div className="text-white/40 text-sm font-medium">
             {isWarmup ? "WARMING UP..." : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound}`)}
           </div>
@@ -81,6 +78,9 @@ export default function Home() {
               PAUSED
             </span>
           )}
+        </div>
+        <div className="flex-1 mx-6">
+          <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
         </div>
         <div className="flex gap-2">
          <Button
@@ -100,11 +100,6 @@ export default function Home() {
            <Maximize className="w-3 h-3" /> Fullscreen
          </Button>
         </div>
-      </div>
-
-      {/* Goals */}
-      <div className="p-3 border-b border-white/5">
-        <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} />
       </div>
 
       {/* Timer */}

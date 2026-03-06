@@ -6,7 +6,9 @@ import GoalDisplay from "./GoalDisplay";
 import { motion } from "framer-motion";
 
 export default function BracketsPreview({ session, actions }) {
-  if (session.status !== "brackets_preview") return null;
+  const isWarmup = session.status === "warmup";
+
+  if (session.status !== "brackets_preview" && !isWarmup) return null;
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
@@ -18,26 +20,37 @@ export default function BracketsPreview({ session, actions }) {
         </div>
       </div>
 
-      {/* Matchups */}
-      <div className="flex-1 p-6 overflow-auto">
-        <MatchupGrid matchups={session.matchups} />
-      </div>
+      {/* Warmup Timer or Matchups */}
+      {isWarmup ? (
+        <div className="flex-1 p-6 flex flex-col items-center justify-center">
+          <div className="text-6xl font-black text-yellow-400 font-mono">
+            {Math.floor(session.timeLeft / 60)}:{(session.timeLeft % 60).toString().padStart(2, "0")}
+          </div>
+          <div className="text-white/50 text-lg mt-4">Warming Up...</div>
+        </div>
+      ) : (
+        <div className="flex-1 p-6 overflow-auto">
+          <MatchupGrid matchups={session.matchups} />
+        </div>
+      )}
 
       {/* Start Button */}
-      <div className="p-6 border-t border-white/5">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-center gap-3"
-        >
-          <Button onClick={actions.stop} variant="outline" size="lg" className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 gap-2">
-            <ArrowLeft className="w-5 h-5" /> Back
-          </Button>
-          <Button onClick={actions.startWarmup} size="lg" className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 gap-2">
-            <Play className="w-5 h-5" /> Start (20s Warmup)
-          </Button>
-        </motion.div>
-      </div>
+      {!isWarmup && (
+        <div className="p-6 border-t border-white/5">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center gap-3"
+          >
+            <Button onClick={actions.stop} variant="outline" size="lg" className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 gap-2">
+              <ArrowLeft className="w-5 h-5" /> Back
+            </Button>
+            <Button onClick={actions.startWarmup} size="lg" className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 gap-2">
+              <Play className="w-5 h-5" /> Start (20s Warmup)
+            </Button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

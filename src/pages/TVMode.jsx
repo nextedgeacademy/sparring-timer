@@ -44,7 +44,7 @@ export default function TVMode() {
     controlTimer.current = setTimeout(() => setShowControls(false), 3000);
   };
 
-  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup";
+  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused" || session.status === "warmup" || session.matchups?.length > 0;
   const isComplete = session.status === "complete";
   const isWarmup = session.status === "warmup";
 
