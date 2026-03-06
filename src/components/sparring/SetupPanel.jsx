@@ -238,7 +238,7 @@ export default function SetupPanel({ session, actions }) {
 
       {/* Repeat Mode */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white">Schedule Loop</h2>
+        <h2 className="text-lg font-bold text-white">Schedule Loop - What should we do when the bracket finishes.</h2>
         <Select value={session.repeatMode || "same"} onValueChange={v => actions.updateSettings({ repeatMode: v })}>
           <SelectTrigger className="bg-white/10 border-white/20 text-white w-64">
             <SelectValue />
