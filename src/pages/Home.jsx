@@ -113,12 +113,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      {/* Header - Round, Timer, and Goals all on one row */}
+      {/* Header - Round, Goals */}
       <div className="p-4 flex items-center justify-between gap-4 border-b border-white/5 whitespace-nowrap">
         <div className="text-3xl md:text-4xl font-black text-white">
           {isWarmup ? "WARMING UP" : (session.phase === "rest" ? "REST — UP NEXT" : `ROUND ${displayRound} —`)}
         </div>
-        <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
         <div className="flex-1 mx-4">
           <GoalDisplay boxingGoal={displayBoxing} muayThaiGoal={displayMuayThai} large={true} />
         </div>
@@ -127,6 +126,11 @@ export default function Home() {
             PAUSED
           </span>
         )}
+      </div>
+
+      {/* Timer */}
+      <div className="flex justify-center py-4 border-b border-white/5">
+        <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
       </div>
 
       {/* Matchups */}

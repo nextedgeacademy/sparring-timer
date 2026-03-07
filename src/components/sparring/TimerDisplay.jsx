@@ -8,7 +8,7 @@ export default function TimerDisplay({ timeLeft, phase, large = false }) {
   const isRest = phase === "rest";
 
   return (
-    <div className={`font-mono font-black tabular-nums tracking-tight ${large ? "text-6xl md:text-7xl lg:text-8xl" : "text-5xl md:text-6xl"} ${isRest ? "text-amber-400" : "text-white"}`}>
+    <div className={`font-mono font-black tabular-nums tracking-tight ${large ? "text-6xl md:text-7xl lg:text-8xl" : "text-8xl md:text-9xl"} ${isRest ? "text-amber-400" : "text-white"}`}>
       {formatted}
     </div>
   );
