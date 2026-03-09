@@ -4,37 +4,24 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Pause, Play, Square, SkipForward, SkipBack, UserPlus, Flag } from "lucide-react";
-import { getMergedRound } from "./roundRobinEngine";
 
 export default function SessionControls({ session, actions }) {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerDiv, setNewPlayerDiv] = useState("0");
-  const [nextClickState, setNextClickState] = useState(null); // null | "next" | "prev"
 
   const isPaused = session.status === "paused";
-  const isActive = session.status === "running" || session.status === "rest" || session.status === "paused";
+  const isActive =
+    session.status === "running" ||
+    session.status === "rest" ||
+    session.status === "paused";
 
   const handleNext = () => {
-    if (nextClickState === "next") {
-      // Second click - advance to next round
-      actions.nextRound();
-      setNextClickState(null);
-    } else {
-      // First click - mark for confirmation
-      setNextClickState("next");
-    }
+    actions.nextRound();
   };
 
   const handlePrev = () => {
-    if (nextClickState === "prev") {
-      // Second click - go back to prev round
-      actions.prevRound();
-      setNextClickState(null);
-    } else {
-      // First click - mark for confirmation
-      setNextClickState("prev");
-    }
+    actions.prevRound();
   };
 
   if (!isActive) return null;
@@ -43,27 +30,67 @@ export default function SessionControls({ session, actions }) {
     <>
       <div className="flex flex-wrap gap-2 items-center">
         {isPaused ? (
-          <Button size="sm" variant="outline" onClick={actions.resume} className="gap-1 bg-green-900/50 border-green-700 text-green-300 hover:bg-green-800">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={actions.resume}
+            className="gap-1 bg-green-900/50 border-green-700 text-green-300 hover:bg-green-800"
+          >
             <Play className="w-3 h-3" /> Resume
           </Button>
         ) : (
-          <Button size="sm" variant="outline" onClick={actions.pause} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={actions.pause}
+            className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10"
+          >
             <Pause className="w-3 h-3" /> Pause
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={actions.stop} className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10">
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={actions.stop}
+          className="gap-1 bg-white/5 border-white/20 text-white/70 hover:bg-white/10"
+        >
           <Square className="w-3 h-3" /> Stop
         </Button>
-        <Button size="sm" variant="outline" onClick={handlePrev} className="gap-1 bg-amber-900/50 border-amber-700 text-amber-300 hover:bg-amber-800">
-          <SkipBack className="w-3 h-3" /> {nextClickState === "prev" ? "Confirm Prev" : "Prev"}
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handlePrev}
+          className="gap-1 bg-amber-900/50 border-amber-700 text-amber-300 hover:bg-amber-800"
+        >
+          <SkipBack className="w-3 h-3" /> Prev
         </Button>
-        <Button size="sm" variant="outline" onClick={handleNext} className="gap-1 bg-amber-900/50 border-amber-700 text-amber-300 hover:bg-amber-800">
-          <SkipForward className="w-3 h-3" /> {nextClickState === "next" ? "Confirm Next" : "Next"}
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleNext}
+          className="gap-1 bg-amber-900/50 border-amber-700 text-amber-300 hover:bg-amber-800"
+        >
+          <SkipForward className="w-3 h-3" /> Next
         </Button>
-        <Button size="sm" variant="outline" onClick={() => setShowAddPlayer(true)} className="gap-1 bg-blue-900/50 border-blue-700 text-blue-300 hover:bg-blue-800">
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowAddPlayer(true)}
+          className="gap-1 bg-blue-900/50 border-blue-700 text-blue-300 hover:bg-blue-800"
+        >
           <UserPlus className="w-3 h-3" /> Add Player
         </Button>
-        <Button size="sm" variant="outline" onClick={actions.complete} className="gap-1 bg-red-900/50 border-red-700 text-red-300 hover:bg-red-800">
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={actions.complete}
+          className="gap-1 bg-red-900/50 border-red-700 text-red-300 hover:bg-red-800"
+        >
           <Flag className="w-3 h-3" /> Sparring Complete
         </Button>
       </div>
@@ -73,24 +100,29 @@ export default function SessionControls({ session, actions }) {
           <DialogHeader>
             <DialogTitle>Add Late Arrival</DialogTitle>
           </DialogHeader>
+
           <div className="space-y-4">
             <Input
               placeholder="Full Name"
               value={newPlayerName}
-              onChange={e => setNewPlayerName(e.target.value)}
+              onChange={(e) => setNewPlayerName(e.target.value)}
               className="bg-gray-800 border-gray-600 text-white"
             />
+
             <Select value={newPlayerDiv} onValueChange={setNewPlayerDiv}>
               <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: session.divisionCount }, (_, i) => (
-                  <SelectItem key={i} value={String(i)}>Division {i + 1}</SelectItem>
+                  <SelectItem key={i} value={String(i)}>
+                    Division {i + 1}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
           <DialogFooter>
             <Button
               onClick={() => {
