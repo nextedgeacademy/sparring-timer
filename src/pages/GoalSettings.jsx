@@ -21,39 +21,132 @@ export default function GoalSettings() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.SparringGoal.create(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SparringGoal.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
-  const toggleMutation = useMutation({
-    mutationFn: ({ id, enabled }) => base44.entities.SparringGoal.update(id, { enabled }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
+  const toggleEnabledMutation = useMutation({
+    mutationFn: ({ id, enabled }) =>
+      base44.entities.SparringGoal.update(id, { enabled }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
   });
 
-  const boxingGoals = goals.filter(g => g.type === "boxing");
-  const muayThaiGoals = goals.filter(g => g.type === "muay_thai");
+  const toggleNeutralMutation = useMutation({
+    mutationFn: ({ id, is_neutral }) =>
+      base44.entities.SparringGoal.update(id, { is_neutral }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["sparring-goals"] }),
+  });
+
+  const boxingGoals = goals.filter((g) => g.type === "boxing");
+  const muayThaiGoals = goals.filter((g) => g.type === "muay_thai");
 
   const handleAdd = (type, text, setter) => {
     if (!text.trim()) return;
-    createMutation.mutate({ text: text.trim(), type, enabled: true });
+
+    createMutation.mutate({
+      text: text.trim(),
+      type,
+      enabled: true,
+      is_neutral: true,
+    });
+
     setter("");
+  };
+
+  const GoalRow = ({ goal, colorClass }) => {
+    const isNeutral =
+      goal.is_neutral === false || goal.is_neutral === "false" ? false : true;
+
+    return (
+      <div className="bg-white/5 rounded-xl px-4 py-3 space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="text-white font-medium">{goal.text}</div>
+            <div className="mt-1">
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  isNeutral
+                    ? "bg-green-500/15 text-green-400"
+                    : "bg-amber-500/15 text-amber-400"
+                }`}
+              >
+                {isNeutral ? "Neutral" : "Switch Mid-Round"}
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8 shrink-0"
+            onClick={() => deleteMutation.mutate(goal.id)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={goal.enabled !== false}
+              onCheckedChange={(checked) =>
+                toggleEnabledMutation.mutate({
+                  id: goal.id,
+                  enabled: checked,
+                })
+              }
+            />
+            <Label className="text-white/70 text-xs">
+              {goal.enabled !== false ? "Enabled" : "Disabled"}
+            </Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={isNeutral}
+              onCheckedChange={(checked) =>
+                toggleNeutralMutation.mutate({
+                  id: goal.id,
+                  is_neutral: checked,
+                })
+              }
+            />
+            <Label className="text-white/70 text-xs">
+              {isNeutral ? "Neutral Goal" : "Role Switch Goal"}
+            </Label>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="min-h-screen bg-gray-950 p-6">
       <div className="max-w-3xl mx-auto space-y-8">
-        {/* Header */}
         <div className="flex items-center gap-4">
           <Link to={createPageUrl("Home")}>
-            <Button variant="ghost" size="icon" className="text-white/50 hover:text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white/50 hover:text-white hover:bg-white/10"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
-          <h1 className="text-3xl font-black text-white">Goal Management</h1>
+          <div>
+            <h1 className="text-3xl font-black text-white">Goal Management</h1>
+            <p className="text-white/40 text-sm mt-1">
+              Neutral goals are pursued by both athletes. Role Switch goals swap offense and defense at the midpoint.
+            </p>
+          </div>
         </div>
 
         {/* Boxing Goals */}
@@ -61,40 +154,36 @@ export default function GoalSettings() {
           <h2 className="text-xl font-bold text-red-400 flex items-center gap-2">
             🥊 Boxing Goals
           </h2>
+
           <div className="flex gap-2">
             <Input
               placeholder="Add a boxing goal..."
               value={newBoxingGoal}
-              onChange={e => setNewBoxingGoal(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)}
+              onChange={(e) => setNewBoxingGoal(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === "Enter" &&
+                handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)
+              }
               className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
             />
-            <Button onClick={() => handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)} className="bg-red-600 hover:bg-red-700 gap-1">
+            <Button
+              onClick={() =>
+                handleAdd("boxing", newBoxingGoal, setNewBoxingGoal)
+              }
+              className="bg-red-600 hover:bg-red-700 gap-1"
+            >
               <Plus className="w-4 h-4" /> Add
             </Button>
           </div>
+
           <div className="space-y-2">
-            {boxingGoals.map(goal => (
-              <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-                <span className="text-white">{goal.text}</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={goal.enabled !== false}
-                      onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
-                    />
-                    <Label className="text-white/50 text-xs">
-                      {goal.enabled !== false ? "On" : "Off"}
-                    </Label>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8" onClick={() => deleteMutation.mutate(goal.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
+            {boxingGoals.map((goal) => (
+              <GoalRow key={goal.id} goal={goal} colorClass="text-red-400" />
             ))}
             {boxingGoals.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-4">No boxing goals yet</p>
+              <p className="text-white/30 text-sm text-center py-4">
+                No boxing goals yet
+              </p>
             )}
           </div>
         </div>
@@ -104,40 +193,36 @@ export default function GoalSettings() {
           <h2 className="text-xl font-bold text-blue-400 flex items-center gap-2">
             🦵 Muay Thai Goals
           </h2>
+
           <div className="flex gap-2">
             <Input
               placeholder="Add a Muay Thai goal..."
               value={newMuayThaiGoal}
-              onChange={e => setNewMuayThaiGoal(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)}
+              onChange={(e) => setNewMuayThaiGoal(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === "Enter" &&
+                handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)
+              }
               className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
             />
-            <Button onClick={() => handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)} className="bg-blue-600 hover:bg-blue-700 gap-1">
+            <Button
+              onClick={() =>
+                handleAdd("muay_thai", newMuayThaiGoal, setNewMuayThaiGoal)
+              }
+              className="bg-blue-600 hover:bg-blue-700 gap-1"
+            >
               <Plus className="w-4 h-4" /> Add
             </Button>
           </div>
+
           <div className="space-y-2">
-            {muayThaiGoals.map(goal => (
-              <div key={goal.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-                <span className="text-white">{goal.text}</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={goal.enabled !== false}
-                      onCheckedChange={checked => toggleMutation.mutate({ id: goal.id, enabled: checked })}
-                    />
-                    <Label className="text-white/50 text-xs">
-                      {goal.enabled !== false ? "On" : "Off"}
-                    </Label>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-red-400/50 hover:text-red-400 hover:bg-red-500/10 h-8 w-8" onClick={() => deleteMutation.mutate(goal.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
+            {muayThaiGoals.map((goal) => (
+              <GoalRow key={goal.id} goal={goal} colorClass="text-blue-400" />
             ))}
             {muayThaiGoals.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-4">No Muay Thai goals yet</p>
+              <p className="text-white/30 text-sm text-center py-4">
+                No Muay Thai goals yet
+              </p>
             )}
           </div>
         </div>
