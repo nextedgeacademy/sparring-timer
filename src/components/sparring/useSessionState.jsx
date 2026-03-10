@@ -199,8 +199,12 @@ export function useSessionState() {
       matchups,
       schedules,
 
-      boxingGoal: prev.doBoxing ? prev.nextBoxingGoal || "" : "",
-      muayThaiGoal: prev.doMuayThai ? prev.nextMuayThaiGoal || "" : "",
+boxingGoal: prev.doBoxing
+  ? prev.nextBoxingGoal || prev.boxingGoal || ""
+  : "",
+muayThaiGoal: prev.doMuayThai
+  ? prev.nextMuayThaiGoal || prev.muayThaiGoal || ""
+  : "",
       boxingGoalIsNeutral: prev.doBoxing
         ? prev.nextBoxingGoalIsNeutral ?? true
         : true,
