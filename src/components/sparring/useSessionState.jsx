@@ -31,7 +31,7 @@ export function useSessionState() {
     const saved = loadFromStorage();
     return (
       saved || {
-        status: "idle", // idle | setup | brackets_preview | warmup | running | paused | rest | complete
+        status: "idle",
         divisions: [[], [], []],
         divisionCount: 1,
         schedules: {},
@@ -40,7 +40,10 @@ export function useSessionState() {
         roundTime: 180,
         restTime: 60,
         timeLeft: 180,
-        phase: "round", // round | rest
+        phase: "round",
+
+        doBoxing: true,
+        doMuayThai: true,
 
         boxingGoal: "",
         muayThaiGoal: "",
@@ -54,7 +57,7 @@ export function useSessionState() {
 
         boxingRolesFlipped: false,
         muayThaiRolesFlipped: false,
-        pendingSwitchSound: null, // null | "boxing" | "muay_thai" | "both"
+        pendingSwitchSound: null,
 
         repeatMode: "same",
         matchups: [],
@@ -124,8 +127,14 @@ export function useSessionState() {
       });
 
       const matchups = getMergedRound(state.schedules, newIndices);
-      const nextBoxingGoal = getRandomGoal(state.allBoxingGoals);
-      const nextMuayThaiGoal = getRandomGoal(state.allMuayThaiGoals);
+
+      const nextBoxingGoal = state.doBoxing
+        ? getRandomGoal(state.allBoxingGoals)
+        : null;
+
+      const nextMuayThaiGoal = state.doMuayThai
+        ? getRandomGoal(state.allMuayThaiGoals)
+        : null;
 
       return {
         matchups,
@@ -190,10 +199,14 @@ export function useSessionState() {
       matchups,
       schedules,
 
-      boxingGoal: prev.nextBoxingGoal || "",
-      muayThaiGoal: prev.nextMuayThaiGoal || "",
-      boxingGoalIsNeutral: prev.nextBoxingGoalIsNeutral ?? true,
-      muayThaiGoalIsNeutral: prev.nextMuayThaiGoalIsNeutral ?? true,
+      boxingGoal: prev.doBoxing ? prev.nextBoxingGoal || "" : "",
+      muayThaiGoal: prev.doMuayThai ? prev.nextMuayThaiGoal || "" : "",
+      boxingGoalIsNeutral: prev.doBoxing
+        ? prev.nextBoxingGoalIsNeutral ?? true
+        : true,
+      muayThaiGoalIsNeutral: prev.doMuayThai
+        ? prev.nextMuayThaiGoalIsNeutral ?? true
+        : true,
 
       boxingRolesFlipped: false,
       muayThaiRolesFlipped: false,
@@ -239,8 +252,8 @@ export function useSessionState() {
                 phase: "rest",
                 timeLeft: prev.restTime,
                 nextMatchups: nextData.matchups,
-                nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal,
-                nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal,
+                nextBoxingGoal: nextData.boxingGoal || "",
+                nextMuayThaiGoal: nextData.muayThaiGoal || "",
                 nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral,
                 nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral,
               };
@@ -253,12 +266,14 @@ export function useSessionState() {
           const midpoint = Math.ceil(prev.roundTime / 2);
 
           const boxingNeedsSwitch =
+            prev.doBoxing &&
             prev.phase === "round" &&
             !prev.boxingGoalIsNeutral &&
             !prev.boxingRolesFlipped &&
             nextTimeLeft === midpoint;
 
           const muayThaiNeedsSwitch =
+            prev.doMuayThai &&
             prev.phase === "round" &&
             !prev.muayThaiGoalIsNeutral &&
             !prev.muayThaiRolesFlipped &&
@@ -299,7 +314,14 @@ export function useSessionState() {
       setSession((prev) => ({ ...prev, ...updates }));
     },
 
-    createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal) => {
+    createBrackets: (
+      divisions,
+      divisionCount,
+      boxingGoal,
+      muayThaiGoal,
+      doBoxing = true,
+      doMuayThai = true
+    ) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -312,8 +334,14 @@ export function useSessionState() {
       });
 
       const matchups = getMergedRound(schedules, roundIndices);
-      const randomBoxingGoal = getRandomGoal(session.allBoxingGoals);
-      const randomMuayThaiGoal = getRandomGoal(session.allMuayThaiGoals);
+
+      const randomBoxingGoal = doBoxing
+        ? getRandomGoal(session.allBoxingGoals)
+        : null;
+
+      const randomMuayThaiGoal = doMuayThai
+        ? getRandomGoal(session.allMuayThaiGoals)
+        : null;
 
       setSession((prev) => ({
         ...prev,
@@ -327,10 +355,27 @@ export function useSessionState() {
         timeLeft: 20,
         matchups,
 
-        boxingGoal: randomBoxingGoal?.text || boxingGoal,
-        muayThaiGoal: randomMuayThaiGoal?.text || muayThaiGoal,
-        boxingGoalIsNeutral: randomBoxingGoal?.isNeutral ?? true,
-        muayThaiGoalIsNeutral: randomMuayThaiGoal?.isNeutral ?? true,
+        doBoxing,
+        doMuayThai,
+
+        boxingGoal: doBoxing
+          ? randomBoxingGoal?.text || boxingGoal || ""
+          : "",
+        muayThaiGoal: doMuayThai
+          ? randomMuayThaiGoal?.text || muayThaiGoal || ""
+          : "",
+
+        boxingGoalIsNeutral: doBoxing
+          ? randomBoxingGoal?.isNeutral ?? true
+          : true,
+        muayThaiGoalIsNeutral: doMuayThai
+          ? randomMuayThaiGoal?.isNeutral ?? true
+          : true,
+
+        nextBoxingGoal: "",
+        nextMuayThaiGoal: "",
+        nextBoxingGoalIsNeutral: true,
+        nextMuayThaiGoalIsNeutral: true,
 
         boxingRolesFlipped: false,
         muayThaiRolesFlipped: false,
@@ -373,6 +418,9 @@ export function useSessionState() {
         roundIndices: {},
         schedules: {},
 
+        doBoxing: true,
+        doMuayThai: true,
+
         boxingGoal: "",
         muayThaiGoal: "",
         boxingGoalIsNeutral: true,
@@ -400,8 +448,8 @@ export function useSessionState() {
             phase: "rest",
             timeLeft: prev.restTime,
             nextMatchups: nextData.matchups,
-            nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal,
-            nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal,
+            nextBoxingGoal: nextData.boxingGoal || "",
+            nextMuayThaiGoal: nextData.muayThaiGoal || "",
             nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral,
             nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral,
           };
@@ -506,6 +554,9 @@ export function useSessionState() {
         restTime: 60,
         timeLeft: 180,
         phase: "round",
+
+        doBoxing: true,
+        doMuayThai: true,
 
         boxingGoal: "",
         muayThaiGoal: "",
