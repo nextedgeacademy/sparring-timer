@@ -45,10 +45,10 @@ export default function SetupPanel({ session, actions }) {
       repeatMode: session.repeatMode || "same",
     });
 
-    const boxingGoal = pickRandomGoal("boxing");
-    const muayThaiGoal = pickRandomGoal("muay_thai");
-    const nextBoxing = pickRandomGoal("boxing");
-    const nextMuayThai = pickRandomGoal("muay_thai");
+    const boxingGoal = doBoxing ? pickRandomGoal("boxing") : "";
+    const muayThaiGoal = doMuayThai ? pickRandomGoal("muay_thai") : "";
+    const nextBoxing = doBoxing ? pickRandomGoal("boxing") : "";
+    const nextMuayThai = doMuayThai ? pickRandomGoal("muay_thai") : "";
 
     actions.updateSettings({ nextBoxingGoal: nextBoxing, nextMuayThaiGoal: nextMuayThai });
 
