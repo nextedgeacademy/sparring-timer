@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Play, Monitor, Maximize } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { createPageUrl } from "@/utils";
 
 export default function SetupPanel({ session, actions }) {
