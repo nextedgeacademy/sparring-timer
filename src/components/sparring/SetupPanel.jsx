@@ -53,7 +53,14 @@ export default function SetupPanel({ session, actions }) {
     actions.updateSettings({ nextBoxingGoal: nextBoxing, nextMuayThaiGoal: nextMuayThai });
 
     setTimeout(() => {
-      actions.createBrackets(divisions, divisionCount, boxingGoal, muayThaiGoal);
+  actions.createBrackets(
+  divisions,
+  divisionCount,
+  boxingGoal,
+  muayThaiGoal,
+  doBoxing,
+  doMuayThai
+);
     }, 50);
   };
 
