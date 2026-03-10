@@ -199,17 +199,18 @@ export function useSessionState() {
       matchups,
       schedules,
 
-boxingGoal: prev.doBoxing
-  ? prev.nextBoxingGoal || prev.boxingGoal || ""
-  : "",
-muayThaiGoal: prev.doMuayThai
-  ? prev.nextMuayThaiGoal || prev.muayThaiGoal || ""
-  : "",
+      boxingGoal: prev.doBoxing
+        ? prev.nextBoxingGoal || prev.boxingGoal || ""
+        : "",
+      muayThaiGoal: prev.doMuayThai
+        ? prev.nextMuayThaiGoal || prev.muayThaiGoal || ""
+        : "",
+
       boxingGoalIsNeutral: prev.doBoxing
-        ? prev.nextBoxingGoalIsNeutral ?? true
+        ? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true
         : true,
       muayThaiGoalIsNeutral: prev.doMuayThai
-        ? prev.nextMuayThaiGoalIsNeutral ?? true
+        ? prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral ?? true
         : true,
 
       boxingRolesFlipped: false,
@@ -256,10 +257,26 @@ muayThaiGoal: prev.doMuayThai
                 phase: "rest",
                 timeLeft: prev.restTime,
                 nextMatchups: nextData.matchups,
-                nextBoxingGoal: nextData.boxingGoal || "",
-                nextMuayThaiGoal: nextData.muayThaiGoal || "",
-                nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral,
-                nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral,
+                nextBoxingGoal:
+                  nextData.boxingGoal ||
+                  prev.nextBoxingGoal ||
+                  prev.boxingGoal ||
+                  "",
+                nextMuayThaiGoal:
+                  nextData.muayThaiGoal ||
+                  prev.nextMuayThaiGoal ||
+                  prev.muayThaiGoal ||
+                  "",
+                nextBoxingGoalIsNeutral:
+                  nextData.boxingGoalIsNeutral ??
+                  prev.nextBoxingGoalIsNeutral ??
+                  prev.boxingGoalIsNeutral ??
+                  true,
+                nextMuayThaiGoalIsNeutral:
+                  nextData.muayThaiGoalIsNeutral ??
+                  prev.nextMuayThaiGoalIsNeutral ??
+                  prev.muayThaiGoalIsNeutral ??
+                  true,
               };
             }
 
@@ -452,10 +469,26 @@ muayThaiGoal: prev.doMuayThai
             phase: "rest",
             timeLeft: prev.restTime,
             nextMatchups: nextData.matchups,
-            nextBoxingGoal: nextData.boxingGoal || "",
-            nextMuayThaiGoal: nextData.muayThaiGoal || "",
-            nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral,
-            nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral,
+            nextBoxingGoal:
+              nextData.boxingGoal ||
+              prev.nextBoxingGoal ||
+              prev.boxingGoal ||
+              "",
+            nextMuayThaiGoal:
+              nextData.muayThaiGoal ||
+              prev.nextMuayThaiGoal ||
+              prev.muayThaiGoal ||
+              "",
+            nextBoxingGoalIsNeutral:
+              nextData.boxingGoalIsNeutral ??
+              prev.nextBoxingGoalIsNeutral ??
+              prev.boxingGoalIsNeutral ??
+              true,
+            nextMuayThaiGoalIsNeutral:
+              nextData.muayThaiGoalIsNeutral ??
+              prev.nextMuayThaiGoalIsNeutral ??
+              prev.muayThaiGoalIsNeutral ??
+              true,
           };
         }
 
