@@ -17,6 +17,8 @@ export default function SetupPanel({ session, actions }) {
   const [restTime, setRestTime] = useState(Math.floor(session.restTime / 60));
   const [roundTimeSec, setRoundTimeSec] = useState(session.roundTime % 60);
   const [restTimeSec, setRestTimeSec] = useState(session.restTime % 60);
+  const [doBoxing, setDoBoxing] = useState(true);
+  const [doMuayThai, setDoMuayThai] = useState(true);
 
   const { data: goals = [] } = useQuery({
     queryKey: ["sparring-goals"],
