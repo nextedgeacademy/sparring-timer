@@ -208,6 +208,11 @@ export default function SetupPanel({ session, actions }) {
           </div>
 
           {/* Right: Division Textareas */}
+          {divisionCount > 1 && (
+            <p className="text-white/40 text-xs italic mb-1">
+              If you are using more than 1 Division please click the division then the name
+            </p>
+          )}
           <div className="grid gap-4" style={{ gridTemplateColumns: "1fr" }}>
             {Array.from({ length: divisionCount }, (_, i) => (
               <div key={i} className="space-y-2">
