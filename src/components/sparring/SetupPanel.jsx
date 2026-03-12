@@ -20,10 +20,7 @@ export default function SetupPanel({ session, actions }) {
   const [doBoxing, setDoBoxing] = useState(true);
   const [doMuayThai, setDoMuayThai] = useState(true);
 
-  const { data: goals = [] } = useQuery({
-    queryKey: ["sparring-goals"],
-    queryFn: () => base44.entities.SparringGoal.list(),
-  });
+
 
   const handleCreateBrackets = () => {
     const divisions = divTexts.map(text =>
