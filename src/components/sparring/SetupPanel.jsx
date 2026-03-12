@@ -16,8 +16,8 @@ export default function SetupPanel({ session, actions }) {
   const roundTime = session.roundTime || 180;
   const restTime = session.restTime || 60;
 
-  const [doBoxing, setDoBoxing] = useState(true);
-  const [doMuayThai, setDoMuayThai] = useState(true);
+  const [doBoxing, setDoBoxing] = useState(false);
+  const [doMuayThai, setDoMuayThai] = useState(false);
   const [activeDivision, setActiveDivision] = useState(0);
 
   // Load active athletes from DB
