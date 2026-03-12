@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 export default function AthleteManager() {
   const queryClient = useQueryClient();
   const [newName, setNewName] = useState("");
+  const [newWeight, setNewWeight] = useState("");
 
   const { data: athletes = [], isLoading } = useQuery({
     queryKey: ["athletes"],
@@ -33,8 +34,11 @@ export default function AthleteManager() {
 
   const handleAdd = () => {
     if (!newName.trim()) return;
-    createMutation.mutate({ name: newName.trim(), active: true });
+    const data = { name: newName.trim(), active: true };
+    if (newWeight) data.weight = parseFloat(newWeight);
+    createMutation.mutate(data);
     setNewName("");
+    setNewWeight("");
   };
 
   const activeCount = athletes.filter((a) => a.active !== false).length;
@@ -69,6 +73,13 @@ export default function AthleteManager() {
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
               className="bg-white/10 border-white/20 text-white placeholder:text-white/30"
             />
+            <Input
+              type="number"
+              placeholder="Weight (lbs)"
+              value={newWeight}
+              onChange={(e) => setNewWeight(e.target.value)}
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/30 w-36"
+            />
             <Button onClick={handleAdd} className="bg-green-600 hover:bg-green-700 gap-1" disabled={createMutation.isPending}>
               <Plus className="w-4 h-4" /> Add
             </Button>
@@ -94,9 +105,14 @@ export default function AthleteManager() {
                   : "bg-white/2 border-white/5 opacity-50"
               }`}
             >
-              <span className={`font-medium ${athlete.active !== false ? "text-white" : "text-white/40"}`}>
-                {athlete.name}
-              </span>
+              <div>
+                <span className={`font-medium ${athlete.active !== false ? "text-white" : "text-white/40"}`}>
+                  {athlete.name}
+                </span>
+                {athlete.weight && (
+                  <span className="ml-2 text-white/40 text-sm">{athlete.weight} lbs</span>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Switch
