@@ -35,17 +35,9 @@ export default function TimerTile({ timeLeft, phase, status }) {
       transition={{ duration: 0.3 }}
       className={`rounded-2xl border flex flex-col items-center justify-center p-4 text-center min-h-[90px] ${bgClass}`}
     >
-      <div className="text-white/40 text-xs font-bold tracking-widest uppercase mb-1">
-        {label}
-      </div>
-      <div className={`font-mono font-black tabular-nums tracking-tight text-5xl md:text-6xl lg:text-7xl ${timeColor}`}>
+      <div className={`font-mono font-black tabular-nums tracking-tight text-7xl md:text-8xl lg:text-9xl ${timeColor}`}>
         {formatted}
       </div>
-      {isPaused && (
-        <div className="mt-1 text-amber-400 text-xs font-bold tracking-widest animate-pulse">
-          PAUSED
-        </div>
-      )}
     </motion.div>
   );
 }
