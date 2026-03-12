@@ -1,10 +1,11 @@
 import React from "react";
 import MatchupTile from "./MatchupTile";
+import TimerTile from "./TimerTile";
 
-export default function MatchupGrid({ matchups, large = false }) {
+export default function MatchupGrid({ matchups, timerProps = null, large = false }) {
   if (!matchups || matchups.length === 0) return null;
 
-  const count = matchups.length;
+  const count = matchups.length + (timerProps ? 1 : 0);
   let cols = "grid-cols-2";
   if (count === 1) cols = "grid-cols-1 max-w-lg mx-auto";
   else if (count === 2) cols = "grid-cols-2 max-w-3xl mx-auto";
@@ -16,6 +17,7 @@ export default function MatchupGrid({ matchups, large = false }) {
 
   return (
     <div className={`grid ${cols} gap-3 ${large ? "gap-4" : ""} w-full`}>
+      {timerProps && <TimerTile {...timerProps} />}
       {matchups.map((match, i) => (
         <MatchupTile key={i} match={match} large={large} />
       ))}
