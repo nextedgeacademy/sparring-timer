@@ -29,16 +29,16 @@ export default function Home() {
     session.status === "paused" ||
     session.status === "warmup";
 
-  // Complete session when user closes/leaves the tab
+  // Complete session only when user closes the window
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && isActive) {
+    const handleBeforeUnload = () => {
+      if (isActive) {
         actions.complete();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isActive, actions]);
 
   const isComplete = session.status === "complete";
