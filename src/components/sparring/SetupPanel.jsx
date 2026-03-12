@@ -25,12 +25,6 @@ export default function SetupPanel({ session, actions }) {
     queryFn: () => base44.entities.SparringGoal.list(),
   });
 
-  const pickRandomGoal = (type) => {
-    const enabled = goals.filter(g => g.type === type && g.enabled !== false);
-    if (enabled.length === 0) return "";
-    return enabled[Math.floor(Math.random() * enabled.length)].text;
-  };
-
   const handleCreateBrackets = () => {
     const divisions = divTexts.map(text =>
       text.split("\n").map(n => n.trim()).filter(n => n.length > 0)
@@ -45,22 +39,8 @@ export default function SetupPanel({ session, actions }) {
       repeatMode: session.repeatMode || "same",
     });
 
-    const boxingGoal = doBoxing ? pickRandomGoal("boxing") : "";
-    const muayThaiGoal = doMuayThai ? pickRandomGoal("muay_thai") : "";
-    const nextBoxing = doBoxing ? pickRandomGoal("boxing") : "";
-    const nextMuayThai = doMuayThai ? pickRandomGoal("muay_thai") : "";
-
-    actions.updateSettings({ nextBoxingGoal: nextBoxing, nextMuayThaiGoal: nextMuayThai });
-
     setTimeout(() => {
-  actions.createBrackets(
-  divisions,
-  divisionCount,
-  boxingGoal,
-  muayThaiGoal,
-  doBoxing,
-  doMuayThai
-);
+      actions.createBrackets(divisions, divisionCount, "", "", doBoxing, doMuayThai);
     }, 50);
   };
 
