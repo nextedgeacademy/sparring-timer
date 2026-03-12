@@ -26,75 +26,81 @@ function loadFromStorage() {
   }
 }
 
+// Get the goal at a specific sequence index (skips disabled, loops)
+function getGoalAtIndex(goals, index) {
+  if (!goals || goals.length === 0) return null;
+  return goals[index % goals.length];
+}
+
+const DEFAULT_STATE = {
+  status: "idle",
+  divisions: [[], [], []],
+  divisionCount: 1,
+  schedules: {},
+  roundIndices: {},
+  globalRound: 1,
+  roundTime: 180,
+  restTime: 60,
+  timeLeft: 180,
+  phase: "round",
+
+  doBoxing: true,
+  doMuayThai: true,
+
+  boxingGoal: "",
+  muayThaiGoal: "",
+  boxingGoalIsNeutral: true,
+  muayThaiGoalIsNeutral: true,
+
+  nextBoxingGoal: "",
+  nextMuayThaiGoal: "",
+  nextBoxingGoalIsNeutral: true,
+  nextMuayThaiGoalIsNeutral: true,
+
+  boxingRolesFlipped: false,
+  muayThaiRolesFlipped: false,
+  pendingSwitchSound: null,
+
+  repeatMode: "same",
+  matchups: [],
+  nextMatchups: [],
+  allBoxingGoals: [],
+  allMuayThaiGoals: [],
+
+  // Sequential goal indices (how many rounds have been played, for looping)
+  boxingGoalIndex: 0,
+  muayThaiGoalIndex: 0,
+};
+
 export function useSessionState() {
   const [session, setSession] = useState(() => {
     const saved = loadFromStorage();
-    return (
-      saved || {
-        status: "idle",
-        divisions: [[], [], []],
-        divisionCount: 1,
-        schedules: {},
-        roundIndices: {},
-        globalRound: 1,
-        roundTime: 180,
-        restTime: 60,
-        timeLeft: 180,
-        phase: "round",
-
-        doBoxing: true,
-        doMuayThai: true,
-
-        boxingGoal: "",
-        muayThaiGoal: "",
-        boxingGoalIsNeutral: true,
-        muayThaiGoalIsNeutral: true,
-
-        nextBoxingGoal: "",
-        nextMuayThaiGoal: "",
-        nextBoxingGoalIsNeutral: true,
-        nextMuayThaiGoalIsNeutral: true,
-
-        boxingRolesFlipped: false,
-        muayThaiRolesFlipped: false,
-        pendingSwitchSound: null,
-
-        repeatMode: "same",
-        matchups: [],
-        nextMatchups: [],
-        allBoxingGoals: [],
-        allMuayThaiGoals: [],
-      }
-    );
+    return saved || DEFAULT_STATE;
   });
 
   const timerRef = useRef(null);
 
+  // Fetch and store ordered, enabled goals on mount
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const boxingGoals = await base44.entities.SparringGoal.filter({
-          type: "boxing",
-          enabled: true,
+        const [boxingGoals, muayThaiGoals] = await Promise.all([
+          base44.entities.SparringGoal.filter({ type: "boxing", enabled: true }),
+          base44.entities.SparringGoal.filter({ type: "muay_thai", enabled: true }),
+        ]);
+
+        const mapGoal = (g) => ({
+          text: g.text,
+          isNeutral: g.is_neutral === false || g.is_neutral === "false" ? false : true,
         });
 
-        const muayThaiGoals = await base44.entities.SparringGoal.filter({
-          type: "muay_thai",
-          enabled: true,
-        });
+        const sortGoals = (list) =>
+          [...list].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)).map(mapGoal);
 
         setSession((prev) => ({
           ...prev,
-          allBoxingGoals: boxingGoals.map((g) => ({
-            text: g.text,
-            isNeutral:
-              g.is_neutral === false || g.is_neutral === "false" ? false : true,
-          })),
-          allMuayThaiGoals: muayThaiGoals.map((g) => ({
-            text: g.text,
-            isNeutral:
-              g.is_neutral === false || g.is_neutral === "false" ? false : true,
-          })),
+          allBoxingGoals: sortGoals(boxingGoals),
+          allMuayThaiGoals: sortGoals(muayThaiGoals),
         }));
       } catch (e) {
         /* ignore */
@@ -104,49 +110,47 @@ export function useSessionState() {
     fetchGoals();
   }, []);
 
-  const getRandomGoal = useCallback((goals) => {
-    if (!goals || goals.length === 0) return null;
-    return goals[Math.floor(Math.random() * goals.length)];
-  }, []);
-
   useEffect(() => {
     saveToStorage(session);
   }, [session]);
 
-  const getNextRoundData = useCallback(
-    (state) => {
-      const newIndices = { ...state.roundIndices };
+  // Get the next goal data for the upcoming round, given current state
+  const getNextRoundData = useCallback((state) => {
+    const newIndices = { ...state.roundIndices };
 
-      Object.keys(state.schedules).forEach((div) => {
-        newIndices[div] = (state.roundIndices[div] || 0) + 1;
+    Object.keys(state.schedules).forEach((div) => {
+      newIndices[div] = (state.roundIndices[div] || 0) + 1;
+      const divSchedule = state.schedules[div];
+      if (divSchedule && newIndices[div] >= divSchedule.length) {
+        newIndices[div] = newIndices[div] % divSchedule.length;
+      }
+    });
 
-        const divSchedule = state.schedules[div];
-        if (divSchedule && newIndices[div] >= divSchedule.length) {
-          newIndices[div] = newIndices[div] % divSchedule.length;
-        }
-      });
+    const matchups = getMergedRound(state.schedules, newIndices);
 
-      const matchups = getMergedRound(state.schedules, newIndices);
+    // Next boxing goal = current index + 1
+    const nextBoxingIdx = state.boxingGoalIndex + 1;
+    const nextMuayThaiIdx = state.muayThaiGoalIndex + 1;
 
-      const nextBoxingGoal = state.doBoxing
-        ? getRandomGoal(state.allBoxingGoals)
-        : null;
+    const nextBoxingGoal = state.doBoxing
+      ? getGoalAtIndex(state.allBoxingGoals, nextBoxingIdx)
+      : null;
 
-      const nextMuayThaiGoal = state.doMuayThai
-        ? getRandomGoal(state.allMuayThaiGoals)
-        : null;
+    const nextMuayThaiGoal = state.doMuayThai
+      ? getGoalAtIndex(state.allMuayThaiGoals, nextMuayThaiIdx)
+      : null;
 
-      return {
-        matchups,
-        roundIndices: newIndices,
-        boxingGoal: nextBoxingGoal?.text || "",
-        muayThaiGoal: nextMuayThaiGoal?.text || "",
-        boxingGoalIsNeutral: nextBoxingGoal?.isNeutral ?? true,
-        muayThaiGoalIsNeutral: nextMuayThaiGoal?.isNeutral ?? true,
-      };
-    },
-    [getRandomGoal]
-  );
+    return {
+      matchups,
+      roundIndices: newIndices,
+      nextBoxingGoalIndex: nextBoxingIdx,
+      nextMuayThaiGoalIndex: nextMuayThaiIdx,
+      boxingGoal: nextBoxingGoal?.text || "",
+      muayThaiGoal: nextMuayThaiGoal?.text || "",
+      boxingGoalIsNeutral: nextBoxingGoal?.isNeutral ?? true,
+      muayThaiGoalIsNeutral: nextMuayThaiGoal?.isNeutral ?? true,
+    };
+  }, []);
 
   function advanceRound(prev) {
     const newIndices = { ...prev.roundIndices };
@@ -157,9 +161,7 @@ export function useSessionState() {
       const divSchedule = prev.schedules[div];
 
       if (divSchedule && newIndices[div] >= divSchedule.length) {
-        if (prev.repeatMode === "reshuffle") {
-          needsReshuffle = true;
-        }
+        if (prev.repeatMode === "reshuffle") needsReshuffle = true;
         newIndices[div] = newIndices[div] % divSchedule.length;
       }
     });
@@ -168,26 +170,26 @@ export function useSessionState() {
 
     if (needsReshuffle) {
       const newSchedules = { ...prev.schedules };
-
       Object.keys(newSchedules).forEach((div) => {
         if (newIndices[div] === 0) {
           const athletes = new Set();
-
           newSchedules[div].forEach((round) => {
             round.forEach((m) => {
               if (m.athlete1 !== "__REST__") athletes.add(m.athlete1);
               if (m.athlete2 !== "__REST__") athletes.add(m.athlete2);
             });
           });
-
           newSchedules[div] = generateRoundRobin(shuffleArray([...athletes]));
         }
       });
-
       schedules = newSchedules;
     }
 
     const matchups = getMergedRound(schedules, newIndices);
+
+    // Advance goal indices: use the stored "next" indices if available
+    const newBoxingGoalIndex = prev.nextBoxingGoalIndex ?? prev.boxingGoalIndex + 1;
+    const newMuayThaiGoalIndex = prev.nextMuayThaiGoalIndex ?? prev.muayThaiGoalIndex + 1;
 
     return {
       ...prev,
@@ -199,12 +201,13 @@ export function useSessionState() {
       matchups,
       schedules,
 
-      boxingGoal: prev.doBoxing
-        ? prev.nextBoxingGoal || prev.boxingGoal || ""
-        : "",
-      muayThaiGoal: prev.doMuayThai
-        ? prev.nextMuayThaiGoal || prev.muayThaiGoal || ""
-        : "",
+      boxingGoalIndex: newBoxingGoalIndex,
+      muayThaiGoalIndex: newMuayThaiGoalIndex,
+      nextBoxingGoalIndex: undefined,
+      nextMuayThaiGoalIndex: undefined,
+
+      boxingGoal: prev.doBoxing ? prev.nextBoxingGoal || prev.boxingGoal || "" : "",
+      muayThaiGoal: prev.doMuayThai ? prev.nextMuayThaiGoal || prev.muayThaiGoal || "" : "",
 
       boxingGoalIsNeutral: prev.doBoxing
         ? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true
@@ -217,6 +220,10 @@ export function useSessionState() {
       muayThaiRolesFlipped: false,
       pendingSwitchSound: null,
 
+      nextBoxingGoal: "",
+      nextMuayThaiGoal: "",
+      nextBoxingGoalIsNeutral: true,
+      nextMuayThaiGoalIsNeutral: true,
       nextMatchups: [],
     };
   }
@@ -257,26 +264,12 @@ export function useSessionState() {
                 phase: "rest",
                 timeLeft: prev.restTime,
                 nextMatchups: nextData.matchups,
-                nextBoxingGoal:
-                  nextData.boxingGoal ||
-                  prev.nextBoxingGoal ||
-                  prev.boxingGoal ||
-                  "",
-                nextMuayThaiGoal:
-                  nextData.muayThaiGoal ||
-                  prev.nextMuayThaiGoal ||
-                  prev.muayThaiGoal ||
-                  "",
-                nextBoxingGoalIsNeutral:
-                  nextData.boxingGoalIsNeutral ??
-                  prev.nextBoxingGoalIsNeutral ??
-                  prev.boxingGoalIsNeutral ??
-                  true,
-                nextMuayThaiGoalIsNeutral:
-                  nextData.muayThaiGoalIsNeutral ??
-                  prev.nextMuayThaiGoalIsNeutral ??
-                  prev.muayThaiGoalIsNeutral ??
-                  true,
+                nextBoxingGoalIndex: nextData.nextBoxingGoalIndex,
+                nextMuayThaiGoalIndex: nextData.nextMuayThaiGoalIndex,
+                nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal || prev.boxingGoal || "",
+                nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal || prev.muayThaiGoal || "",
+                nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral ?? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true,
+                nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral ?? prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral ?? true,
               };
             }
 
@@ -301,24 +294,15 @@ export function useSessionState() {
             nextTimeLeft === midpoint;
 
           let pendingSwitchSound = null;
-
-          if (boxingNeedsSwitch && muayThaiNeedsSwitch) {
-            pendingSwitchSound = "both";
-          } else if (boxingNeedsSwitch) {
-            pendingSwitchSound = "boxing";
-          } else if (muayThaiNeedsSwitch) {
-            pendingSwitchSound = "muay_thai";
-          }
+          if (boxingNeedsSwitch && muayThaiNeedsSwitch) pendingSwitchSound = "both";
+          else if (boxingNeedsSwitch) pendingSwitchSound = "boxing";
+          else if (muayThaiNeedsSwitch) pendingSwitchSound = "muay_thai";
 
           return {
             ...prev,
             timeLeft: nextTimeLeft,
-            boxingRolesFlipped: boxingNeedsSwitch
-              ? true
-              : prev.boxingRolesFlipped,
-            muayThaiRolesFlipped: muayThaiNeedsSwitch
-              ? true
-              : prev.muayThaiRolesFlipped,
+            boxingRolesFlipped: boxingNeedsSwitch ? true : prev.boxingRolesFlipped,
+            muayThaiRolesFlipped: muayThaiNeedsSwitch ? true : prev.muayThaiRolesFlipped,
             pendingSwitchSound,
           };
         });
@@ -335,14 +319,7 @@ export function useSessionState() {
       setSession((prev) => ({ ...prev, ...updates }));
     },
 
-    createBrackets: (
-      divisions,
-      divisionCount,
-      boxingGoal,
-      muayThaiGoal,
-      doBoxing = true,
-      doMuayThai = true
-    ) => {
+    createBrackets: (divisions, divisionCount, _boxingGoal, _muayThaiGoal, doBoxing = true, doMuayThai = true) => {
       const activeDivisions = divisions.slice(0, divisionCount);
       const schedules = {};
       const roundIndices = {};
@@ -356,13 +333,9 @@ export function useSessionState() {
 
       const matchups = getMergedRound(schedules, roundIndices);
 
-      const randomBoxingGoal = doBoxing
-        ? getRandomGoal(session.allBoxingGoals)
-        : null;
-
-      const randomMuayThaiGoal = doMuayThai
-        ? getRandomGoal(session.allMuayThaiGoals)
-        : null;
+      // Start from index 0 for a fresh session
+      const startBoxingGoal = doBoxing ? getGoalAtIndex(session.allBoxingGoals, 0) : null;
+      const startMuayThaiGoal = doMuayThai ? getGoalAtIndex(session.allMuayThaiGoals, 0) : null;
 
       setSession((prev) => ({
         ...prev,
@@ -379,19 +352,16 @@ export function useSessionState() {
         doBoxing,
         doMuayThai,
 
-        boxingGoal: doBoxing
-          ? randomBoxingGoal?.text || boxingGoal || ""
-          : "",
-        muayThaiGoal: doMuayThai
-          ? randomMuayThaiGoal?.text || muayThaiGoal || ""
-          : "",
+        boxingGoalIndex: 0,
+        muayThaiGoalIndex: 0,
+        nextBoxingGoalIndex: undefined,
+        nextMuayThaiGoalIndex: undefined,
 
-        boxingGoalIsNeutral: doBoxing
-          ? randomBoxingGoal?.isNeutral ?? true
-          : true,
-        muayThaiGoalIsNeutral: doMuayThai
-          ? randomMuayThaiGoal?.isNeutral ?? true
-          : true,
+        boxingGoal: doBoxing ? startBoxingGoal?.text || "" : "",
+        muayThaiGoal: doMuayThai ? startMuayThaiGoal?.text || "" : "",
+
+        boxingGoalIsNeutral: doBoxing ? startBoxingGoal?.isNeutral ?? true : true,
+        muayThaiGoalIsNeutral: doMuayThai ? startMuayThaiGoal?.isNeutral ?? true : true,
 
         nextBoxingGoal: "",
         nextMuayThaiGoal: "",
@@ -416,10 +386,7 @@ export function useSessionState() {
     },
 
     pause: () => {
-      setSession((prev) => ({
-        ...prev,
-        status: "paused",
-      }));
+      setSession((prev) => ({ ...prev, status: "paused" }));
     },
 
     resume: () => {
@@ -441,6 +408,11 @@ export function useSessionState() {
 
         doBoxing: true,
         doMuayThai: true,
+
+        boxingGoalIndex: 0,
+        muayThaiGoalIndex: 0,
+        nextBoxingGoalIndex: undefined,
+        nextMuayThaiGoalIndex: undefined,
 
         boxingGoal: "",
         muayThaiGoal: "",
@@ -469,26 +441,12 @@ export function useSessionState() {
             phase: "rest",
             timeLeft: prev.restTime,
             nextMatchups: nextData.matchups,
-            nextBoxingGoal:
-              nextData.boxingGoal ||
-              prev.nextBoxingGoal ||
-              prev.boxingGoal ||
-              "",
-            nextMuayThaiGoal:
-              nextData.muayThaiGoal ||
-              prev.nextMuayThaiGoal ||
-              prev.muayThaiGoal ||
-              "",
-            nextBoxingGoalIsNeutral:
-              nextData.boxingGoalIsNeutral ??
-              prev.nextBoxingGoalIsNeutral ??
-              prev.boxingGoalIsNeutral ??
-              true,
-            nextMuayThaiGoalIsNeutral:
-              nextData.muayThaiGoalIsNeutral ??
-              prev.nextMuayThaiGoalIsNeutral ??
-              prev.muayThaiGoalIsNeutral ??
-              true,
+            nextBoxingGoalIndex: nextData.nextBoxingGoalIndex,
+            nextMuayThaiGoalIndex: nextData.nextMuayThaiGoalIndex,
+            nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal || prev.boxingGoal || "",
+            nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal || prev.muayThaiGoal || "",
+            nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral ?? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true,
+            nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral ?? prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral ?? true,
           };
         }
 
@@ -520,6 +478,8 @@ export function useSessionState() {
         });
 
         const matchups = getMergedRound(prev.schedules, newIndices);
+        const prevBoxingIdx = Math.max(0, (prev.boxingGoalIndex ?? 0) - 1);
+        const prevMuayThaiIdx = Math.max(0, (prev.muayThaiGoalIndex ?? 0) - 1);
 
         return {
           ...prev,
@@ -529,12 +489,12 @@ export function useSessionState() {
           roundIndices: newIndices,
           globalRound: Math.max(1, prev.globalRound - 1),
           matchups,
+          boxingGoalIndex: prevBoxingIdx,
+          muayThaiGoalIndex: prevMuayThaiIdx,
           boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
           muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
-          boxingGoalIsNeutral:
-            prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral,
-          muayThaiGoalIsNeutral:
-            prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral,
+          boxingGoalIsNeutral: prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral,
+          muayThaiGoalIsNeutral: prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral,
           boxingRolesFlipped: false,
           muayThaiRolesFlipped: false,
           pendingSwitchSound: null,
@@ -557,64 +517,16 @@ export function useSessionState() {
 
     complete: () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      setSession((prev) => ({
-        ...prev,
-        status: "complete",
-      }));
-    },
-
-    setGoals: (boxingGoal, muayThaiGoal) => {
-      setSession((prev) => ({
-        ...prev,
-        nextBoxingGoal: boxingGoal,
-        nextMuayThaiGoal: muayThaiGoal,
-      }));
+      setSession((prev) => ({ ...prev, status: "complete" }));
     },
 
     clearPendingSwitchSound: () => {
-      setSession((prev) => ({
-        ...prev,
-        pendingSwitchSound: null,
-      }));
+      setSession((prev) => ({ ...prev, pendingSwitchSound: null }));
     },
 
     clearSession: () => {
       localStorage.removeItem(STORAGE_KEY);
-      setSession({
-        status: "idle",
-        divisions: [[], [], []],
-        divisionCount: 1,
-        schedules: {},
-        roundIndices: {},
-        globalRound: 1,
-        roundTime: 180,
-        restTime: 60,
-        timeLeft: 180,
-        phase: "round",
-
-        doBoxing: true,
-        doMuayThai: true,
-
-        boxingGoal: "",
-        muayThaiGoal: "",
-        boxingGoalIsNeutral: true,
-        muayThaiGoalIsNeutral: true,
-
-        nextBoxingGoal: "",
-        nextMuayThaiGoal: "",
-        nextBoxingGoalIsNeutral: true,
-        nextMuayThaiGoalIsNeutral: true,
-
-        boxingRolesFlipped: false,
-        muayThaiRolesFlipped: false,
-        pendingSwitchSound: null,
-
-        repeatMode: "same",
-        matchups: [],
-        nextMatchups: [],
-        allBoxingGoals: [],
-        allMuayThaiGoals: [],
-      });
+      setSession({ ...DEFAULT_STATE });
     },
   };
 
