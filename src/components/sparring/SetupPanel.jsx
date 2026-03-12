@@ -208,41 +208,43 @@ export default function SetupPanel({ session, actions }) {
           </div>
 
           {/* Right: Division Textareas */}
-          {divisionCount > 1 && (
-            <p className="text-white/40 text-xs italic mb-1">
-              If you are using more than 1 Division please click the division then the name
-            </p>
-          )}
-          <div className="grid gap-4" style={{ gridTemplateColumns: "1fr" }}>
-            {Array.from({ length: divisionCount }, (_, i) => (
-              <div key={i} className="space-y-2">
-                <Label
-                  className={`font-bold cursor-pointer transition-colors ${
-                    divisionCount > 1 && activeDivision === i ? "text-red-400" : "text-white/70"
-                  }`}
-                  onClick={() => setActiveDivision(i)}
-                >
-                  Division {i + 1}
-                  {divisionCount > 1 && activeDivision === i && (
-                    <span className="ml-2 text-xs font-normal text-red-400/70">← active</span>
-                  )}
-                </Label>
-                <Textarea
-                  placeholder={"One name per line...\nBruce Hoyer\nJohn Smith\nAdam Lee"}
-                  value={divisionTexts[i] || ""}
-                  onChange={(e) => {
-                    const copy = [...divisionTexts];
-                    copy[i] = e.target.value;
-                    setDivisionTexts(copy);
-                  }}
-                  onFocus={() => setActiveDivision(i)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[200px] font-mono"
-                />
-                <p className="text-white/40 text-xs">
-                  {(divisionTexts[i] || "").split("\n").filter((n) => n.trim()).length} athletes
-                </p>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {divisionCount > 1 && (
+              <p className="text-white/40 text-xs italic">
+                If you are using more than 1 Division please click the division then the name
+              </p>
+            )}
+            <div className="grid gap-4">
+              {Array.from({ length: divisionCount }, (_, i) => (
+                <div key={i} className="space-y-2">
+                  <Label
+                    className={`font-bold cursor-pointer transition-colors ${
+                      divisionCount > 1 && activeDivision === i ? "text-red-400" : "text-white/70"
+                    }`}
+                    onClick={() => setActiveDivision(i)}
+                  >
+                    Division {i + 1}
+                    {divisionCount > 1 && activeDivision === i && (
+                      <span className="ml-2 text-xs font-normal text-red-400/70">← active</span>
+                    )}
+                  </Label>
+                  <Textarea
+                    placeholder={"One name per line...\nBruce Hoyer\nJohn Smith\nAdam Lee"}
+                    value={divisionTexts[i] || ""}
+                    onChange={(e) => {
+                      const copy = [...divisionTexts];
+                      copy[i] = e.target.value;
+                      setDivisionTexts(copy);
+                    }}
+                    onFocus={() => setActiveDivision(i)}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[200px] font-mono"
+                  />
+                  <p className="text-white/40 text-xs">
+                    {(divisionTexts[i] || "").split("\n").filter((n) => n.trim()).length} athletes
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
