@@ -26,6 +26,15 @@ export default function SetupPanel({ session, actions }) {
     queryFn: () => base44.entities.Athlete.filter({ active: true }, "name"),
   });
 
+  // Compute which athletes are already assigned to any division
+  const assignedNames = new Set(
+    divisionTexts.flatMap((text) =>
+      text.split("\n").map((n) => n.trim()).filter(Boolean)
+    )
+  );
+
+  const availableAthletes = athletes.filter((a) => !assignedNames.has(a.name));
+
   const setDivisionCount = (count) => {
     actions.updateSettings({ divisionCount: count });
   };
