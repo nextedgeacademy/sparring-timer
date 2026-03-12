@@ -192,10 +192,10 @@ export default function SetupPanel({ session, actions }) {
                 ))}
               </div>
             )}
-            {athletes.length > 0 ? (
+            {availableAthletes.length > 0 ? (
               <>
                 <div className="flex flex-wrap gap-2">
-                  {athletes.map((a) => (
+                  {availableAthletes.map((a) => (
                     <button
                       key={a.id}
                       onClick={() => handleAddAthlete(a.name)}
