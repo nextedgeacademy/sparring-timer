@@ -63,7 +63,7 @@ useEffect(() => {
   );
 
   muayThaiSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/Beep.mp3"
+    "https://nextedgeacademy.b-cdn.net/Audio/muaythaiswitch.mp3"
   );
 
   bothSwitchAudioRef.current = createAudio(
