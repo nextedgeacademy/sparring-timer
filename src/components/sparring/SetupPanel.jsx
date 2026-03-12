@@ -208,7 +208,7 @@ export default function SetupPanel({ session, actions }) {
           </div>
 
           {/* Right: Division Textareas */}
-          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${divisionCount}, 1fr)` }}>
+          <div className="grid gap-4" style={{ gridTemplateColumns: "1fr" }}>
             {Array.from({ length: divisionCount }, (_, i) => (
               <div key={i} className="space-y-2">
                 <Label
