@@ -35,6 +35,29 @@ export default function TimerTile({ timeLeft, phase, status, roundNumber, boxing
       transition={{ duration: 0.3 }}
       className={`rounded-2xl border flex flex-col items-center justify-center p-4 text-center min-h-[90px] ${bgClass}`}
     >
+      {/* Round label */}
+      <div className="text-white/50 text-sm font-bold tracking-widest uppercase mb-1">
+        {isWarmup ? "WARMUP" : phase === "rest" ? "REST" : isPaused ? "PAUSED" : `ROUND ${roundNumber || ""}`}
+      </div>
+
+      {/* Goals */}
+      {!isWarmup && (boxingGoal || muayThaiGoal) && (
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mb-2">
+          {boxingGoal && (
+            <span className="text-white/70 text-xs font-semibold">
+              🥊 {boxingGoal.text}
+              {boxingGoal.role && <span className="text-white/40 ml-1">({boxingGoal.role})</span>}
+            </span>
+          )}
+          {muayThaiGoal && (
+            <span className="text-white/70 text-xs font-semibold">
+              🦵 {muayThaiGoal.text}
+              {muayThaiGoal.role && <span className="text-white/40 ml-1">({muayThaiGoal.role})</span>}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className={`font-mono font-black tabular-nums tracking-tight text-7xl md:text-8xl lg:text-9xl ${timeColor}`}>
         {formatted}
       </div>
