@@ -221,13 +221,12 @@ useEffect(() => {
         )}
       </div>
 
-      <div className="flex justify-center py-4 border-b border-white/5">
-        <TimerDisplay timeLeft={session.timeLeft} phase={session.phase} />
-      </div>
-
       <div className="flex-1 p-4 overflow-auto">
         <AnimatePresence mode="wait">
-          <MatchupGrid matchups={displayMatchups} />
+          <MatchupGrid
+            matchups={displayMatchups}
+            timerProps={{ timeLeft: session.timeLeft, phase: session.phase, status: session.status }}
+          />
         </AnimatePresence>
       </div>
 
