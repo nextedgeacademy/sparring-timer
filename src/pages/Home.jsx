@@ -29,6 +29,18 @@ export default function Home() {
     session.status === "paused" ||
     session.status === "warmup";
 
+  // Complete session when user closes/leaves the tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && isActive) {
+        actions.complete();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isActive, actions]);
+
   const isComplete = session.status === "complete";
 
 useEffect(() => {
