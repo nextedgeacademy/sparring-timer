@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Play, Trash2, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Link } from "react-router-dom";
@@ -16,9 +22,18 @@ export default function SetupPanel({ session, actions }) {
   const roundTime = session.roundTime || 180;
   const restTime = session.restTime || 60;
 
-  const [doBoxing, setDoBoxing] = useState(false);
-  const [doMuayThai, setDoMuayThai] = useState(false);
+  const doBoxing = session.doBoxing ?? false;
+  const doMuayThai = session.doMuayThai ?? false;
+
   const [activeDivision, setActiveDivision] = useState(0);
+
+  const setDoBoxing = (value) => {
+    actions.updateSettings({ doBoxing: value });
+  };
+
+  const setDoMuayThai = (value) => {
+    actions.updateSettings({ doMuayThai: value });
+  };
 
   // Load active athletes from DB
   const { data: athletes = [] } = useQuery({
@@ -67,16 +82,29 @@ export default function SetupPanel({ session, actions }) {
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
-    if (lines.includes(athleteName)) return; // prevent duplicate
+
+    if (lines.includes(athleteName)) return;
+
     copy[activeDivision] = lines.concat(athleteName).join("\n");
     setDivisionTexts(copy);
   };
 
   const handleCreateBrackets = () => {
     const divisions = divisionTexts.map((text) =>
-      text.split("\n").map((n) => n.trim()).filter((n) => n.length > 0)
+      text
+        .split("\n")
+        .map((n) => n.trim())
+        .filter((n) => n.length > 0)
     );
-    actions.createBrackets(divisions, divisionCount, "", "", doBoxing, doMuayThai);
+
+    actions.createBrackets(
+      divisions,
+      divisionCount,
+      "",
+      "",
+      doBoxing,
+      doMuayThai
+    );
   };
 
   const roundMins = Math.floor(roundTime / 60);
@@ -88,7 +116,9 @@ export default function SetupPanel({ session, actions }) {
     <div className="max-w-4xl mx-auto space-y-8 p-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-black text-white tracking-tight">COMBAT SPORTS - SPARRING TIMER</h1>
+        <h1 className="text-4xl font-black text-white tracking-tight">
+          COMBAT SPORTS - SPARRING TIMER
+        </h1>
         <p className="text-white/50 text-sm">Round Robin Timer</p>
       </div>
 
@@ -104,7 +134,9 @@ export default function SetupPanel({ session, actions }) {
                   type="number"
                   min={0}
                   value={roundMins}
-                  onChange={(e) => setRoundTime(parseInt(e.target.value) || 0, undefined)}
+                  onChange={(e) =>
+                    setRoundTime(parseInt(e.target.value) || 0, undefined)
+                  }
                   className="bg-white/10 border-white/20 text-white text-center text-lg"
                 />
                 <span className="text-white/40 text-xs">min</span>
@@ -115,13 +147,16 @@ export default function SetupPanel({ session, actions }) {
                   min={0}
                   max={59}
                   value={roundSecs}
-                  onChange={(e) => setRoundTime(undefined, parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setRoundTime(undefined, parseInt(e.target.value) || 0)
+                  }
                   className="bg-white/10 border-white/20 text-white text-center text-lg"
                 />
                 <span className="text-white/40 text-xs">sec</span>
               </div>
             </div>
           </div>
+
           <div className="space-y-2">
             <Label className="text-white/70">Rest Duration</Label>
             <div className="flex gap-2">
@@ -130,7 +165,9 @@ export default function SetupPanel({ session, actions }) {
                   type="number"
                   min={0}
                   value={restMins}
-                  onChange={(e) => setRestTime(parseInt(e.target.value) || 0, undefined)}
+                  onChange={(e) =>
+                    setRestTime(parseInt(e.target.value) || 0, undefined)
+                  }
                   className="bg-white/10 border-white/20 text-white text-center text-lg"
                 />
                 <span className="text-white/40 text-xs">min</span>
@@ -141,7 +178,9 @@ export default function SetupPanel({ session, actions }) {
                   min={0}
                   max={59}
                   value={restSecs}
-                  onChange={(e) => setRestTime(undefined, parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setRestTime(undefined, parseInt(e.target.value) || 0)
+                  }
                   className="bg-white/10 border-white/20 text-white text-center text-lg"
                 />
                 <span className="text-white/40 text-xs">sec</span>
@@ -155,7 +194,10 @@ export default function SetupPanel({ session, actions }) {
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-white">Divisions</h2>
-          <Select value={String(divisionCount)} onValueChange={(v) => setDivisionCount(parseInt(v))}>
+          <Select
+            value={String(divisionCount)}
+            onValueChange={(v) => setDivisionCount(parseInt(v))}
+          >
             <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
               <SelectValue />
             </SelectTrigger>
@@ -167,14 +209,16 @@ export default function SetupPanel({ session, actions }) {
           </Select>
         </div>
 
-        {/* Two-column layout: Quick Add | Division Textareas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left: Quick Add Athletes */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-white/40" />
-              <span className="text-white/60 text-sm font-medium">Quick Add Athletes</span>
+              <span className="text-white/60 text-sm font-medium">
+                Quick Add Athletes
+              </span>
             </div>
+
             {divisionCount > 1 && (
               <div className="flex gap-1">
                 {Array.from({ length: divisionCount }, (_, i) => (
@@ -192,6 +236,7 @@ export default function SetupPanel({ session, actions }) {
                 ))}
               </div>
             )}
+
             {availableAthletes.length > 0 ? (
               <>
                 <div className="flex flex-wrap gap-2">
@@ -212,7 +257,9 @@ export default function SetupPanel({ session, actions }) {
                 )}
               </>
             ) : athletes.length === 0 ? (
-              <p className="text-white/30 text-sm">No athletes in database yet.</p>
+              <p className="text-white/30 text-sm">
+                No athletes in database yet.
+              </p>
             ) : (
               <p className="text-white/30 text-sm">All athletes assigned.</p>
             )}
@@ -222,23 +269,30 @@ export default function SetupPanel({ session, actions }) {
           <div className="space-y-3">
             {divisionCount > 1 && (
               <p className="text-white/40 text-xs italic">
-                If you are using more than 1 Division please click the division then the name
+                If you are using more than 1 Division please click the division
+                then the name
               </p>
             )}
+
             <div className="grid gap-4">
               {Array.from({ length: divisionCount }, (_, i) => (
                 <div key={i} className="space-y-2">
                   <Label
                     className={`font-bold cursor-pointer transition-colors ${
-                      divisionCount > 1 && activeDivision === i ? "text-red-400" : "text-white/70"
+                      divisionCount > 1 && activeDivision === i
+                        ? "text-red-400"
+                        : "text-white/70"
                     }`}
                     onClick={() => setActiveDivision(i)}
                   >
                     Division {i + 1}
                     {divisionCount > 1 && activeDivision === i && (
-                      <span className="ml-2 text-xs font-normal text-red-400/70">← active</span>
+                      <span className="ml-2 text-xs font-normal text-red-400/70">
+                        ← active
+                      </span>
                     )}
                   </Label>
+
                   <Textarea
                     placeholder={"One name per line...\nBruce Hoyer\nJohn Smith\nAdam Lee"}
                     value={divisionTexts[i] || ""}
@@ -250,8 +304,12 @@ export default function SetupPanel({ session, actions }) {
                     onFocus={() => setActiveDivision(i)}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[200px] font-mono"
                   />
+
                   <p className="text-white/40 text-xs">
-                    {(divisionTexts[i] || "").split("\n").filter((n) => n.trim()).length} athletes
+                    {(divisionTexts[i] || "")
+                      .split("\n")
+                      .filter((n) => n.trim()).length}{" "}
+                    athletes
                   </p>
                 </div>
               ))}
@@ -263,33 +321,53 @@ export default function SetupPanel({ session, actions }) {
       {/* Sports Selection */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
         <h2 className="text-lg font-bold text-white">Sports</h2>
-        <p className="text-white/40 text-sm">Select which disciplines will be used this session.</p>
+        <p className="text-white/40 text-sm">
+          Select which disciplines will be used this session.
+        </p>
+
         <div className="flex flex-col sm:flex-row gap-4">
           <div
-            onClick={() => setDoBoxing((v) => !v)}
+            onClick={() => setDoBoxing(!doBoxing)}
             className={`flex-1 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-              doBoxing ? "bg-red-500/15 border-red-500/50" : "bg-white/5 border-white/10 opacity-50"
+              doBoxing
+                ? "bg-red-500/15 border-red-500/50"
+                : "bg-white/5 border-white/10 opacity-50"
             }`}
           >
             <span className="text-3xl">🥊</span>
             <div className="flex-1">
               <div className="text-white font-bold">Boxing</div>
-              <div className="text-white/40 text-xs">Boxing goals & role switching</div>
+              <div className="text-white/40 text-xs">
+                Boxing goals & role switching
+              </div>
             </div>
-            <Switch checked={doBoxing} onCheckedChange={setDoBoxing} onClick={(e) => e.stopPropagation()} />
+            <Switch
+              checked={doBoxing}
+              onCheckedChange={setDoBoxing}
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
+
           <div
-            onClick={() => setDoMuayThai((v) => !v)}
+            onClick={() => setDoMuayThai(!doMuayThai)}
             className={`flex-1 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-              doMuayThai ? "bg-blue-500/15 border-blue-500/50" : "bg-white/5 border-white/10 opacity-50"
+              doMuayThai
+                ? "bg-blue-500/15 border-blue-500/50"
+                : "bg-white/5 border-white/10 opacity-50"
             }`}
           >
             <span className="text-3xl">🦵</span>
             <div className="flex-1">
               <div className="text-white font-bold">Muay Thai</div>
-              <div className="text-white/40 text-xs">Muay Thai goals & role switching</div>
+              <div className="text-white/40 text-xs">
+                Muay Thai goals & role switching
+              </div>
             </div>
-            <Switch checked={doMuayThai} onCheckedChange={setDoMuayThai} onClick={(e) => e.stopPropagation()} />
+            <Switch
+              checked={doMuayThai}
+              onCheckedChange={setDoMuayThai}
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       </div>
@@ -321,6 +399,7 @@ export default function SetupPanel({ session, actions }) {
         >
           <Play className="w-5 h-5" /> Create Brackets
         </Button>
+
         <Button
           onClick={actions.clearSetup}
           size="lg"
@@ -329,6 +408,7 @@ export default function SetupPanel({ session, actions }) {
         >
           <Trash2 className="w-4 h-4" /> Clear Setup
         </Button>
+
         <Link to="/AthleteManager">
           <Button
             size="lg"
