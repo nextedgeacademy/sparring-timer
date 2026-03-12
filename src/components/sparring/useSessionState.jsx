@@ -36,6 +36,7 @@ const DEFAULT_STATE = {
   status: "idle",
   divisions: [[], [], []],
   divisionCount: 1,
+  divisionTexts: ["", "", ""],
   schedules: {},
   roundIndices: {},
   globalRound: 1,
@@ -397,6 +398,7 @@ export function useSessionState() {
     },
 
     stop: () => {
+      // Stop resets session but preserves setup config (divisions, timer settings, repeat mode)
       setSession((prev) => ({
         ...prev,
         status: "idle",
@@ -425,7 +427,13 @@ export function useSessionState() {
         boxingRolesFlipped: false,
         muayThaiRolesFlipped: false,
         pendingSwitchSound: null,
+        // divisionCount, divisionTexts, roundTime, restTime, repeatMode are preserved
       }));
+    },
+
+    clearSetup: () => {
+      localStorage.removeItem(STORAGE_KEY);
+      setSession({ ...DEFAULT_STATE });
     },
 
     nextRound: () => {
@@ -527,6 +535,10 @@ export function useSessionState() {
     clearSession: () => {
       localStorage.removeItem(STORAGE_KEY);
       setSession({ ...DEFAULT_STATE });
+    },
+
+    updateDivisionTexts: (divisionTexts) => {
+      setSession((prev) => ({ ...prev, divisionTexts }));
     },
   };
 
