@@ -45,8 +45,8 @@ const DEFAULT_STATE = {
   timeLeft: 180,
   phase: "round",
 
-  doBoxing: true,
-  doMuayThai: true,
+  doBoxing: false,
+  doMuayThai: false,
 
   boxingGoal: "",
   muayThaiGoal: "",
@@ -68,7 +68,7 @@ const DEFAULT_STATE = {
   allBoxingGoals: [],
   allMuayThaiGoals: [],
 
-  // Sequential goal indices (how many rounds have been played, for looping)
+  // Sequential goal indices
   boxingGoalIndex: 0,
   muayThaiGoalIndex: 0,
 };
@@ -96,7 +96,9 @@ export function useSessionState() {
         });
 
         const sortGoals = (list) =>
-          [...list].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)).map(mapGoal);
+          [...list]
+            .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+            .map(mapGoal);
 
         setSession((prev) => ({
           ...prev,
@@ -115,7 +117,6 @@ export function useSessionState() {
     saveToStorage(session);
   }, [session]);
 
-  // Get the next goal data for the upcoming round, given current state
   const getNextRoundData = useCallback((state) => {
     const newIndices = { ...state.roundIndices };
 
@@ -129,7 +130,6 @@ export function useSessionState() {
 
     const matchups = getMergedRound(state.schedules, newIndices);
 
-    // Next boxing goal = current index + 1
     const nextBoxingIdx = state.boxingGoalIndex + 1;
     const nextMuayThaiIdx = state.muayThaiGoalIndex + 1;
 
@@ -188,9 +188,10 @@ export function useSessionState() {
 
     const matchups = getMergedRound(schedules, newIndices);
 
-    // Advance goal indices: use the stored "next" indices if available
-    const newBoxingGoalIndex = prev.nextBoxingGoalIndex ?? prev.boxingGoalIndex + 1;
-    const newMuayThaiGoalIndex = prev.nextMuayThaiGoalIndex ?? prev.muayThaiGoalIndex + 1;
+    const newBoxingGoalIndex =
+      prev.nextBoxingGoalIndex ?? prev.boxingGoalIndex + 1;
+    const newMuayThaiGoalIndex =
+      prev.nextMuayThaiGoalIndex ?? prev.muayThaiGoalIndex + 1;
 
     return {
       ...prev,
@@ -207,8 +208,12 @@ export function useSessionState() {
       nextBoxingGoalIndex: undefined,
       nextMuayThaiGoalIndex: undefined,
 
-      boxingGoal: prev.doBoxing ? prev.nextBoxingGoal || prev.boxingGoal || "" : "",
-      muayThaiGoal: prev.doMuayThai ? prev.nextMuayThaiGoal || prev.muayThaiGoal || "" : "",
+      boxingGoal: prev.doBoxing
+        ? prev.nextBoxingGoal || prev.boxingGoal || ""
+        : "",
+      muayThaiGoal: prev.doMuayThai
+        ? prev.nextMuayThaiGoal || prev.muayThaiGoal || ""
+        : "",
 
       boxingGoalIsNeutral: prev.doBoxing
         ? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true
@@ -267,10 +272,26 @@ export function useSessionState() {
                 nextMatchups: nextData.matchups,
                 nextBoxingGoalIndex: nextData.nextBoxingGoalIndex,
                 nextMuayThaiGoalIndex: nextData.nextMuayThaiGoalIndex,
-                nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal || prev.boxingGoal || "",
-                nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal || prev.muayThaiGoal || "",
-                nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral ?? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true,
-                nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral ?? prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral ?? true,
+                nextBoxingGoal:
+                  nextData.boxingGoal ||
+                  prev.nextBoxingGoal ||
+                  prev.boxingGoal ||
+                  "",
+                nextMuayThaiGoal:
+                  nextData.muayThaiGoal ||
+                  prev.nextMuayThaiGoal ||
+                  prev.muayThaiGoal ||
+                  "",
+                nextBoxingGoalIsNeutral:
+                  nextData.boxingGoalIsNeutral ??
+                  prev.nextBoxingGoalIsNeutral ??
+                  prev.boxingGoalIsNeutral ??
+                  true,
+                nextMuayThaiGoalIsNeutral:
+                  nextData.muayThaiGoalIsNeutral ??
+                  prev.nextMuayThaiGoalIsNeutral ??
+                  prev.muayThaiGoalIsNeutral ??
+                  true,
               };
             }
 
@@ -302,8 +323,12 @@ export function useSessionState() {
           return {
             ...prev,
             timeLeft: nextTimeLeft,
-            boxingRolesFlipped: boxingNeedsSwitch ? true : prev.boxingRolesFlipped,
-            muayThaiRolesFlipped: muayThaiNeedsSwitch ? true : prev.muayThaiRolesFlipped,
+            boxingRolesFlipped: boxingNeedsSwitch
+              ? true
+              : prev.boxingRolesFlipped,
+            muayThaiRolesFlipped: muayThaiNeedsSwitch
+              ? true
+              : prev.muayThaiRolesFlipped,
             pendingSwitchSound,
           };
         });
@@ -320,69 +345,81 @@ export function useSessionState() {
       setSession((prev) => ({ ...prev, ...updates }));
     },
 
-createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, doBoxing = true, doMuayThai = true) => {
-  const activeDivisions = divisions.slice(0, divisionCount);
-  const schedules = {};
-  const roundIndices = {};
+    createBrackets: (
+      divisions,
+      divisionCount,
+      boxingGoal,
+      muayThaiGoal,
+      doBoxing = true,
+      doMuayThai = true
+    ) => {
+      const activeDivisions = divisions.slice(0, divisionCount);
+      const schedules = {};
+      const roundIndices = {};
 
-  activeDivisions.forEach((athletes, i) => {
-    if (athletes.length >= 2) {
-      schedules[i] = generateRoundRobin(athletes);
-      roundIndices[i] = 0;
-    }
-  });
+      activeDivisions.forEach((athletes, i) => {
+        if (athletes.length >= 2) {
+          schedules[i] = generateRoundRobin(athletes);
+          roundIndices[i] = 0;
+        }
+      });
 
-  const matchups = getMergedRound(schedules, roundIndices);
+      const matchups = getMergedRound(schedules, roundIndices);
 
-  const startBoxingGoal = doBoxing ? getGoalAtIndex(session.allBoxingGoals, 0) : null;
-  const startMuayThaiGoal = doMuayThai ? getGoalAtIndex(session.allMuayThaiGoals, 0) : null;
+      const startBoxingGoal = doBoxing
+        ? getGoalAtIndex(session.allBoxingGoals, 0)
+        : null;
+      const startMuayThaiGoal = doMuayThai
+        ? getGoalAtIndex(session.allMuayThaiGoals, 0)
+        : null;
 
-  setSession((prev) => ({
-    ...prev,
-    status: "brackets_preview",
-    phase: "round",
-    divisions,
-    divisionCount,
-    schedules,
-    roundIndices,
-    globalRound: 1,
-    timeLeft: 20,
-    matchups,
+      setSession((prev) => ({
+        ...prev,
+        status: "brackets_preview",
+        phase: "round",
+        divisions,
+        divisionCount,
+        schedules,
+        roundIndices,
+        globalRound: 1,
+        timeLeft: 20,
+        matchups,
 
-    doBoxing,
-    doMuayThai,
+        doBoxing,
+        doMuayThai,
 
-    boxingGoalIndex: 0,
-    muayThaiGoalIndex: 0,
-    nextBoxingGoalIndex: undefined,
-    nextMuayThaiGoalIndex: undefined,
+        boxingGoalIndex: 0,
+        muayThaiGoalIndex: 0,
+        nextBoxingGoalIndex: undefined,
+        nextMuayThaiGoalIndex: undefined,
 
-    boxingGoal: doBoxing
-      ? startBoxingGoal?.text || boxingGoal || ""
-      : "",
-    muayThaiGoal: doMuayThai
-      ? startMuayThaiGoal?.text || muayThaiGoal || ""
-      : "",
+        boxingGoal: doBoxing
+          ? startBoxingGoal?.text || boxingGoal || ""
+          : "",
+        muayThaiGoal: doMuayThai
+          ? startMuayThaiGoal?.text || muayThaiGoal || ""
+          : "",
 
-    boxingGoalIsNeutral: doBoxing
-      ? startBoxingGoal?.isNeutral ?? true
-      : true,
-    muayThaiGoalIsNeutral: doMuayThai
-      ? startMuayThaiGoal?.isNeutral ?? true
-      : true,
+        boxingGoalIsNeutral: doBoxing
+          ? startBoxingGoal?.isNeutral ?? true
+          : true,
+        muayThaiGoalIsNeutral: doMuayThai
+          ? startMuayThaiGoal?.isNeutral ?? true
+          : true,
 
-    nextBoxingGoal: "",
-    nextMuayThaiGoal: "",
-    nextBoxingGoalIsNeutral: true,
-    nextMuayThaiGoalIsNeutral: true,
+        nextBoxingGoal: "",
+        nextMuayThaiGoal: "",
+        nextBoxingGoalIsNeutral: true,
+        nextMuayThaiGoalIsNeutral: true,
 
-    boxingRolesFlipped: false,
-    muayThaiRolesFlipped: false,
-    pendingSwitchSound: null,
+        boxingRolesFlipped: false,
+        muayThaiRolesFlipped: false,
+        pendingSwitchSound: null,
 
-    nextMatchups: [],
-  }));
-},
+        nextMatchups: [],
+      }));
+    },
+
     startWarmup: () => {
       if (timerRef.current) clearInterval(timerRef.current);
       setSession((prev) => ({
@@ -404,7 +441,6 @@ createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, doBoxing = 
     },
 
     stop: () => {
-      // Stop resets session but preserves setup config (divisions, timer settings, repeat mode)
       setSession((prev) => ({
         ...prev,
         status: "idle",
@@ -413,9 +449,6 @@ createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, doBoxing = 
         nextMatchups: [],
         roundIndices: {},
         schedules: {},
-
-        doBoxing: true,
-        doMuayThai: true,
 
         boxingGoalIndex: 0,
         muayThaiGoalIndex: 0,
@@ -433,7 +466,6 @@ createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, doBoxing = 
         boxingRolesFlipped: false,
         muayThaiRolesFlipped: false,
         pendingSwitchSound: null,
-        // divisionCount, divisionTexts, roundTime, restTime, repeatMode are preserved
       }));
     },
 
@@ -457,10 +489,26 @@ createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, doBoxing = 
             nextMatchups: nextData.matchups,
             nextBoxingGoalIndex: nextData.nextBoxingGoalIndex,
             nextMuayThaiGoalIndex: nextData.nextMuayThaiGoalIndex,
-            nextBoxingGoal: nextData.boxingGoal || prev.nextBoxingGoal || prev.boxingGoal || "",
-            nextMuayThaiGoal: nextData.muayThaiGoal || prev.nextMuayThaiGoal || prev.muayThaiGoal || "",
-            nextBoxingGoalIsNeutral: nextData.boxingGoalIsNeutral ?? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true,
-            nextMuayThaiGoalIsNeutral: nextData.muayThaiGoalIsNeutral ?? prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral ?? true,
+            nextBoxingGoal:
+              nextData.boxingGoal ||
+              prev.nextBoxingGoal ||
+              prev.boxingGoal ||
+              "",
+            nextMuayThaiGoal:
+              nextData.muayThaiGoal ||
+              prev.nextMuayThaiGoal ||
+              prev.muayThaiGoal ||
+              "",
+            nextBoxingGoalIsNeutral:
+              nextData.boxingGoalIsNeutral ??
+              prev.nextBoxingGoalIsNeutral ??
+              prev.boxingGoalIsNeutral ??
+              true,
+            nextMuayThaiGoalIsNeutral:
+              nextData.muayThaiGoalIsNeutral ??
+              prev.nextMuayThaiGoalIsNeutral ??
+              prev.muayThaiGoalIsNeutral ??
+              true,
           };
         }
 
@@ -507,8 +555,10 @@ createBrackets: (divisions, divisionCount, boxingGoal, muayThaiGoal, doBoxing = 
           muayThaiGoalIndex: prevMuayThaiIdx,
           boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
           muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
-          boxingGoalIsNeutral: prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral,
-          muayThaiGoalIsNeutral: prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral,
+          boxingGoalIsNeutral:
+            prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral,
+          muayThaiGoalIsNeutral:
+            prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral,
           boxingRolesFlipped: false,
           muayThaiRolesFlipped: false,
           pendingSwitchSound: null,
