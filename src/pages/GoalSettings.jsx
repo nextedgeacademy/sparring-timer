@@ -61,11 +61,10 @@ export default function GoalSettings() {
 
     const a = list[index];
     const b = list[swapIndex];
-    const aOrder = a.sort_order ?? index;
-    const bOrder = b.sort_order ?? swapIndex;
 
-    updateMutation.mutate({ id: a.id, sort_order: bOrder });
-    updateMutation.mutate({ id: b.id, sort_order: aOrder });
+    // Always use index-based order values to avoid collisions
+    updateMutation.mutate({ id: a.id, sort_order: swapIndex });
+    updateMutation.mutate({ id: b.id, sort_order: index });
   };
 
   const GoalRow = ({ goal, index, list }) => {
