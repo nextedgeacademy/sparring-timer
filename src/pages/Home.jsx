@@ -40,11 +40,11 @@ useEffect(() => {
   };
 
   roundStartAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/Round%20Start.mp3"
+    "https://nextedgeacademy.b-cdn.net/Audio/Gong3.mp3"
   );
 
   roundEndAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/Round%20End%20Sound.mp3"
+    "https://nextedgeacademy.b-cdn.net/Audio/Gong.mp3"
   );
 
   boxingSwitchAudioRef.current = createAudio(
