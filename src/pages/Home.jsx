@@ -48,15 +48,15 @@ useEffect(() => {
   );
 
   boxingSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/BoxingSwitchRoles.mp3"
+    "https://nextedgeacademy.b-cdn.net/Audio/Beep.mp3"
   );
 
   muayThaiSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/ThaiBoxingSwitchRoles.mp3"
+    "https://nextedgeacademy.b-cdn.net/Audio/Beep.mp3"
   );
 
   bothSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/BothGroupsSwitchRoles.mp3"
+    "https://nextedgeacademy.b-cdn.net/Audio/Beep.mp3"
   );
 
 }, []);
