@@ -3,7 +3,6 @@ import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
 import MatchupGrid from "../components/sparring/MatchupGrid";
-import TimerDisplay from "../components/sparring/TimerDisplay";
 import GoalDisplay from "../components/sparring/GoalDisplay";
 import BracketsPreview from "../components/sparring/BracketsPreview";
 import { Button } from "@/components/ui/button";
