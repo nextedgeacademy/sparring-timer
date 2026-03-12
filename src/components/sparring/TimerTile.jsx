@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export default function TimerTile({ timeLeft, phase, status }) {
+export default function TimerTile({ timeLeft, phase, status, roundNumber, boxingGoal, muayThaiGoal }) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const formatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
