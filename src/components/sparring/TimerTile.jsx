@@ -39,7 +39,7 @@ export default function TimerTile({
       className={`rounded-2xl border flex flex-col items-center justify-center p-4 text-center min-h-[90px] ${bgClass}`}
     >
       <div
-        className={`font-mono font-black tabular-nums tracking-tight text-7xl md:text-8xl lg:text-9xl ${timeColor}`}
+        className={`font-mono font-black tabular-nums tracking-tight text-[6rem] md:text-[8rem] lg:text-[10rem] ${timeColor}`}
       >
         {formatted}
       </div>
