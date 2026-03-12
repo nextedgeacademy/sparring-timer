@@ -297,8 +297,9 @@ export default function SetupPanel({ session, actions }) {
       <div className="flex flex-wrap gap-3 justify-center">
         <Button
           onClick={handleCreateBrackets}
+          disabled={!doBoxing && !doMuayThai}
           size="lg"
-          className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 gap-2"
+          className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Play className="w-5 h-5" /> Create Brackets
         </Button>
