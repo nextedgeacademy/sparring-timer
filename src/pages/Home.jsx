@@ -182,15 +182,15 @@ useEffect(() => {
         : session.matchups
       : session.matchups;
 
-  const displayBoxing =
-    session.phase === "rest"
-      ? session.nextBoxingGoal || session.boxingGoal
-      : session.boxingGoal;
+const displayBoxing =
+  session.phase === "rest"
+    ? session.nextBoxingGoal || session.boxingGoal || ""
+    : session.boxingGoal || session.nextBoxingGoal || "";
 
-  const displayMuayThai =
-    session.phase === "rest"
-      ? session.nextMuayThaiGoal || session.muayThaiGoal
-      : session.muayThaiGoal;
+const displayMuayThai =
+  session.phase === "rest"
+    ? session.nextMuayThaiGoal || session.muayThaiGoal || ""
+    : session.muayThaiGoal || session.nextMuayThaiGoal || "";
 
   const displayRound =
     session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
