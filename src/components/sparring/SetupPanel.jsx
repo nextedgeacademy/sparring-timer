@@ -158,80 +158,87 @@ export default function SetupPanel({ session, actions }) {
           </Select>
         </div>
 
-        {/* Athlete Quick-Add */}
-        {athletes.length > 0 && (
-          <div className="space-y-2">
+        {/* Two-column layout: Quick Add | Division Textareas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left: Quick Add Athletes */}
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-white/40" />
               <span className="text-white/60 text-sm font-medium">Quick Add Athletes</span>
-              {divisionCount > 1 && (
-                <div className="flex gap-1 ml-auto">
-                  {Array.from({ length: divisionCount }, (_, i) => (
+            </div>
+            {divisionCount > 1 && (
+              <div className="flex gap-1">
+                {Array.from({ length: divisionCount }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveDivision(i)}
+                    className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
+                      activeDivision === i
+                        ? "bg-red-600 text-white"
+                        : "bg-white/10 text-white/50 hover:bg-white/20"
+                    }`}
+                  >
+                    Div {i + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+            {athletes.length > 0 ? (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {athletes.map((a) => (
                     <button
-                      key={i}
-                      onClick={() => setActiveDivision(i)}
-                      className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
-                        activeDivision === i
-                          ? "bg-red-600 text-white"
-                          : "bg-white/10 text-white/50 hover:bg-white/20"
-                      }`}
+                      key={a.id}
+                      onClick={() => handleAddAthlete(a.name)}
+                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-sm rounded-full border border-white/15 hover:border-white/30 transition-all"
                     >
-                      Div {i + 1}
+                      {a.name}
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {athletes.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => handleAddAthlete(a.name)}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-sm rounded-full border border-white/15 hover:border-white/30 transition-all"
-                >
-                  {a.name}
-                </button>
-              ))}
-            </div>
-            {divisionCount > 1 && (
-              <p className="text-white/30 text-xs">
-                Adding to Division {activeDivision + 1} — click a division button above to switch
-              </p>
+                {divisionCount > 1 && (
+                  <p className="text-white/30 text-xs">
+                    Adding to Division {activeDivision + 1}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-white/30 text-sm">No athletes in database yet.</p>
             )}
           </div>
-        )}
 
-        {/* Division Textareas */}
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${divisionCount}, 1fr)` }}>
-          {Array.from({ length: divisionCount }, (_, i) => (
-            <div key={i} className="space-y-2">
-              <Label
-                className={`font-bold cursor-pointer transition-colors ${
-                  divisionCount > 1 && activeDivision === i ? "text-red-400" : "text-white/70"
-                }`}
-                onClick={() => setActiveDivision(i)}
-              >
-                Division {i + 1} Athletes
-                {divisionCount > 1 && activeDivision === i && (
-                  <span className="ml-2 text-xs font-normal text-red-400/70">← active</span>
-                )}
-              </Label>
-              <Textarea
-                placeholder={"One name per line...\nBruce Hoyer\nJohn Smith\nAdam Lee"}
-                value={divisionTexts[i] || ""}
-                onChange={(e) => {
-                  const copy = [...divisionTexts];
-                  copy[i] = e.target.value;
-                  setDivisionTexts(copy);
-                }}
-                onFocus={() => setActiveDivision(i)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[200px] font-mono"
-              />
-              <p className="text-white/40 text-xs">
-                {(divisionTexts[i] || "").split("\n").filter((n) => n.trim()).length} athletes
-              </p>
-            </div>
-          ))}
+          {/* Right: Division Textareas */}
+          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${divisionCount}, 1fr)` }}>
+            {Array.from({ length: divisionCount }, (_, i) => (
+              <div key={i} className="space-y-2">
+                <Label
+                  className={`font-bold cursor-pointer transition-colors ${
+                    divisionCount > 1 && activeDivision === i ? "text-red-400" : "text-white/70"
+                  }`}
+                  onClick={() => setActiveDivision(i)}
+                >
+                  Division {i + 1}
+                  {divisionCount > 1 && activeDivision === i && (
+                    <span className="ml-2 text-xs font-normal text-red-400/70">← active</span>
+                  )}
+                </Label>
+                <Textarea
+                  placeholder={"One name per line...\nBruce Hoyer\nJohn Smith\nAdam Lee"}
+                  value={divisionTexts[i] || ""}
+                  onChange={(e) => {
+                    const copy = [...divisionTexts];
+                    copy[i] = e.target.value;
+                    setDivisionTexts(copy);
+                  }}
+                  onFocus={() => setActiveDivision(i)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[200px] font-mono"
+                />
+                <p className="text-white/40 text-xs">
+                  {(divisionTexts[i] || "").split("\n").filter((n) => n.trim()).length} athletes
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
