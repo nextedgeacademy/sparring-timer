@@ -23,7 +23,7 @@ export default function SetupPanel({ session, actions }) {
   // Load active athletes from DB
   const { data: athletes = [] } = useQuery({
     queryKey: ["athletes-active"],
-    queryFn: () => base44.entities.Athlete.filter({ active: true }),
+    queryFn: () => base44.entities.Athlete.filter({ active: true }, "name"),
   });
 
   const setDivisionCount = (count) => {
