@@ -39,6 +39,14 @@ const AppRoutes = () => {
           }
         />
       ))}
+      <Route
+        path="/AthleteManager"
+        element={
+          <LayoutWrapper currentPageName="AthleteManager">
+            <AthleteManager />
+          </LayoutWrapper>
+        }
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
