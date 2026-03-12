@@ -211,8 +211,10 @@ export default function SetupPanel({ session, actions }) {
                   </p>
                 )}
               </>
-            ) : (
+            ) : athletes.length === 0 ? (
               <p className="text-white/30 text-sm">No athletes in database yet.</p>
+            ) : (
+              <p className="text-white/30 text-sm">All athletes assigned.</p>
             )}
           </div>
 
