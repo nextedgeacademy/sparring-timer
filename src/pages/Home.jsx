@@ -225,7 +225,14 @@ useEffect(() => {
         <AnimatePresence mode="wait">
           <MatchupGrid
             matchups={displayMatchups}
-            timerProps={{ timeLeft: session.timeLeft, phase: session.phase, status: session.status }}
+            timerProps={{
+              timeLeft: session.timeLeft,
+              phase: session.phase,
+              status: session.status,
+              roundNumber: displayRound,
+              boxingGoal: displayBoxing,
+              muayThaiGoal: displayMuayThai,
+            }}
           />
         </AnimatePresence>
       </div>
