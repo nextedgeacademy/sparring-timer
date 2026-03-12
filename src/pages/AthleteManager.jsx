@@ -14,7 +14,7 @@ export default function AthleteManager() {
 
   const { data: athletes = [], isLoading } = useQuery({
     queryKey: ["athletes"],
-    queryFn: () => base44.entities.Athlete.list("-created_date"),
+    queryFn: () => base44.entities.Athlete.list("name"),
   });
 
   const createMutation = useMutation({
