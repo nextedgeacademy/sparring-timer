@@ -469,10 +469,14 @@ export function useSessionState() {
       }));
     },
 
-    clearSetup: () => {
-      localStorage.removeItem(STORAGE_KEY);
-      setSession({ ...DEFAULT_STATE });
-    },
+clearSetup: () => {
+  localStorage.removeItem(STORAGE_KEY);
+  setSession((prev) => ({
+    ...DEFAULT_STATE,
+    allBoxingGoals: prev.allBoxingGoals,
+    allMuayThaiGoals: prev.allMuayThaiGoals,
+  }));
+},
 
     nextRound: () => {
       setSession((prev) => {
@@ -588,10 +592,14 @@ export function useSessionState() {
       setSession((prev) => ({ ...prev, pendingSwitchSound: null }));
     },
 
-    clearSession: () => {
-      localStorage.removeItem(STORAGE_KEY);
-      setSession({ ...DEFAULT_STATE });
-    },
+ clearSession: () => {
+  localStorage.removeItem(STORAGE_KEY);
+  setSession((prev) => ({
+    ...DEFAULT_STATE,
+    allBoxingGoals: prev.allBoxingGoals,
+    allMuayThaiGoals: prev.allMuayThaiGoals,
+  }));
+},
 
     updateDivisionTexts: (divisionTexts) => {
       setSession((prev) => ({ ...prev, divisionTexts }));
