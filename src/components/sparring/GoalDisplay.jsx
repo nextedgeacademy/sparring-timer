@@ -16,7 +16,7 @@ export default function GoalDisplay({ boxingGoal, muayThaiGoal, large = false })
       {muayThaiGoal && (
         <div className="flex items-center gap-2">
           <span className={`font-bold text-blue-400 uppercase tracking-wider ${large ? "text-3xl" : "text-xs"}`}>
-            🦵 MMA/Muay Thai:
+            🦵 Muay Thai:
           </span>
           <span className={`text-white/90 ${large ? "text-3xl font-semibold" : "text-sm"}`}>
             {muayThaiGoal}
