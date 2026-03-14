@@ -248,7 +248,11 @@ const displayMuayThai =
       </div>
 
       <div className="p-4 border-t border-white/5">
-        <SessionControls session={session} actions={actions} />
+        <SessionControls
+          session={session}
+          actions={actions}
+          onComplete={() => { stopAllAudio(); actions.complete(); }}
+        />
       </div>
     </div>
   );
