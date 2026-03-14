@@ -66,44 +66,27 @@ export function getMergedRound(schedules, roundIndices) {
 export function addLateArrival(schedules, divIndex, playerName, currentRoundIndices) {
   const divSchedule = schedules[divIndex];
   if (!divSchedule) return schedules;
-  
+
   const currentRound = currentRoundIndices[divIndex] || 0;
-  
-  // Check for rest rounds in upcoming matches
-  let replaced = false;
-  for (let r = currentRound + 1; r < divSchedule.length && !replaced; r++) {
-    for (let m = 0; m < divSchedule[r].length; m++) {
-      if (divSchedule[r][m].athlete1 === "__REST__") {
-        divSchedule[r][m].athlete1 = playerName;
-        replaced = true;
-        break;
-      }
-      if (divSchedule[r][m].athlete2 === "__REST__") {
-        divSchedule[r][m].athlete2 = playerName;
-        replaced = true;
-        break;
-      }
-    }
-  }
-  
-  if (!replaced) {
-    // Get all existing athletes in this division
-    const existingAthletes = new Set();
-    divSchedule.forEach(round => {
-      round.forEach(match => {
-        if (match.athlete1 !== "__REST__") existingAthletes.add(match.athlete1);
-        if (match.athlete2 !== "__REST__") existingAthletes.add(match.athlete2);
-      });
+
+  // Collect all existing athletes in this division
+  const existingAthletes = new Set();
+  divSchedule.forEach(round => {
+    round.forEach(match => {
+      if (match.athlete1 !== "__REST__") existingAthletes.add(match.athlete1);
+      if (match.athlete2 !== "__REST__") existingAthletes.add(match.athlete2);
     });
-    existingAthletes.add(playerName);
-    
-    // Regenerate schedule for this division from current point forward
-    const newSchedule = generateRoundRobin([...existingAthletes]);
-    // Keep completed rounds, append new ones
-    const kept = divSchedule.slice(0, currentRound + 1);
-    schedules[divIndex] = [...kept, ...newSchedule];
-  }
-  
+  });
+  existingAthletes.add(playerName);
+
+  // Fully regenerate the schedule with the new player included,
+  // so they participate in ALL future rounds (including looped cycles).
+  const newSchedule = generateRoundRobin([...existingAthletes]);
+
+  // Keep already-completed rounds, replace everything from current round onward
+  const kept = divSchedule.slice(0, currentRound + 1);
+  schedules[divIndex] = [...kept, ...newSchedule];
+
   return { ...schedules };
 }
 
