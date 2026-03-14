@@ -343,7 +343,7 @@ export function useSessionState() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [session.status, session.phase, getNextRoundData]);
+  }, [session.status, session.phase, session.timerKey, getNextRoundData]);
 
   const actions = {
     updateSettings: (updates) => {
