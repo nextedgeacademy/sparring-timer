@@ -44,13 +44,12 @@ export default function GoalSettings() {
 
   const handleAdd = (type, text, setter, list) => {
     if (!text.trim()) return;
-    const maxOrder = list.length > 0 ? Math.max(...list.map(g => g.sort_order ?? 0)) : -1;
     createMutation.mutate({
       text: text.trim(),
       type,
       enabled: true,
       is_neutral: true,
-      sort_order: maxOrder + 1,
+      sort_order: list.length,
     });
     setter("");
   };
