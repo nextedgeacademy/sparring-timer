@@ -232,6 +232,7 @@ export function useSessionState() {
       nextBoxingGoalIsNeutral: true,
       nextMuayThaiGoalIsNeutral: true,
       nextMatchups: [],
+      timerKey: timerKeyRef.current,
     };
   }
 
