@@ -257,6 +257,7 @@ export function useSessionState() {
                 boxingRolesFlipped: false,
                 muayThaiRolesFlipped: false,
                 pendingSwitchSound: null,
+                timerKey: timerKeyRef.current,
               };
             }
 
