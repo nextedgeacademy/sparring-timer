@@ -80,6 +80,7 @@ export function useSessionState() {
   });
 
   const timerRef = useRef(null);
+  const timerKeyRef = useRef(0);
 
   // Fetch and store ordered, enabled goals on mount
   useEffect(() => {
