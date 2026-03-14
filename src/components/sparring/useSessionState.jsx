@@ -241,6 +241,7 @@ export function useSessionState() {
       session.status === "rest" ||
       session.status === "warmup"
     ) {
+      if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         setSession((prev) => {
           if (prev.timeLeft <= 1) {
