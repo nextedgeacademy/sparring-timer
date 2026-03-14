@@ -88,7 +88,7 @@ export default function SessionControls({ session, actions, onComplete }) {
         <Button
           size="sm"
           variant="outline"
-          onClick={actions.complete}
+          onClick={onComplete || actions.complete}
           className="gap-1 bg-red-900/50 border-red-700 text-red-300 hover:bg-red-800"
         >
           <Flag className="w-3 h-3" /> Sparring Complete
