@@ -41,7 +41,7 @@ const DEFAULT_STATE = {
   roundIndices: {},
   globalRound: 1,
   roundTime: 180,
-  restTime: 60,
+  restTime: 30,
   timeLeft: 180,
   phase: "round",
 
