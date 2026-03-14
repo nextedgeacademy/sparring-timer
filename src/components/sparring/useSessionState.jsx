@@ -243,16 +243,7 @@ export function useSessionState() {
       timerRef.current = setInterval(() => {
         setSession((prev) => {
           if (prev.timeLeft <= 1) {
-            // Only clear interval for truly terminal transitions (rest→running stays running)
-            const isTerminal = prev.status === "warmup"
-              ? false
-              : prev.phase === "round" && prev.restTime > 0
-              ? true   // round→rest: different phase, interval will restart
-              : prev.phase === "rest"
-              ? true   // rest→running: status/phase changes, interval will restart
-              : false;
-
-            if (isTerminal) clearInterval(timerRef.current);
+            clearInterval(timerRef.current);
 
             if (prev.status === "warmup") {
               return {
