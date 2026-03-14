@@ -59,12 +59,14 @@ export default function GoalSettings() {
     const swapIndex = index + direction;
     if (swapIndex < 0 || swapIndex >= list.length) return;
 
-    const a = list[index];
-    const b = list[swapIndex];
+    // Build new ordered array with the two items swapped
+    const reordered = [...list];
+    [reordered[index], reordered[swapIndex]] = [reordered[swapIndex], reordered[index]];
 
-    // Always use index-based order values to avoid collisions
-    updateMutation.mutate({ id: a.id, sort_order: swapIndex });
-    updateMutation.mutate({ id: b.id, sort_order: index });
+    // Re-normalize all sort_order values to 0,1,2,... sequentially
+    reordered.forEach((goal, i) => {
+      updateMutation.mutate({ id: goal.id, sort_order: i });
+    });
   };
 
   const GoalRow = ({ goal, index, list }) => {
