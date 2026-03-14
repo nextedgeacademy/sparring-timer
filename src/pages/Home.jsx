@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
