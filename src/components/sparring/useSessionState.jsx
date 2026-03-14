@@ -71,6 +71,7 @@ const DEFAULT_STATE = {
   // Sequential goal indices
   boxingGoalIndex: 0,
   muayThaiGoalIndex: 0,
+  timerKey: 0,
 };
 
 export function useSessionState() {
