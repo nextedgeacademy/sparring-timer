@@ -28,17 +28,27 @@ export default function Home() {
     session.status === "paused" ||
     session.status === "warmup";
 
+  const stopAllAudio = useCallback(() => {
+    [roundStartAudioRef, roundEndAudioRef, boxingSwitchAudioRef, muayThaiSwitchAudioRef, bothSwitchAudioRef].forEach((ref) => {
+      if (ref.current) {
+        ref.current.pause();
+        ref.current.currentTime = 0;
+      }
+    });
+  }, []);
+
   // Complete session only when user closes the window
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isActive) {
+        stopAllAudio();
         actions.complete();
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isActive, actions]);
+  }, [isActive, actions, stopAllAudio]);
 
   const isComplete = session.status === "complete";
 
