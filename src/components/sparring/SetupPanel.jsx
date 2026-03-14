@@ -68,11 +68,10 @@ export default function SetupPanel({ session, actions }) {
   };
 
   const setRestTime = (mins, secs) => {
-    const current = restTime;
-    const currentMins = Math.floor(current / 60);
-    const currentSecs = current % 60;
-    const newMins = mins !== undefined ? mins : currentMins;
-    const newSecs = secs !== undefined ? secs : currentSecs;
+    const currentMins = Math.floor(restTime / 60);
+    const currentSecs = restTime % 60;
+    const newMins = mins !== undefined && mins !== null && !isNaN(mins) ? mins : currentMins;
+    const newSecs = secs !== undefined && secs !== null && !isNaN(secs) ? secs : currentSecs;
     actions.updateSettings({ restTime: newMins * 60 + newSecs });
   };
 
