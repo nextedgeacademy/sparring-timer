@@ -585,7 +585,7 @@ clearSetup: () => {
 
     complete: () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      setSession((prev) => ({ ...prev, status: "complete" }));
+      setSession((prev) => ({ ...prev, status: "complete", pendingSwitchSound: null }));
     },
 
     clearPendingSwitchSound: () => {
