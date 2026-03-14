@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Pause, Play, Square, SkipForward, SkipBack, UserPlus, Flag } from "lucide-react";
 
-export default function SessionControls({ session, actions }) {
+export default function SessionControls({ session, actions, onComplete }) {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerDiv, setNewPlayerDiv] = useState("0");
