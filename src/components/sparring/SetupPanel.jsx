@@ -159,31 +159,33 @@ export default function SetupPanel({ session, actions }) {
           <div className="space-y-2">
             <Label className="text-white/70">Rest Duration</Label>
             <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  type="number"
-                  min={0}
-                  value={restMins}
-                  onChange={(e) =>
-                    setRestTime(parseInt(e.target.value) || 0, undefined)
-                  }
-                  className="bg-white/10 border-white/20 text-white text-center text-lg"
-                />
-                <span className="text-white/40 text-xs">min</span>
-              </div>
-              <div className="flex-1">
-                <Input
-                  type="number"
-                  min={0}
-                  max={59}
-                  value={restSecs}
-                  onChange={(e) =>
-                    setRestTime(undefined, parseInt(e.target.value) || 0)
-                  }
-                  className="bg-white/10 border-white/20 text-white text-center text-lg"
-                />
-                <span className="text-white/40 text-xs">sec</span>
-              </div>
+            <div className="flex-1">
+              <Input
+                type="number"
+                min={0}
+                value={restMins}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setRestTime(val === "" ? 0 : parseInt(val), undefined);
+                }}
+                className="bg-white/10 border-white/20 text-white text-center text-lg"
+              />
+              <span className="text-white/40 text-xs">min</span>
+            </div>
+            <div className="flex-1">
+              <Input
+                type="number"
+                min={0}
+                max={59}
+                value={restSecs}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setRestTime(undefined, val === "" ? 0 : parseInt(val));
+                }}
+                className="bg-white/10 border-white/20 text-white text-center text-lg"
+              />
+              <span className="text-white/40 text-xs">sec</span>
+            </div>
             </div>
           </div>
         </div>
