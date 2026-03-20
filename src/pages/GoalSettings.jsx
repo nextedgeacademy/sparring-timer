@@ -7,8 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Trash2, Plus, GripVertical, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-function GoalSection({ title, emoji, entityName, color }) {
+function GoalSection({ title, emoji, entityName }) {
   const queryClient = useQueryClient();
   const [newText, setNewText] = useState("");
   const [newIsNeutral, setNewIsNeutral] = useState(true);
@@ -47,51 +48,100 @@ function GoalSection({ title, emoji, entityName, color }) {
     setNewIsNeutral(true);
   };
 
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+
+    const reordered = [...sorted];
+    const [moved] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, moved);
+
+    // Update sort_order for all affected items
+    reordered.forEach((goal, idx) => {
+      if (goal.sort_order !== idx) {
+        updateMutation.mutate({ id: goal.id, data: { sort_order: idx } });
+      }
+    });
+
+    // Optimistically update the cache
+    queryClient.setQueryData([entityName], (old) => {
+      if (!old) return old;
+      const map = Object.fromEntries(reordered.map((g, i) => [g.id, i]));
+      return old.map((g) => ({ ...g, sort_order: map[g.id] ?? g.sort_order }));
+    });
+  };
+
   return (
-    <div className={`bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4`}>
+    <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
       <h2 className="text-xl font-bold text-white flex items-center gap-2">
         <span>{emoji}</span> {title} Goals
       </h2>
 
-      <div className="space-y-2">
-        {sorted.map((goal) => (
-          <div
-            key={goal.id}
-            className="flex items-center gap-3 bg-white/5 rounded-xl px-4 py-3 border border-white/10"
-          >
-            <GripVertical className="w-4 h-4 text-white/20 shrink-0" />
-            <span className="flex-1 text-white text-sm">{goal.text}</span>
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
-                <span className={`text-xs font-semibold ${goal.is_neutral ? "text-blue-400" : "text-orange-400"}`}>
-                  {goal.is_neutral ? "Neutral" : "Role-based"}
-                </span>
-                <Switch
-                  checked={!!goal.is_neutral}
-                  onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { is_neutral: v } })}
-                />
-              </div>
-              <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
-                <span className={`text-xs font-semibold ${goal.enabled ? "text-green-400" : "text-white/30"}`}>
-                  {goal.enabled ? "Enabled" : "Disabled"}
-                </span>
-                <Switch
-                  checked={!!goal.enabled}
-                  onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { enabled: v } })}
-                />
-              </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-white/30 hover:text-red-400 h-7 w-7"
-                onClick={() => deleteMutation.mutate(goal.id)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId={entityName}>
+          {(provided) => (
+            <div
+              className="space-y-2"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {sorted.map((goal, index) => (
+                <Draggable key={goal.id} draggableId={goal.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-colors ${
+                        snapshot.isDragging
+                          ? "bg-white/15 border-white/30 shadow-lg"
+                          : "bg-white/5 border-white/10"
+                      }`}
+                    >
+                      <div
+                        {...provided.dragHandleProps}
+                        className="cursor-grab active:cursor-grabbing text-white/30 hover:text-white/60 transition-colors shrink-0"
+                      >
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      <span className="flex-1 text-white text-sm">{goal.text}</span>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
+                          <span className={`text-xs font-semibold ${goal.is_neutral ? "text-blue-400" : "text-orange-400"}`}>
+                            {goal.is_neutral ? "Neutral" : "Role-based"}
+                          </span>
+                          <Switch
+                            checked={!!goal.is_neutral}
+                            onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { is_neutral: v } })}
+                          />
+                        </div>
+                        <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
+                          <span className={`text-xs font-semibold ${goal.enabled ? "text-green-400" : "text-white/30"}`}>
+                            {goal.enabled ? "Enabled" : "Disabled"}
+                          </span>
+                          <Switch
+                            checked={!!goal.enabled}
+                            onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { enabled: v } })}
+                          />
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-white/30 hover:text-red-400 h-7 w-7"
+                          onClick={() => deleteMutation.mutate(goal.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {/* Add new */}
       <div className="flex gap-2 pt-2">
@@ -131,8 +181,8 @@ export default function GoalSettings() {
           <h1 className="text-3xl font-black text-white">Goals & Settings</h1>
         </div>
 
-        <GoalSection title="Boxing" emoji="🥊" entityName="BoxingGoal" color="red" />
-        <GoalSection title="Muay Thai" emoji="🦵" entityName="MuayThaiGoal" color="blue" />
+        <GoalSection title="Boxing" emoji="🥊" entityName="BoxingGoal" />
+        <GoalSection title="Muay Thai" emoji="🦵" entityName="MuayThaiGoal" />
       </div>
     </div>
   );
