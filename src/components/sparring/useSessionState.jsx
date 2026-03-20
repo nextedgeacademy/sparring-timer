@@ -123,11 +123,11 @@ export function useSessionState() {
     const newIndices = { ...state.roundIndices };
 
     Object.keys(state.schedules).forEach((div) => {
-      newIndices[div] = (state.roundIndices[div] || 0) + 1;
       const divSchedule = state.schedules[div];
-      if (divSchedule && newIndices[div] >= divSchedule.length) {
-        newIndices[div] = newIndices[div] % divSchedule.length;
-      }
+      const nextIdx = (state.roundIndices[div] || 0) + 1;
+      newIndices[div] = divSchedule && divSchedule.length > 0
+        ? nextIdx % divSchedule.length
+        : 0;
     });
 
     const matchups = getMergedRound(state.schedules, newIndices);
