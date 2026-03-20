@@ -65,10 +65,15 @@ function GoalSection({ title, emoji, entityName, color }) {
               <span className="text-white/40 text-xs">
                 {goal.is_neutral ? "Neutral" : "Roles switch"}
               </span>
-              <Switch
-                checked={!!goal.enabled}
-                onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { enabled: v } })}
-              />
+              <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
+                <span className={`text-xs font-semibold ${goal.enabled ? "text-green-400" : "text-white/30"}`}>
+                  {goal.enabled ? "Enabled" : "Disabled"}
+                </span>
+                <Switch
+                  checked={!!goal.enabled}
+                  onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { enabled: v } })}
+                />
+              </div>
               <Button
                 size="icon"
                 variant="ghost"
