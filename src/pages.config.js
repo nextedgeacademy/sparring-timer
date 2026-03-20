@@ -47,7 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import GoalSettings from './pages/GoalSettings';
+import GoalSettings from './pages/GoalSettings.jsx';
 import Home from './pages/Home';
 import TVMode from './pages/TVMode';
 
