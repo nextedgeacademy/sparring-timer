@@ -88,8 +88,8 @@ export function useSessionState() {
     const fetchGoals = async () => {
       try {
         const [boxingGoals, muayThaiGoals] = await Promise.all([
-          base44.entities.SparringGoal.filter({ type: "boxing", enabled: true }, "sort_order"),
-          base44.entities.SparringGoal.filter({ type: "muay_thai", enabled: true }, "sort_order"),
+          base44.entities.BoxingGoal.filter({ enabled: true }, "sort_order"),
+          base44.entities.MuayThaiGoal.filter({ enabled: true }, "sort_order"),
         ]);
 
         const mapGoal = (g) => ({
