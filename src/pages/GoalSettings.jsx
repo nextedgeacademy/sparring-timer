@@ -61,10 +61,16 @@ function GoalSection({ title, emoji, entityName, color }) {
           >
             <GripVertical className="w-4 h-4 text-white/20 shrink-0" />
             <span className="flex-1 text-white text-sm">{goal.text}</span>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-white/40 text-xs">
-                {goal.is_neutral ? "Neutral" : "Roles switch"}
-              </span>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
+                <span className={`text-xs font-semibold ${goal.is_neutral ? "text-blue-400" : "text-orange-400"}`}>
+                  {goal.is_neutral ? "Neutral" : "Role-based"}
+                </span>
+                <Switch
+                  checked={!!goal.is_neutral}
+                  onCheckedChange={(v) => updateMutation.mutate({ id: goal.id, data: { is_neutral: v } })}
+                />
+              </div>
               <div className="flex items-center gap-1.5 border border-white/10 rounded-lg px-2 py-1 bg-white/5">
                 <span className={`text-xs font-semibold ${goal.enabled ? "text-green-400" : "text-white/30"}`}>
                   {goal.enabled ? "Enabled" : "Disabled"}
