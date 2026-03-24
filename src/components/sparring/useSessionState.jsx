@@ -26,10 +26,14 @@ function loadFromStorage() {
   }
 }
 
-// Get the goal at a specific sequence index (skips disabled, loops)
+// Goals are already filtered/sorted before being stored in state.
+// This helper safely wraps the index.
 function getGoalAtIndex(goals, index) {
-  if (!goals || goals.length === 0) return null;
-  return goals[index % goals.length];
+  if (!goals || goals.length === 0) {
+    return { text: "", isNeutral: true };
+  }
+  const idx = ((index % goals.length) + goals.length) % goals.length;
+  return goals[idx];
 }
 
 const DEFAULT_STATE = {
@@ -68,9 +72,11 @@ const DEFAULT_STATE = {
   allBoxingGoals: [],
   allMuayThaiGoals: [],
 
-  // Sequential goal indices
   boxingGoalIndex: 0,
   muayThaiGoalIndex: 0,
+  nextBoxingGoalIndex: undefined,
+  nextMuayThaiGoalIndex: undefined,
+
   timerKey: 0,
 };
 
@@ -83,7 +89,6 @@ export function useSessionState() {
   const timerRef = useRef(null);
   const timerKeyRef = useRef(0);
 
-  // Fetch and store ordered, enabled goals on mount
   useEffect(() => {
     const fetchGoals = async () => {
       try {
@@ -94,7 +99,8 @@ export function useSessionState() {
 
         const mapGoal = (g) => ({
           text: g.text,
-          isNeutral: g.is_neutral === false || g.is_neutral === "false" ? false : true,
+          isNeutral:
+            g.is_neutral === false || g.is_neutral === "false" ? false : true,
         });
 
         const sortGoals = (list) =>
@@ -119,39 +125,38 @@ export function useSessionState() {
     saveToStorage(session);
   }, [session]);
 
-  const getNextRoundData = useCallback((state) => {
+  const buildQueuedNextRoundData = useCallback((state) => {
     const newIndices = { ...state.roundIndices };
 
     Object.keys(state.schedules).forEach((div) => {
       const divSchedule = state.schedules[div];
       const nextIdx = (state.roundIndices[div] || 0) + 1;
-      newIndices[div] = divSchedule && divSchedule.length > 0
-        ? nextIdx % divSchedule.length
-        : 0;
+      newIndices[div] =
+        divSchedule && divSchedule.length > 0 ? nextIdx % divSchedule.length : 0;
     });
 
     const matchups = getMergedRound(state.schedules, newIndices);
 
-    const nextBoxingIdx = state.boxingGoalIndex + 1;
-    const nextMuayThaiIdx = state.muayThaiGoalIndex + 1;
+    const nextBoxingIdx = (state.boxingGoalIndex ?? 0) + 1;
+    const nextMuayThaiIdx = (state.muayThaiGoalIndex ?? 0) + 1;
 
     const nextBoxingGoal = state.doBoxing
       ? getGoalAtIndex(state.allBoxingGoals, nextBoxingIdx)
-      : null;
+      : { text: "", isNeutral: true };
 
     const nextMuayThaiGoal = state.doMuayThai
       ? getGoalAtIndex(state.allMuayThaiGoals, nextMuayThaiIdx)
-      : null;
+      : { text: "", isNeutral: true };
 
     return {
       matchups,
       roundIndices: newIndices,
       nextBoxingGoalIndex: nextBoxingIdx,
       nextMuayThaiGoalIndex: nextMuayThaiIdx,
-      boxingGoal: nextBoxingGoal?.text || "",
-      muayThaiGoal: nextMuayThaiGoal?.text || "",
-      boxingGoalIsNeutral: nextBoxingGoal?.isNeutral ?? true,
-      muayThaiGoalIsNeutral: nextMuayThaiGoal?.isNeutral ?? true,
+      boxingGoal: nextBoxingGoal.text || "",
+      muayThaiGoal: nextMuayThaiGoal.text || "",
+      boxingGoalIsNeutral: nextBoxingGoal.isNeutral ?? true,
+      muayThaiGoalIsNeutral: nextMuayThaiGoal.isNeutral ?? true,
     };
   }, []);
 
@@ -188,12 +193,49 @@ export function useSessionState() {
       schedules = newSchedules;
     }
 
-    const matchups = getMergedRound(schedules, newIndices);
+    const currentMatchups =
+      prev.nextMatchups && prev.nextMatchups.length > 0
+        ? prev.nextMatchups
+        : getMergedRound(schedules, newIndices);
 
-    const newBoxingGoalIndex =
-      prev.nextBoxingGoalIndex ?? prev.boxingGoalIndex + 1;
-    const newMuayThaiGoalIndex =
-      prev.nextMuayThaiGoalIndex ?? prev.muayThaiGoalIndex + 1;
+    const followingIndices = { ...newIndices };
+    Object.keys(schedules).forEach((div) => {
+      const divSchedule = schedules[div];
+      followingIndices[div] =
+        divSchedule && divSchedule.length > 0
+          ? ((newIndices[div] ?? 0) + 1) % divSchedule.length
+          : 0;
+    });
+    const followingMatchups = getMergedRound(schedules, followingIndices);
+
+    const currentBoxingGoalIndex =
+      prev.nextBoxingGoalIndex !== undefined
+        ? prev.nextBoxingGoalIndex
+        : (prev.boxingGoalIndex ?? 0) + 1;
+
+    const currentMuayThaiGoalIndex =
+      prev.nextMuayThaiGoalIndex !== undefined
+        ? prev.nextMuayThaiGoalIndex
+        : (prev.muayThaiGoalIndex ?? 0) + 1;
+
+    const currentBoxingGoalObj = prev.doBoxing
+      ? getGoalAtIndex(prev.allBoxingGoals, currentBoxingGoalIndex)
+      : { text: "", isNeutral: true };
+
+    const currentMuayThaiGoalObj = prev.doMuayThai
+      ? getGoalAtIndex(prev.allMuayThaiGoals, currentMuayThaiGoalIndex)
+      : { text: "", isNeutral: true };
+
+    const followingBoxingGoalIndex = currentBoxingGoalIndex + 1;
+    const followingMuayThaiGoalIndex = currentMuayThaiGoalIndex + 1;
+
+    const followingBoxingGoalObj = prev.doBoxing
+      ? getGoalAtIndex(prev.allBoxingGoals, followingBoxingGoalIndex)
+      : { text: "", isNeutral: true };
+
+    const followingMuayThaiGoalObj = prev.doMuayThai
+      ? getGoalAtIndex(prev.allMuayThaiGoals, followingMuayThaiGoalIndex)
+      : { text: "", isNeutral: true };
 
     return {
       ...prev,
@@ -202,37 +244,39 @@ export function useSessionState() {
       timeLeft: prev.roundTime,
       roundIndices: newIndices,
       globalRound: prev.globalRound + 1,
-      matchups,
+      matchups: currentMatchups,
       schedules,
 
-      boxingGoalIndex: newBoxingGoalIndex,
-      muayThaiGoalIndex: newMuayThaiGoalIndex,
-      nextBoxingGoalIndex: undefined,
-      nextMuayThaiGoalIndex: undefined,
+      boxingGoalIndex: currentBoxingGoalIndex,
+      muayThaiGoalIndex: currentMuayThaiGoalIndex,
+      nextBoxingGoalIndex: followingBoxingGoalIndex,
+      nextMuayThaiGoalIndex: followingMuayThaiGoalIndex,
 
-      boxingGoal: prev.doBoxing
-        ? prev.nextBoxingGoal || prev.boxingGoal || ""
-        : "",
-      muayThaiGoal: prev.doMuayThai
-        ? prev.nextMuayThaiGoal || prev.muayThaiGoal || ""
-        : "",
+      boxingGoal: prev.doBoxing ? currentBoxingGoalObj.text || "" : "",
+      muayThaiGoal: prev.doMuayThai ? currentMuayThaiGoalObj.text || "" : "",
 
       boxingGoalIsNeutral: prev.doBoxing
-        ? prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral ?? true
+        ? currentBoxingGoalObj.isNeutral ?? true
         : true,
       muayThaiGoalIsNeutral: prev.doMuayThai
-        ? prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral ?? true
+        ? currentMuayThaiGoalObj.isNeutral ?? true
         : true,
 
       boxingRolesFlipped: false,
       muayThaiRolesFlipped: false,
       pendingSwitchSound: null,
 
-      nextBoxingGoal: "",
-      nextMuayThaiGoal: "",
-      nextBoxingGoalIsNeutral: true,
-      nextMuayThaiGoalIsNeutral: true,
-      nextMatchups: [],
+      nextBoxingGoal: prev.doBoxing ? followingBoxingGoalObj.text || "" : "",
+      nextMuayThaiGoal: prev.doMuayThai
+        ? followingMuayThaiGoalObj.text || ""
+        : "",
+      nextBoxingGoalIsNeutral: prev.doBoxing
+        ? followingBoxingGoalObj.isNeutral ?? true
+        : true,
+      nextMuayThaiGoalIsNeutral: prev.doMuayThai
+        ? followingMuayThaiGoalObj.isNeutral ?? true
+        : true,
+      nextMatchups: followingMatchups,
       timerKey: timerKeyRef.current,
     };
   }
@@ -244,6 +288,7 @@ export function useSessionState() {
       session.status === "warmup"
     ) {
       if (timerRef.current) clearInterval(timerRef.current);
+
       timerRef.current = setInterval(() => {
         setSession((prev) => {
           if (prev.timeLeft <= 1) {
@@ -268,7 +313,7 @@ export function useSessionState() {
                 return advanceRound(prev);
               }
 
-              const nextData = getNextRoundData(prev);
+              const nextData = buildQueuedNextRoundData(prev);
 
               return {
                 ...prev,
@@ -278,26 +323,12 @@ export function useSessionState() {
                 nextMatchups: nextData.matchups,
                 nextBoxingGoalIndex: nextData.nextBoxingGoalIndex,
                 nextMuayThaiGoalIndex: nextData.nextMuayThaiGoalIndex,
-                nextBoxingGoal:
-                  nextData.boxingGoal ||
-                  prev.nextBoxingGoal ||
-                  prev.boxingGoal ||
-                  "",
-                nextMuayThaiGoal:
-                  nextData.muayThaiGoal ||
-                  prev.nextMuayThaiGoal ||
-                  prev.muayThaiGoal ||
-                  "",
+                nextBoxingGoal: nextData.boxingGoal || "",
+                nextMuayThaiGoal: nextData.muayThaiGoal || "",
                 nextBoxingGoalIsNeutral:
-                  nextData.boxingGoalIsNeutral ??
-                  prev.nextBoxingGoalIsNeutral ??
-                  prev.boxingGoalIsNeutral ??
-                  true,
+                  nextData.boxingGoalIsNeutral ?? true,
                 nextMuayThaiGoalIsNeutral:
-                  nextData.muayThaiGoalIsNeutral ??
-                  prev.nextMuayThaiGoalIsNeutral ??
-                  prev.muayThaiGoalIsNeutral ??
-                  true,
+                  nextData.muayThaiGoalIsNeutral ?? true,
               };
             }
 
@@ -322,9 +353,13 @@ export function useSessionState() {
             nextTimeLeft === midpoint;
 
           let pendingSwitchSound = null;
-          if (boxingNeedsSwitch && muayThaiNeedsSwitch) pendingSwitchSound = "both";
-          else if (boxingNeedsSwitch) pendingSwitchSound = "boxing";
-          else if (muayThaiNeedsSwitch) pendingSwitchSound = "muay_thai";
+          if (boxingNeedsSwitch && muayThaiNeedsSwitch) {
+            pendingSwitchSound = "both";
+          } else if (boxingNeedsSwitch) {
+            pendingSwitchSound = "boxing";
+          } else if (muayThaiNeedsSwitch) {
+            pendingSwitchSound = "muay_thai";
+          }
 
           return {
             ...prev,
@@ -344,7 +379,7 @@ export function useSessionState() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [session.status, session.phase, session.timerKey, getNextRoundData]);
+  }, [session.status, session.phase, session.timerKey, buildQueuedNextRoundData]);
 
   const actions = {
     updateSettings: (updates) => {
@@ -374,10 +409,25 @@ export function useSessionState() {
 
       const startBoxingGoal = doBoxing
         ? getGoalAtIndex(session.allBoxingGoals, 0)
-        : null;
+        : { text: "", isNeutral: true };
+
       const startMuayThaiGoal = doMuayThai
         ? getGoalAtIndex(session.allMuayThaiGoals, 0)
-        : null;
+        : { text: "", isNeutral: true };
+
+      const queuedNextBoxingGoal = doBoxing
+        ? getGoalAtIndex(session.allBoxingGoals, 1)
+        : { text: "", isNeutral: true };
+
+      const queuedNextMuayThaiGoal = doMuayThai
+        ? getGoalAtIndex(session.allMuayThaiGoals, 1)
+        : { text: "", isNeutral: true };
+
+      const round2Indices = {};
+      Object.keys(schedules).forEach((div) => {
+        round2Indices[div] = 1 % schedules[div].length;
+      });
+      const nextMatchups = getMergedRound(schedules, round2Indices);
 
       setSession((prev) => ({
         ...prev,
@@ -390,39 +440,44 @@ export function useSessionState() {
         globalRound: 1,
         timeLeft: 20,
         matchups,
+        nextMatchups,
 
         doBoxing,
         doMuayThai,
 
         boxingGoalIndex: 0,
         muayThaiGoalIndex: 0,
-        nextBoxingGoalIndex: undefined,
-        nextMuayThaiGoalIndex: undefined,
+        nextBoxingGoalIndex: 1,
+        nextMuayThaiGoalIndex: 1,
 
         boxingGoal: doBoxing
-          ? startBoxingGoal?.text || boxingGoal || ""
+          ? startBoxingGoal.text || boxingGoal || ""
           : "",
         muayThaiGoal: doMuayThai
-          ? startMuayThaiGoal?.text || muayThaiGoal || ""
+          ? startMuayThaiGoal.text || muayThaiGoal || ""
           : "",
 
         boxingGoalIsNeutral: doBoxing
-          ? startBoxingGoal?.isNeutral ?? true
+          ? startBoxingGoal.isNeutral ?? true
           : true,
         muayThaiGoalIsNeutral: doMuayThai
-          ? startMuayThaiGoal?.isNeutral ?? true
+          ? startMuayThaiGoal.isNeutral ?? true
           : true,
 
-        nextBoxingGoal: "",
-        nextMuayThaiGoal: "",
-        nextBoxingGoalIsNeutral: true,
-        nextMuayThaiGoalIsNeutral: true,
+        nextBoxingGoal: doBoxing ? queuedNextBoxingGoal.text || "" : "",
+        nextMuayThaiGoal: doMuayThai
+          ? queuedNextMuayThaiGoal.text || ""
+          : "",
+        nextBoxingGoalIsNeutral: doBoxing
+          ? queuedNextBoxingGoal.isNeutral ?? true
+          : true,
+        nextMuayThaiGoalIsNeutral: doMuayThai
+          ? queuedNextMuayThaiGoal.isNeutral ?? true
+          : true,
 
         boxingRolesFlipped: false,
         muayThaiRolesFlipped: false,
         pendingSwitchSound: null,
-
-        nextMatchups: [],
       }));
     },
 
@@ -475,21 +530,25 @@ export function useSessionState() {
       }));
     },
 
-clearSetup: () => {
-  localStorage.removeItem(STORAGE_KEY);
-  setSession((prev) => ({
-    ...DEFAULT_STATE,
-    allBoxingGoals: prev.allBoxingGoals,
-    allMuayThaiGoals: prev.allMuayThaiGoals,
-  }));
-},
+    clearSetup: () => {
+      localStorage.removeItem(STORAGE_KEY);
+      setSession((prev) => ({
+        ...DEFAULT_STATE,
+        allBoxingGoals: prev.allBoxingGoals,
+        allMuayThaiGoals: prev.allMuayThaiGoals,
+      }));
+    },
 
     nextRound: () => {
       setSession((prev) => {
         if (timerRef.current) clearInterval(timerRef.current);
 
         if (prev.phase === "round") {
-          const nextData = getNextRoundData(prev);
+          if (prev.restTime === 0) {
+            return advanceRound(prev);
+          }
+
+          const nextData = buildQueuedNextRoundData(prev);
 
           return {
             ...prev,
@@ -499,26 +558,12 @@ clearSetup: () => {
             nextMatchups: nextData.matchups,
             nextBoxingGoalIndex: nextData.nextBoxingGoalIndex,
             nextMuayThaiGoalIndex: nextData.nextMuayThaiGoalIndex,
-            nextBoxingGoal:
-              nextData.boxingGoal ||
-              prev.nextBoxingGoal ||
-              prev.boxingGoal ||
-              "",
-            nextMuayThaiGoal:
-              nextData.muayThaiGoal ||
-              prev.nextMuayThaiGoal ||
-              prev.muayThaiGoal ||
-              "",
+            nextBoxingGoal: nextData.boxingGoal || "",
+            nextMuayThaiGoal: nextData.muayThaiGoal || "",
             nextBoxingGoalIsNeutral:
-              nextData.boxingGoalIsNeutral ??
-              prev.nextBoxingGoalIsNeutral ??
-              prev.boxingGoalIsNeutral ??
-              true,
+              nextData.boxingGoalIsNeutral ?? true,
             nextMuayThaiGoalIsNeutral:
-              nextData.muayThaiGoalIsNeutral ??
-              prev.nextMuayThaiGoalIsNeutral ??
-              prev.muayThaiGoalIsNeutral ??
-              true,
+              nextData.muayThaiGoalIsNeutral ?? true,
           };
         }
 
@@ -550,8 +595,17 @@ clearSetup: () => {
         });
 
         const matchups = getMergedRound(prev.schedules, newIndices);
+
         const prevBoxingIdx = Math.max(0, (prev.boxingGoalIndex ?? 0) - 1);
         const prevMuayThaiIdx = Math.max(0, (prev.muayThaiGoalIndex ?? 0) - 1);
+
+        const prevBoxingGoalObj = prev.doBoxing
+          ? getGoalAtIndex(prev.allBoxingGoals, prevBoxingIdx)
+          : { text: "", isNeutral: true };
+
+        const prevMuayThaiGoalObj = prev.doMuayThai
+          ? getGoalAtIndex(prev.allMuayThaiGoals, prevMuayThaiIdx)
+          : { text: "", isNeutral: true };
 
         return {
           ...prev,
@@ -563,12 +617,14 @@ clearSetup: () => {
           matchups,
           boxingGoalIndex: prevBoxingIdx,
           muayThaiGoalIndex: prevMuayThaiIdx,
-          boxingGoal: prev.nextBoxingGoal || prev.boxingGoal,
-          muayThaiGoal: prev.nextMuayThaiGoal || prev.muayThaiGoal,
-          boxingGoalIsNeutral:
-            prev.nextBoxingGoalIsNeutral ?? prev.boxingGoalIsNeutral,
-          muayThaiGoalIsNeutral:
-            prev.nextMuayThaiGoalIsNeutral ?? prev.muayThaiGoalIsNeutral,
+          boxingGoal: prev.doBoxing ? prevBoxingGoalObj.text || "" : "",
+          muayThaiGoal: prev.doMuayThai ? prevMuayThaiGoalObj.text || "" : "",
+          boxingGoalIsNeutral: prev.doBoxing
+            ? prevBoxingGoalObj.isNeutral ?? true
+            : true,
+          muayThaiGoalIsNeutral: prev.doMuayThai
+            ? prevMuayThaiGoalObj.isNeutral ?? true
+            : true,
           boxingRolesFlipped: false,
           muayThaiRolesFlipped: false,
           pendingSwitchSound: null,
@@ -591,21 +647,25 @@ clearSetup: () => {
 
     complete: () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      setSession((prev) => ({ ...prev, status: "complete", pendingSwitchSound: null }));
+      setSession((prev) => ({
+        ...prev,
+        status: "complete",
+        pendingSwitchSound: null,
+      }));
     },
 
     clearPendingSwitchSound: () => {
       setSession((prev) => ({ ...prev, pendingSwitchSound: null }));
     },
 
- clearSession: () => {
-  localStorage.removeItem(STORAGE_KEY);
-  setSession((prev) => ({
-    ...DEFAULT_STATE,
-    allBoxingGoals: prev.allBoxingGoals,
-    allMuayThaiGoals: prev.allMuayThaiGoals,
-  }));
-},
+    clearSession: () => {
+      localStorage.removeItem(STORAGE_KEY);
+      setSession((prev) => ({
+        ...DEFAULT_STATE,
+        allBoxingGoals: prev.allBoxingGoals,
+        allMuayThaiGoals: prev.allMuayThaiGoals,
+      }));
+    },
 
     updateDivisionTexts: (divisionTexts) => {
       setSession((prev) => ({ ...prev, divisionTexts }));
