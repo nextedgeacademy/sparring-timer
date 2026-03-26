@@ -133,28 +133,6 @@ useEffect(() => {
     playSwitchSound();
   }, [session.pendingSwitchSound, actions]);
 
-  if (isComplete) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="space-y-6"
-        >
-          <h1 className="text-5xl font-black text-white">SESSION COMPLETE</h1>
-          <p className="text-white/50 text-lg">Great work today!</p>
-          <Button
-            onClick={actions.clearSession}
-            size="lg"
-            className="bg-white text-gray-950 hover:bg-gray-100 font-bold gap-2"
-          >
-            <RotateCcw className="w-5 h-5" /> New Session
-          </Button>
-        </motion.div>
-      </div>
-    );
-  }
-
   // Warm-up runner: fetch template when entering brackets_preview with warmup enabled
   useEffect(() => {
     if (session.status === "brackets_preview" && session.useWarmup && session.selectedWarmupId && !warmupSegments) {
@@ -182,6 +160,28 @@ useEffect(() => {
   function handleSkipWarmup() {
     setWarmupSegments(null);
     actions.startWarmup();
+  }
+
+  if (isComplete) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="space-y-6"
+        >
+          <h1 className="text-5xl font-black text-white">SESSION COMPLETE</h1>
+          <p className="text-white/50 text-lg">Great work today!</p>
+          <Button
+            onClick={actions.clearSession}
+            size="lg"
+            className="bg-white text-gray-950 hover:bg-gray-100 font-bold gap-2"
+          >
+            <RotateCcw className="w-5 h-5" /> New Session
+          </Button>
+        </motion.div>
+      </div>
+    );
   }
 
   if (session.status === "brackets_preview" && warmupSegments) {
