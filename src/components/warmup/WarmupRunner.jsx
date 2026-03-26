@@ -134,6 +134,13 @@ export default function WarmupRunner({ segments, autoAdvance, onComplete, onSkip
           {fmt(timeLeft)}
         </motion.div>
 
+        {/* Up Next (shown during rest) */}
+        {!isWork && segments[idx + 1] && (
+          <div className="text-white/50 text-xl">
+            Up Next: <span className="text-white font-bold">{segments[idx + 1].blockTitle}</span>
+          </div>
+        )}
+
         {/* Notes */}
         {segment.notes && (
           <p className="text-white/40 text-lg italic max-w-lg mx-auto">{segment.notes}</p>
