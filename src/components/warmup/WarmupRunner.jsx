@@ -128,7 +128,7 @@ export default function WarmupRunner({ segments, autoAdvance, onComplete, onSkip
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="text-9xl font-black text-white leading-tight"
+              className="text-8xl font-black text-white leading-tight"
             >
               {segment.blockTitle}
             </motion.h1>
@@ -148,7 +148,7 @@ export default function WarmupRunner({ segments, autoAdvance, onComplete, onSkip
 
           {/* Up Next (shown during rest) */}
           {!isWork && segments[idx + 1] && (
-            <div className="text-white/50 text-xl">
+            <div className="text-white/50 text-5xl">
               Up Next: <span className="text-white font-bold">{segments[idx + 1].blockTitle}</span>
             </div>
           )}
