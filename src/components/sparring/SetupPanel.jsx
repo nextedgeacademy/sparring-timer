@@ -185,6 +185,67 @@ export default function SetupPanel({ session, actions }) {
         </div>
       </div>
 
+      {/* Warm-Up Section */}
+      <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Flame className="w-5 h-5 text-orange-400" /> Warm-Up
+          </h2>
+          <div className="flex items-center gap-2">
+            <span className="text-white/40 text-sm">Use warm-up before session</span>
+            <Switch
+              checked={useWarmup}
+              onCheckedChange={(v) => actions.updateSettings({ useWarmup: v })}
+            />
+          </div>
+        </div>
+
+        {useWarmup && (
+          <div className="space-y-3">
+            <div className="flex gap-2 items-center">
+              <Select
+                value={selectedWarmupId || ""}
+                onValueChange={(v) => actions.updateSettings({ selectedWarmupId: v || null })}
+              >
+                <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
+                  <SelectValue placeholder="Select a warm-up template…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warmupTemplates.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Link to="/WarmupBuilder">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/5 border-white/20 text-white/60 hover:text-white gap-1 shrink-0"
+                >
+                  <Settings2 className="w-3 h-3" /> Manage
+                </Button>
+              </Link>
+            </div>
+            {selectedWarmup && (
+              <div className="text-white/40 text-sm">
+                ~{formatDuration(calcTotalTime(selectedWarmup))} ·{" "}
+                {(selectedWarmup.blocks || []).filter((b) => b.enabled !== false).length} blocks
+              </div>
+            )}
+            {warmupTemplates.length === 0 && (
+              <p className="text-white/30 text-sm">
+                No templates yet.{" "}
+                <Link to="/WarmupBuilder" className="text-orange-400 underline">
+                  Create one
+                </Link>
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Timer Settings */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
         <h2 className="text-lg font-bold text-white">Timer Settings</h2>
@@ -398,67 +459,6 @@ export default function SetupPanel({ session, actions }) {
             <SelectItem value="reshuffle">Reshuffle Each Cycle</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      {/* Warm-Up Section */}
-      <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Flame className="w-5 h-5 text-orange-400" /> Warm-Up
-          </h2>
-          <div className="flex items-center gap-2">
-            <span className="text-white/40 text-sm">Use warm-up before session</span>
-            <Switch
-              checked={useWarmup}
-              onCheckedChange={(v) => actions.updateSettings({ useWarmup: v })}
-            />
-          </div>
-        </div>
-
-        {useWarmup && (
-          <div className="space-y-3">
-            <div className="flex gap-2 items-center">
-              <Select
-                value={selectedWarmupId || ""}
-                onValueChange={(v) => actions.updateSettings({ selectedWarmupId: v || null })}
-              >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
-                  <SelectValue placeholder="Select a warm-up template…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {warmupTemplates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Link to="/WarmupBuilder">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/5 border-white/20 text-white/60 hover:text-white gap-1 shrink-0"
-                >
-                  <Settings2 className="w-3 h-3" /> Manage
-                </Button>
-              </Link>
-            </div>
-            {selectedWarmup && (
-              <div className="text-white/40 text-sm">
-                ~{formatDuration(calcTotalTime(selectedWarmup))} ·{" "}
-                {(selectedWarmup.blocks || []).filter((b) => b.enabled !== false).length} blocks
-              </div>
-            )}
-            {warmupTemplates.length === 0 && (
-              <p className="text-white/30 text-sm">
-                No templates yet.{" "}
-                <Link to="/WarmupBuilder" className="text-orange-400 underline">
-                  Create one
-                </Link>
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Actions */}
