@@ -20,8 +20,8 @@ import { calcTotalTime, formatDuration } from "../warmup/warmupUtils";
 export default function SetupPanel({ session, actions }) {
   const divisionTexts = session.divisionTexts || ["", "", ""];
   const divisionCount = session.divisionCount || 1;
-  const roundTime = session.roundTime || 180;
-  const restTime = session.restTime || 30;
+  const roundTime = session.roundTime || 120;
+  const restTime = session.restTime || 20;
 
   const doBoxing = session.doBoxing ?? false;
   const doMuayThai = session.doMuayThai ?? false;

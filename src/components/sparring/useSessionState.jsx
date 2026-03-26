@@ -44,9 +44,9 @@ const DEFAULT_STATE = {
   schedules: {},
   roundIndices: {},
   globalRound: 1,
-  roundTime: 180,
-  restTime: 30,
-  timeLeft: 180,
+  roundTime: 120,
+  restTime: 20,
+  timeLeft: 120,
   phase: "round",
 
   doBoxing: false,
