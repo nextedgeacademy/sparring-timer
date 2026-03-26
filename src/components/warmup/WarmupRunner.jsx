@@ -118,7 +118,7 @@ export default function WarmupRunner({ segments, autoAdvance, onComplete, onSkip
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="text-5xl font-black text-white leading-tight"
+              className="text-9xl font-black text-white leading-tight"
             >
               {segment.blockTitle}
             </motion.h1>
@@ -129,7 +129,7 @@ export default function WarmupRunner({ segments, autoAdvance, onComplete, onSkip
             key={timeLeft}
             initial={{ scale: 1.05 }}
             animate={{ scale: 1 }}
-            className={`text-8xl font-black tabular-nums ${
+            className={`text-[12rem] font-black tabular-nums leading-none ${
               timeLeft <= 5 && isWork ? "text-red-400" : timeLeft <= 5 ? "text-blue-400" : "text-white"
             }`}
           >
