@@ -51,6 +51,8 @@ const DEFAULT_STATE = {
 
   doBoxing: false,
   doMuayThai: false,
+  useWarmup: false,
+  selectedWarmupId: null,
 
   boxingGoal: "",
   muayThaiGoal: "",

@@ -1,20 +1,25 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import { useSessionState } from "../components/sparring/useSessionState";
 import SetupPanel from "../components/sparring/SetupPanel";
 import SessionControls from "../components/sparring/SessionControls";
 import MatchupGrid from "../components/sparring/MatchupGrid";
 import GoalDisplay from "../components/sparring/GoalDisplay";
 import BracketsPreview from "../components/sparring/BracketsPreview";
+import WarmupRunner from "../components/warmup/WarmupRunner";
 import { Button } from "@/components/ui/button";
 import { Settings, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { base44 } from "@/api/base44Client";
+import { buildSegments } from "../components/warmup/warmupUtils";
 
 export default function Home() {
   const { session, actions } = useSessionState();
   const prevStatusRef = useRef(session.status);
   const prevPhaseRef = useRef(session.phase);
+  const [warmupSegments, setWarmupSegments] = useState(null);
+  const [showTransition, setShowTransition] = useState(false);
 
   const roundStartAudioRef = useRef(null);
   const roundEndAudioRef = useRef(null);
@@ -145,6 +150,61 @@ useEffect(() => {
           >
             <RotateCcw className="w-5 h-5" /> New Session
           </Button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Warm-up runner: fetch template when entering brackets_preview with warmup enabled
+  useEffect(() => {
+    if (session.status === "brackets_preview" && session.useWarmup && session.selectedWarmupId && !warmupSegments) {
+      base44.entities.WarmupTemplate.list().then((all) => {
+        const template = all.find((t) => t.id === session.selectedWarmupId);
+        if (template) {
+          const segs = buildSegments(template);
+          if (segs.length > 0) {
+            setWarmupSegments(segs);
+          }
+        }
+      }).catch(() => {});
+    }
+  }, [session.status, session.useWarmup, session.selectedWarmupId]);
+
+  function handleWarmupComplete() {
+    setWarmupSegments(null);
+    setShowTransition(true);
+    setTimeout(() => {
+      setShowTransition(false);
+      actions.startWarmup();
+    }, 3000);
+  }
+
+  function handleSkipWarmup() {
+    setWarmupSegments(null);
+    actions.startWarmup();
+  }
+
+  if (session.status === "brackets_preview" && warmupSegments) {
+    return (
+      <WarmupRunner
+        segments={warmupSegments}
+        autoAdvance={true}
+        onComplete={handleWarmupComplete}
+        onSkipWarmup={handleSkipWarmup}
+      />
+    );
+  }
+
+  if (showTransition) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-4"
+        >
+          <div className="text-6xl font-black text-white">GET READY</div>
+          <div className="text-white/40 text-xl">Round Robin Starting…</div>
         </motion.div>
       </div>
     );

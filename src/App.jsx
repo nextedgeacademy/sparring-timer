@@ -5,6 +5,7 @@ import { pagesConfig } from "./pages.config";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import PageNotFound from "./lib/PageNotFound";
 import AthleteManager from "./pages/AthleteManager";
+import WarmupBuilder from "./pages/WarmupBuilder";
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -44,6 +45,14 @@ const AppRoutes = () => {
         element={
           <LayoutWrapper currentPageName="AthleteManager">
             <AthleteManager />
+          </LayoutWrapper>
+        }
+      />
+      <Route
+        path="/WarmupBuilder"
+        element={
+          <LayoutWrapper currentPageName="WarmupBuilder">
+            <WarmupBuilder />
           </LayoutWrapper>
         }
       />
