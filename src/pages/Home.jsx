@@ -184,6 +184,20 @@ useEffect(() => {
     );
   }
 
+  function handleBackToWarmup() {
+    if (session.useWarmup && session.selectedWarmupId) {
+      base44.entities.WarmupTemplate.list().then((all) => {
+        const template = all.find((t) => t.id === session.selectedWarmupId);
+        if (template) {
+          const segs = buildSegments(template);
+          if (segs.length > 0) {
+            setWarmupSegments(segs);
+          }
+        }
+      }).catch(() => {});
+    }
+  }
+
   if (session.status === "brackets_preview" && warmupSegments) {
     return (
       <WarmupRunner
@@ -211,7 +225,7 @@ useEffect(() => {
   }
 
   if (session.status === "brackets_preview") {
-    return <BracketsPreview session={session} actions={actions} />;
+    return <BracketsPreview session={session} actions={actions} onBackToWarmup={session.useWarmup && session.selectedWarmupId ? handleBackToWarmup : null} />;
   }
 
   if (!isActive) {

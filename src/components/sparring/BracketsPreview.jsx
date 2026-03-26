@@ -1,11 +1,11 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowLeft } from "lucide-react";
+import { Play, ArrowLeft, Flame } from "lucide-react";
 import MatchupGrid from "./MatchupGrid";
 import GoalDisplay from "./GoalDisplay";
 import { motion } from "framer-motion";
 
-export default function BracketsPreview({ session, actions }) {
+export default function BracketsPreview({ session, actions, onBackToWarmup }) {
   const isWarmup = session.status === "warmup";
 
   if (session.status !== "brackets_preview" && !isWarmup) return null;
@@ -45,7 +45,7 @@ export default function BracketsPreview({ session, actions }) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center gap-3"
+            className="flex justify-center gap-3 flex-wrap"
           >
             <Button
               onClick={actions.clearSession}
@@ -56,6 +56,18 @@ export default function BracketsPreview({ session, actions }) {
               <ArrowLeft className="w-5 h-5" />
               Back
             </Button>
+
+            {onBackToWarmup && (
+              <Button
+                onClick={onBackToWarmup}
+                size="lg"
+                variant="outline"
+                className="border-orange-500/40 bg-orange-500/10 text-orange-300 hover:bg-orange-500/20 gap-2 px-6"
+              >
+                <Flame className="w-5 h-5" />
+                Back to Warm-Up
+              </Button>
+            )}
 
             <Button
               onClick={actions.startWarmup}
