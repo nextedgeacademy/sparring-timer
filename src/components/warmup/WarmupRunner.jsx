@@ -15,12 +15,22 @@ export default function WarmupRunner({ segments, autoAdvance, onComplete, onSkip
   const [paused, setPaused] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
   const timerRef = useRef(null);
+  const workAudioRef = useRef(new Audio("https://nextedgeacademy.b-cdn.net/Audio/Gong3.mp3"));
+  const restAudioRef = useRef(new Audio("https://nextedgeacademy.b-cdn.net/Audio/Gong.mp3"));
 
   const segment = segments[idx] || null;
 
-  // Reset timer when segment changes
+  // Reset timer and play sound when segment changes
   useEffect(() => {
-    if (segment) setTimeLeft(segment.duration);
+    if (!segment) return;
+    setTimeLeft(segment.duration);
+    if (segment.type === "work") {
+      workAudioRef.current.currentTime = 0;
+      workAudioRef.current.play().catch(() => {});
+    } else {
+      restAudioRef.current.currentTime = 0;
+      restAudioRef.current.play().catch(() => {});
+    }
   }, [idx]);
 
   useEffect(() => {
