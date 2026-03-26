@@ -131,6 +131,60 @@ export default function SetupPanel({ session, actions }) {
         <p className="text-white/50 text-sm">Round Robin Timer</p>
       </div>
 
+      {/* Sports Selection */}
+      <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white">Sports</h2>
+        <p className="text-white/40 text-sm">
+          Select which disciplines will be used this session.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div
+            onClick={() => setDoBoxing(!doBoxing)}
+            className={`flex-1 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+              doBoxing
+                ? "bg-red-500/15 border-red-500/50"
+                : "bg-white/5 border-white/10 opacity-50"
+            }`}
+          >
+            <span className="text-3xl">🥊</span>
+            <div className="flex-1">
+              <div className="text-white font-bold">Boxing</div>
+              <div className="text-white/40 text-xs">
+                Boxing goals & role switching
+              </div>
+            </div>
+            <Switch
+              checked={doBoxing}
+              onCheckedChange={setDoBoxing}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+
+          <div
+            onClick={() => setDoMuayThai(!doMuayThai)}
+            className={`flex-1 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
+              doMuayThai
+                ? "bg-blue-500/15 border-blue-500/50"
+                : "bg-white/5 border-white/10 opacity-50"
+            }`}
+          >
+            <span className="text-3xl">🦵</span>
+            <div className="flex-1">
+              <div className="text-white font-bold">Muay Thai</div>
+              <div className="text-white/40 text-xs">
+                Muay Thai goals & role switching
+              </div>
+            </div>
+            <Switch
+              checked={doMuayThai}
+              onCheckedChange={setDoMuayThai}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Timer Settings */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
         <h2 className="text-lg font-bold text-white">Timer Settings</h2>
@@ -325,60 +379,6 @@ export default function SetupPanel({ session, actions }) {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Sports Selection */}
-      <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white">Sports</h2>
-        <p className="text-white/40 text-sm">
-          Select which disciplines will be used this session.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div
-            onClick={() => setDoBoxing(!doBoxing)}
-            className={`flex-1 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-              doBoxing
-                ? "bg-red-500/15 border-red-500/50"
-                : "bg-white/5 border-white/10 opacity-50"
-            }`}
-          >
-            <span className="text-3xl">🥊</span>
-            <div className="flex-1">
-              <div className="text-white font-bold">Boxing</div>
-              <div className="text-white/40 text-xs">
-                Boxing goals & role switching
-              </div>
-            </div>
-            <Switch
-              checked={doBoxing}
-              onCheckedChange={setDoBoxing}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-
-          <div
-            onClick={() => setDoMuayThai(!doMuayThai)}
-            className={`flex-1 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-              doMuayThai
-                ? "bg-blue-500/15 border-blue-500/50"
-                : "bg-white/5 border-white/10 opacity-50"
-            }`}
-          >
-            <span className="text-3xl">🦵</span>
-            <div className="flex-1">
-              <div className="text-white font-bold">Muay Thai</div>
-              <div className="text-white/40 text-xs">
-                Muay Thai goals & role switching
-              </div>
-            </div>
-            <Switch
-              checked={doMuayThai}
-              onCheckedChange={setDoMuayThai}
-              onClick={(e) => e.stopPropagation()}
-            />
           </div>
         </div>
       </div>
