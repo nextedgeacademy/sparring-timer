@@ -58,7 +58,7 @@ function WarmupMatchupPreview({ matchups, boxingGoal, muayThaiGoal }) {
 
       {(boxingGoal || muayThaiGoal) && (
         <div className="space-y-1 border-t border-white/10 pt-2 text-center text-2xl md:text-3xl">
-          {<div className="text-red-400">Boxing: {boxingGoal}</div>}
+          {boxingGoal && <div className="text-red-400">Boxing: {boxingGoal}</div>}
           {muayThaiGoal && (
             <div className="text-blue-400 font-bold">Muay Thai: {muayThaiGoal}</div>
           )}
