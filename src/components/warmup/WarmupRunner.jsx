@@ -9,182 +9,59 @@ function fmt(secs) {
   return `${m}:${s}`;
 }
 
-function parseRoleGoal(goalText) {
-  if (!goalText || typeof goalText !== "string") return null;
-
-  const parts = goalText
-    .split(/\s+vs\.?\s+/i)
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  if (parts.length !== 2) return null;
-
-  return {
-    leftRole: parts[0],
-    rightRole: parts[1],
-  };
-}
-
-function getPreviewNames(match) {
-  const athlete1 = match?.athlete1 ?? "";
-  const athlete2 = match?.athlete2 ?? "";
-
-  const isRest =
-    athlete1 === "__REST__" ||
-    athlete2 === "__REST__" ||
-    athlete1 === "REST" ||
-    athlete2 === "REST";
-
-  if (isRest) {
-    const activeName =
-      athlete1 === "__REST__" || athlete1 === "REST" ? athlete2 : athlete1;
-
-    return {
-      leftName: activeName || "Rest Round",
-      rightName: "Rest Round",
-      isRest: true,
-    };
-  }
-
-  return {
-    leftName: athlete1,
-    rightName: athlete2,
-    isRest: false,
-  };
-}
-
-function PreviewRoleCard({ title, goalText, accentClass }) {
-  const parsed = parseRoleGoal(goalText);
-
-  if (!goalText) return null;
-
-  if (!parsed) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-        <div className={`mb-2 text-[10px] font-black uppercase tracking-[0.2em] ${accentClass}`}>
-          {title}
-        </div>
-        <div className="text-xs font-semibold leading-snug text-white">
-          {goalText}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-      <div className={`mb-2 text-[10px] font-black uppercase tracking-[0.2em] ${accentClass}`}>
-        {title}
-      </div>
-
-      <div className="space-y-2 text-xs">
-        <div className="flex items-start justify-between gap-3 rounded-xl bg-white/5 p-2.5">
-          <span className="text-[10px] uppercase tracking-wider text-white/50">
-            Left
-          </span>
-          <span className="text-right font-bold text-white">
-            {parsed.leftRole}
-          </span>
-        </div>
-
-        <div className="flex items-start justify-between gap-3 rounded-xl bg-white/5 p-2.5">
-          <span className="text-[10px] uppercase tracking-wider text-white/50">
-            Right
-          </span>
-          <span className="text-right font-bold text-white">
-            {parsed.rightRole}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function WarmupMatchupPreview({ matchups, boxingGoal, muayThaiGoal }) {
   if (!matchups || matchups.length === 0) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-        <div className="text-base font-bold text-white/70">Round 1 Preview</div>
-        <div className="mt-1 text-xs text-white/40">
-          No round robin names available yet.
-        </div>
+      <div className="w-full text-center">
+        <div className="text-sm text-white/50">No matchups available</div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-      <div className="mb-3">
-        <div className="text-xl font-black leading-none text-white">ROUND 1 PREVIEW</div>
-        <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/45">
-          Matchups during warm-up
+    <div className="w-full space-y-3">
+      <div className="text-center">
+        <div className="text-lg font-bold text-white">ROUND 1</div>
+        <div className="text-xs uppercase tracking-wider text-white/40">
+          Matchups
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-base md:grid-cols-3 md:text-lg xl:grid-cols-4">
         {matchups.map((match, i) => {
-          const { leftName, rightName, isRest } = getPreviewNames(match);
+          const a = match?.athlete1 ?? "";
+          const b = match?.athlete2 ?? "";
+
+          const isRest =
+            a === "__REST__" ||
+            b === "__REST__" ||
+            a === "REST" ||
+            b === "REST";
+
+          if (isRest) {
+            const name = a === "__REST__" || a === "REST" ? b : a;
+
+            return (
+              <div key={i} className="italic text-amber-400">
+                {name} (Rest)
+              </div>
+            );
+          }
 
           return (
-            <motion.div
-              key={`${leftName}-${rightName}-${i}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: i * 0.03 }}
-              className={`rounded-2xl border p-3 ${
-                isRest
-                  ? "border-amber-700/30 bg-amber-950/30"
-                  : "border-green-700/30 bg-green-950/20"
-              }`}
-            >
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] font-black text-white/70">
-                  {i + 1}
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-                  {isRest ? "Rest" : "Match"}
-                </div>
-              </div>
-
-              <div className="min-w-0">
-                <div className="break-words text-base font-bold leading-tight text-white">
-                  {leftName}
-                </div>
-
-                <div
-                  className={`my-1 text-[10px] uppercase tracking-[0.25em] ${
-                    isRest ? "text-amber-400" : "text-green-400"
-                  }`}
-                >
-                  {isRest ? "" : "vs"}
-                </div>
-
-                <div
-                  className={`break-words text-base font-bold leading-tight ${
-                    isRest ? "italic text-amber-300" : "text-white"
-                  }`}
-                >
-                  {rightName}
-                </div>
-              </div>
-            </motion.div>
+            <div key={i} className="text-white/90">
+              {a} vs {b}
+            </div>
           );
         })}
       </div>
 
       {(boxingGoal || muayThaiGoal) && (
-        <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <PreviewRoleCard
-            title="Boxing roles"
-            goalText={boxingGoal}
-            accentClass="text-red-400"
-          />
-
-          <PreviewRoleCard
-            title="Muay Thai roles"
-            goalText={muayThaiGoal}
-            accentClass="text-blue-400"
-          />
+        <div className="space-y-1 border-t border-white/10 pt-2 text-center text-xs">
+          {boxingGoal && <div className="text-red-400">Boxing: {boxingGoal}</div>}
+          {muayThaiGoal && (
+            <div className="text-blue-400">Muay Thai: {muayThaiGoal}</div>
+          )}
         </div>
       )}
     </div>
@@ -285,7 +162,7 @@ export default function WarmupRunner({
   const progress = segment.duration > 0 ? timeLeft / segment.duration : 1;
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="flex min-h-screen flex-col bg-gray-950">
       <div className="flex-1 p-4 lg:p-6">
         <div className="flex h-full flex-col gap-4">
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
