@@ -209,7 +209,7 @@ export default function WarmupRunner({
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    className="text-3xl font-black leading-tight text-white md:text-4xl xl:text-5xl"
+                    className="text-5xl font-black leading-tight text-white md:text-6xl xl:text-7xl"
                   >
                     {segment.blockTitle}
                   </motion.h1>
@@ -219,7 +219,7 @@ export default function WarmupRunner({
                   key={timeLeft}
                   initial={{ scale: 1.05 }}
                   animate={{ scale: 1 }}
-                  className={`tabular-nums text-[4.5rem] font-black leading-none md:text-[6rem] xl:text-[7rem] ${
+                  className={`tabular-nums text-[7rem] font-black leading-none md:text-[9rem] xl:text-[11rem] ${
                     timeLeft <= 5 && isWork
                       ? "text-red-400"
                       : timeLeft <= 5
@@ -231,7 +231,7 @@ export default function WarmupRunner({
                 </motion.div>
 
                 {!isWork && segments[idx + 1] && (
-                  <div className="text-lg text-white/50 md:text-xl xl:text-2xl">
+                  <div className="text-2xl text-white/50 md:text-3xl xl:text-4xl">
                     Up Next:{" "}
                     <span className="font-bold text-white">
                       {segments[idx + 1].blockTitle}
