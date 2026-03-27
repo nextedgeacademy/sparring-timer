@@ -27,7 +27,7 @@ function WarmupMatchupPreview({ matchups, boxingGoal, muayThaiGoal }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-base md:grid-cols-3 md:text-lg xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-lg md:grid-cols-3 md:text-xl xl:grid-cols-4">
         {matchups.map((match, i) => {
           const a = match?.athlete1 ?? "";
           const b = match?.athlete2 ?? "";
