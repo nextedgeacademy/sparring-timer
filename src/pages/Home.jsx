@@ -34,7 +34,13 @@ export default function Home() {
     session.status === "warmup";
 
   const stopAllAudio = useCallback(() => {
-    [roundStartAudioRef, roundEndAudioRef, boxingSwitchAudioRef, muayThaiSwitchAudioRef, bothSwitchAudioRef].forEach((ref) => {
+    [
+      roundStartAudioRef,
+      roundEndAudioRef,
+      boxingSwitchAudioRef,
+      muayThaiSwitchAudioRef,
+      bothSwitchAudioRef,
+    ].forEach((ref) => {
       if (ref.current) {
         ref.current.pause();
         ref.current.currentTime = 0;
@@ -42,7 +48,6 @@ export default function Home() {
     });
   }, []);
 
-  // Complete session only when user closes the window
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isActive) {
@@ -57,35 +62,33 @@ export default function Home() {
 
   const isComplete = session.status === "complete";
 
-useEffect(() => {
+  useEffect(() => {
+    const createAudio = (url) => {
+      const audio = new Audio(url);
+      audio.preload = "auto";
+      return audio;
+    };
 
-  const createAudio = (url) => {
-    const audio = new Audio(url);
-    audio.preload = "auto";
-    return audio;
-  };
+    roundStartAudioRef.current = createAudio(
+      "https://nextedgeacademy.b-cdn.net/Audio/Gong3.mp3"
+    );
 
-  roundStartAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/Gong3.mp3"
-  );
+    roundEndAudioRef.current = createAudio(
+      "https://nextedgeacademy.b-cdn.net/Audio/Gong.mp3"
+    );
 
-  roundEndAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/Gong.mp3"
-  );
+    boxingSwitchAudioRef.current = createAudio(
+      "https://nextedgeacademy.b-cdn.net/Audio/boxingswitch.mp3"
+    );
 
-  boxingSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/boxingswitch.mp3"
-  );
+    muayThaiSwitchAudioRef.current = createAudio(
+      "https://nextedgeacademy.b-cdn.net/Audio/muaythaiswitch.mp3"
+    );
 
-  muayThaiSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/muaythaiswitch.mp3"
-  );
-
-  bothSwitchAudioRef.current = createAudio(
-    "https://nextedgeacademy.b-cdn.net/Audio/Beep.mp3"
-  );
-
-}, []);
+    bothSwitchAudioRef.current = createAudio(
+      "https://nextedgeacademy.b-cdn.net/Audio/Beep.mp3"
+    );
+  }, []);
 
   useEffect(() => {
     const prevStatus = prevStatusRef.current;
@@ -133,20 +136,31 @@ useEffect(() => {
     playSwitchSound();
   }, [session.pendingSwitchSound, actions]);
 
-  // Warm-up runner: fetch template when entering brackets_preview with warmup enabled
   useEffect(() => {
-    if (session.status === "brackets_preview" && session.useWarmup && session.selectedWarmupId && !warmupSegments) {
-      base44.entities.WarmupTemplate.list().then((all) => {
-        const template = all.find((t) => t.id === session.selectedWarmupId);
-        if (template) {
-          const segs = buildSegments(template);
-          if (segs.length > 0) {
-            setWarmupSegments(segs);
+    if (
+      session.status === "brackets_preview" &&
+      session.useWarmup &&
+      session.selectedWarmupId &&
+      !warmupSegments
+    ) {
+      base44.entities.WarmupTemplate.list()
+        .then((all) => {
+          const template = all.find((t) => t.id === session.selectedWarmupId);
+          if (template) {
+            const segs = buildSegments(template);
+            if (segs.length > 0) {
+              setWarmupSegments(segs);
+            }
           }
-        }
-      }).catch(() => {});
+        })
+        .catch(() => {});
     }
-  }, [session.status, session.useWarmup, session.selectedWarmupId]);
+  }, [
+    session.status,
+    session.useWarmup,
+    session.selectedWarmupId,
+    warmupSegments,
+  ]);
 
   function handleWarmupComplete() {
     setWarmupSegments(null);
@@ -162,6 +176,22 @@ useEffect(() => {
     actions.startWarmup();
   }
 
+  function handleBackToWarmup() {
+    if (session.useWarmup && session.selectedWarmupId) {
+      base44.entities.WarmupTemplate.list()
+        .then((all) => {
+          const template = all.find((t) => t.id === session.selectedWarmupId);
+          if (template) {
+            const segs = buildSegments(template);
+            if (segs.length > 0) {
+              setWarmupSegments(segs);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
   if (isComplete) {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 text-center">
@@ -171,31 +201,17 @@ useEffect(() => {
           className="space-y-6"
         >
           <h1 className="text-5xl font-black text-white">SESSION COMPLETE</h1>
-          <p className="text-white/50 text-lg">Great work today!</p>
+          <p className="text-lg text-white/50">Great work today!</p>
           <Button
             onClick={actions.clearSession}
             size="lg"
-            className="bg-white text-gray-950 hover:bg-gray-100 font-bold gap-2"
+            className="gap-2 bg-white font-bold text-gray-950 hover:bg-gray-100"
           >
-            <RotateCcw className="w-5 h-5" /> New Session
+            <RotateCcw className="h-5 w-5" /> New Session
           </Button>
         </motion.div>
       </div>
     );
-  }
-
-  function handleBackToWarmup() {
-    if (session.useWarmup && session.selectedWarmupId) {
-      base44.entities.WarmupTemplate.list().then((all) => {
-        const template = all.find((t) => t.id === session.selectedWarmupId);
-        if (template) {
-          const segs = buildSegments(template);
-          if (segs.length > 0) {
-            setWarmupSegments(segs);
-          }
-        }
-      }).catch(() => {});
-    }
   }
 
   if (session.status === "brackets_preview" && warmupSegments) {
@@ -205,6 +221,9 @@ useEffect(() => {
         autoAdvance={true}
         onComplete={handleWarmupComplete}
         onSkipWarmup={handleSkipWarmup}
+        previewMatchups={session.matchups}
+        boxingGoal={session.doBoxing ? session.boxingGoal || "" : ""}
+        muayThaiGoal={session.doMuayThai ? session.muayThaiGoal || "" : ""}
       />
     );
   }
@@ -215,43 +234,53 @@ useEffect(() => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center space-y-4"
+          className="space-y-4 text-center"
         >
           <div className="text-6xl font-black text-white">GET READY</div>
-          <div className="text-white/40 text-xl">Round Robin Starting…</div>
+          <div className="text-xl text-white/40">Round Robin Starting…</div>
         </motion.div>
       </div>
     );
   }
 
   if (session.status === "brackets_preview") {
-    return <BracketsPreview session={session} actions={actions} onBackToWarmup={session.useWarmup && session.selectedWarmupId ? handleBackToWarmup : null} />;
+    return (
+      <BracketsPreview
+        session={session}
+        actions={actions}
+        onBackToWarmup={
+          session.useWarmup && session.selectedWarmupId
+            ? handleBackToWarmup
+            : null
+        }
+      />
+    );
   }
 
   if (!isActive) {
     return (
       <div className="min-h-screen bg-gray-950">
-        <div className="flex justify-end p-4 gap-2">
+        <div className="flex justify-end gap-2 p-4">
           <Link to={createPageUrl("GoalSettings")}>
             <Button
               variant="outline"
               size="sm"
-              className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600 font-semibold gap-1"
+              className="gap-1 border-gray-600 bg-gray-700 font-semibold text-white hover:bg-gray-600"
             >
-              <Settings className="w-3 h-3" /> Goals & Settings
+              <Settings className="h-3 w-3" /> Goals & Settings
             </Button>
           </Link>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-8 gap-4">
+        <div className="flex flex-col items-center justify-center gap-4 py-8">
           <img
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aaefa79c043dbf1a24d5c7/cb5e094d8_SparringTimerLogoBlackBackground.png"
             alt="Combat Sports Logo"
-            className="w-48 h-48"
+            className="h-48 w-48"
           />
         </div>
 
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="mx-auto max-w-4xl px-6">
           <SetupPanel session={session} actions={actions} />
         </div>
       </div>
@@ -259,6 +288,7 @@ useEffect(() => {
   }
 
   const isWarmup = session.status === "warmup";
+
   const displayMatchups =
     session.phase === "rest"
       ? session.nextMatchups.length > 0
@@ -266,31 +296,31 @@ useEffect(() => {
         : session.matchups
       : session.matchups;
 
-const displayBoxing =
-  session.phase === "rest"
-    ? session.nextBoxingGoal || session.boxingGoal || ""
-    : session.boxingGoal || session.nextBoxingGoal || "";
+  const displayBoxing =
+    session.phase === "rest"
+      ? session.nextBoxingGoal || session.boxingGoal || ""
+      : session.boxingGoal || session.nextBoxingGoal || "";
 
-const displayMuayThai =
-  session.phase === "rest"
-    ? session.nextMuayThaiGoal || session.muayThaiGoal || ""
-    : session.muayThaiGoal || session.nextMuayThaiGoal || "";
+  const displayMuayThai =
+    session.phase === "rest"
+      ? session.nextMuayThaiGoal || session.muayThaiGoal || ""
+      : session.muayThaiGoal || session.nextMuayThaiGoal || "";
 
   const displayRound =
     session.phase === "rest" ? session.globalRound + 1 : session.globalRound;
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      <div className="p-4 flex items-center justify-between gap-4 border-b border-white/5 whitespace-nowrap">
-        <div className="text-3xl md:text-4xl font-black text-white">
+      <div className="flex items-center justify-between gap-4 whitespace-nowrap border-b border-white/5 p-4">
+        <div className="text-3xl font-black text-white md:text-4xl">
           {isWarmup
             ? "WARMING UP"
             : session.phase === "rest"
             ? "REST — UP NEXT"
-            : `ROUND ${displayRound} `}
+            : `ROUND ${displayRound}`}
         </div>
 
-        <div className="flex-1 mx-4">
+        <div className="mx-4 flex-1">
           <GoalDisplay
             boxingGoal={displayBoxing}
             muayThaiGoal={displayMuayThai}
@@ -299,13 +329,13 @@ const displayMuayThai =
         </div>
 
         {session.status === "paused" && (
-          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-bold rounded-full animate-pulse">
+          <span className="animate-pulse rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-bold text-amber-400">
             PAUSED
           </span>
         )}
       </div>
 
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 overflow-auto p-4">
         <AnimatePresence mode="wait">
           <MatchupGrid
             matchups={displayMatchups}
@@ -321,11 +351,14 @@ const displayMuayThai =
         </AnimatePresence>
       </div>
 
-      <div className="p-4 border-t border-white/5">
+      <div className="border-t border-white/5 p-4">
         <SessionControls
           session={session}
           actions={actions}
-          onComplete={() => { stopAllAudio(); actions.complete(); }}
+          onComplete={() => {
+            stopAllAudio();
+            actions.complete();
+          }}
         />
       </div>
     </div>
