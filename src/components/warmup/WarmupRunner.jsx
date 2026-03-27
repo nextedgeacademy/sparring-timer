@@ -60,11 +60,11 @@ function PreviewRoleCard({ title, goalText, accentClass }) {
 
   if (!parsed) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <div className={`mb-2 text-xs font-black uppercase tracking-[0.2em] ${accentClass}`}>
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <div className={`mb-2 text-[10px] font-black uppercase tracking-[0.2em] ${accentClass}`}>
           {title}
         </div>
-        <div className="text-sm font-semibold leading-snug text-white">
+        <div className="text-xs font-semibold leading-snug text-white">
           {goalText}
         </div>
       </div>
@@ -72,24 +72,24 @@ function PreviewRoleCard({ title, goalText, accentClass }) {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <div className={`mb-3 text-xs font-black uppercase tracking-[0.2em] ${accentClass}`}>
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+      <div className={`mb-2 text-[10px] font-black uppercase tracking-[0.2em] ${accentClass}`}>
         {title}
       </div>
 
-      <div className="space-y-2 text-sm">
-        <div className="flex items-start justify-between gap-3 rounded-xl bg-white/5 p-3">
-          <span className="text-xs uppercase tracking-wider text-white/50">
-            Left side
+      <div className="space-y-2 text-xs">
+        <div className="flex items-start justify-between gap-3 rounded-xl bg-white/5 p-2.5">
+          <span className="text-[10px] uppercase tracking-wider text-white/50">
+            Left
           </span>
           <span className="text-right font-bold text-white">
             {parsed.leftRole}
           </span>
         </div>
 
-        <div className="flex items-start justify-between gap-3 rounded-xl bg-white/5 p-3">
-          <span className="text-xs uppercase tracking-wider text-white/50">
-            Right side
+        <div className="flex items-start justify-between gap-3 rounded-xl bg-white/5 p-2.5">
+          <span className="text-[10px] uppercase tracking-wider text-white/50">
+            Right
           </span>
           <span className="text-right font-bold text-white">
             {parsed.rightRole}
@@ -103,9 +103,9 @@ function PreviewRoleCard({ title, goalText, accentClass }) {
 function WarmupMatchupPreview({ matchups, boxingGoal, muayThaiGoal }) {
   if (!matchups || matchups.length === 0) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-        <div className="text-lg font-bold text-white/70">Round 1 Preview</div>
-        <div className="mt-2 text-sm text-white/40">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+        <div className="text-base font-bold text-white/70">Round 1 Preview</div>
+        <div className="mt-1 text-xs text-white/40">
           No round robin names available yet.
         </div>
       </div>
@@ -113,55 +113,58 @@ function WarmupMatchupPreview({ matchups, boxingGoal, muayThaiGoal }) {
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-      <div className="mb-4">
-        <div className="text-2xl font-black leading-none text-white">ROUND 1</div>
-        <div className="mt-1 text-xs uppercase tracking-[0.2em] text-white/45">
-          Preview during warm-up
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+      <div className="mb-3">
+        <div className="text-xl font-black leading-none text-white">ROUND 1 PREVIEW</div>
+        <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/45">
+          Matchups during warm-up
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
         {matchups.map((match, i) => {
           const { leftName, rightName, isRest } = getPreviewNames(match);
 
           return (
             <motion.div
               key={`${leftName}-${rightName}-${i}`}
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.22, delay: i * 0.03 }}
-              className={`rounded-2xl border p-4 ${
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: i * 0.03 }}
+              className={`rounded-2xl border p-3 ${
                 isRest
                   ? "border-amber-700/30 bg-amber-950/30"
                   : "border-green-700/30 bg-green-950/20"
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-black text-white/70">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] font-black text-white/70">
                   {i + 1}
                 </div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                  {isRest ? "Rest" : "Match"}
+                </div>
+              </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="break-words text-lg font-bold leading-tight text-white">
-                    {leftName}
-                  </div>
+              <div className="min-w-0">
+                <div className="break-words text-base font-bold leading-tight text-white">
+                  {leftName}
+                </div>
 
-                  <div
-                    className={`my-1 text-[11px] uppercase tracking-[0.25em] ${
-                      isRest ? "text-amber-400" : "text-green-400"
-                    }`}
-                  >
-                    {isRest ? "" : "vs"}
-                  </div>
+                <div
+                  className={`my-1 text-[10px] uppercase tracking-[0.25em] ${
+                    isRest ? "text-amber-400" : "text-green-400"
+                  }`}
+                >
+                  {isRest ? "" : "vs"}
+                </div>
 
-                  <div
-                    className={`break-words text-lg font-bold leading-tight ${
-                      isRest ? "italic text-amber-300" : "text-white"
-                    }`}
-                  >
-                    {rightName}
-                  </div>
+                <div
+                  className={`break-words text-base font-bold leading-tight ${
+                    isRest ? "italic text-amber-300" : "text-white"
+                  }`}
+                >
+                  {rightName}
                 </div>
               </div>
             </motion.div>
@@ -169,19 +172,21 @@ function WarmupMatchupPreview({ matchups, boxingGoal, muayThaiGoal }) {
         })}
       </div>
 
-      <div className="mt-5 space-y-3">
-        <PreviewRoleCard
-          title="Boxing roles"
-          goalText={boxingGoal}
-          accentClass="text-red-400"
-        />
+      {(boxingGoal || muayThaiGoal) && (
+        <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <PreviewRoleCard
+            title="Boxing roles"
+            goalText={boxingGoal}
+            accentClass="text-red-400"
+          />
 
-        <PreviewRoleCard
-          title="Muay Thai roles"
-          goalText={muayThaiGoal}
-          accentClass="text-blue-400"
-        />
-      </div>
+          <PreviewRoleCard
+            title="Muay Thai roles"
+            goalText={muayThaiGoal}
+            accentClass="text-blue-400"
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -281,12 +286,12 @@ export default function WarmupRunner({
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
-      <div className="flex-1 p-6 lg:p-8">
-        <div className="grid h-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="flex min-h-0 flex-col items-center justify-center">
-            <div className="w-full max-w-4xl">
-              <div className="mb-8">
-                <div className="mb-1 flex justify-between text-xs text-white/30">
+      <div className="flex-1 p-4 lg:p-6">
+        <div className="flex h-full flex-col gap-4">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+            <div className="w-full max-w-5xl">
+              <div className="mb-5">
+                <div className="mb-1 flex justify-between text-[11px] text-white/30">
                   <span>{blockLabel}</span>
                   <span>
                     Segment {idx + 1} / {segments.length}
@@ -304,14 +309,14 @@ export default function WarmupRunner({
                 </div>
               </div>
 
-              <div className="space-y-6 text-center">
+              <div className="space-y-4 text-center">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={segment.type}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className={`inline-block rounded-full border px-6 py-2 text-lg font-black uppercase tracking-widest ${
+                    className={`inline-block rounded-full border px-4 py-1.5 text-sm font-black uppercase tracking-widest ${
                       isWork
                         ? "border-red-500/40 bg-red-600/30 text-red-400"
                         : "border-blue-500/40 bg-blue-600/30 text-blue-400"
@@ -327,7 +332,7 @@ export default function WarmupRunner({
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    className="text-6xl font-black leading-tight text-white md:text-7xl xl:text-8xl"
+                    className="text-3xl font-black leading-tight text-white md:text-4xl xl:text-5xl"
                   >
                     {segment.blockTitle}
                   </motion.h1>
@@ -337,7 +342,7 @@ export default function WarmupRunner({
                   key={timeLeft}
                   initial={{ scale: 1.05 }}
                   animate={{ scale: 1 }}
-                  className={`tabular-nums text-[6rem] font-black leading-none md:text-[9rem] xl:text-[12rem] ${
+                  className={`tabular-nums text-[4.5rem] font-black leading-none md:text-[6rem] xl:text-[7rem] ${
                     timeLeft <= 5 && isWork
                       ? "text-red-400"
                       : timeLeft <= 5
@@ -349,7 +354,7 @@ export default function WarmupRunner({
                 </motion.div>
 
                 {!isWork && segments[idx + 1] && (
-                  <div className="text-2xl text-white/50 md:text-3xl xl:text-4xl">
+                  <div className="text-lg text-white/50 md:text-xl xl:text-2xl">
                     Up Next:{" "}
                     <span className="font-bold text-white">
                       {segments[idx + 1].blockTitle}
@@ -358,7 +363,7 @@ export default function WarmupRunner({
                 )}
 
                 {segment.notes && (
-                  <p className="mx-auto max-w-2xl text-lg italic text-white/40">
+                  <p className="mx-auto max-w-2xl text-sm italic text-white/40 md:text-base">
                     {segment.notes}
                   </p>
                 )}
@@ -372,7 +377,7 @@ export default function WarmupRunner({
             </div>
           </div>
 
-          <div className="min-h-0 xl:overflow-y-auto">
+          <div className="w-full">
             <WarmupMatchupPreview
               matchups={previewMatchups}
               boxingGoal={boxingGoal}
