@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { SkipForward, Pause, Play, SkipBack, Flag } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { SkipForward, Pause, Play, SkipBack, Flag, UserPlus } from "lucide-react";
 
 function fmt(secs) {
   const m = Math.floor(secs / 60);
@@ -76,11 +79,16 @@ export default function WarmupRunner({
   previewMatchups = [],
   boxingGoal = "",
   muayThaiGoal = "",
+  onAddPlayer,
+  divisionCount = 1,
 }) {
   const [idx, setIdx] = useState(0);
   const [timeLeft, setTimeLeft] = useState(segments[0]?.duration || 0);
   const [paused, setPaused] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
+  const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerDiv, setNewPlayerDiv] = useState("0");
 
   const timerRef = useRef(null);
   const workAudioRef = useRef(
@@ -314,8 +322,61 @@ export default function WarmupRunner({
           >
             <Flag className="h-3 w-3" /> Skip Warm-Up
           </Button>
+
+          {onAddPlayer && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowAddPlayer(true)}
+              className="gap-1 border-blue-700 bg-blue-900/50 text-blue-300 hover:bg-blue-800"
+            >
+              <UserPlus className="h-3 w-3" /> Add Player
+            </Button>
+          )}
         </div>
       </div>
+
+      <Dialog open={showAddPlayer} onOpenChange={setShowAddPlayer}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle>Add Late Arrival</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Full Name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              className="bg-gray-800 border-gray-600 text-white"
+            />
+            <Select value={newPlayerDiv} onValueChange={setNewPlayerDiv}>
+              <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: divisionCount }, (_, i) => (
+                  <SelectItem key={i} value={String(i)}>
+                    Division {i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                if (newPlayerName.trim()) {
+                  onAddPlayer(newPlayerName.trim(), parseInt(newPlayerDiv));
+                  setNewPlayerName("");
+                  setShowAddPlayer(false);
+                }
+              }}
+              className="bg-white text-black hover:bg-gray-200"
+            >
+              Add Player
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -224,6 +224,8 @@ export default function Home() {
         previewMatchups={session.matchups}
         boxingGoal={session.doBoxing ? session.boxingGoal || "" : ""}
         muayThaiGoal={session.doMuayThai ? session.muayThaiGoal || "" : ""}
+        onAddPlayer={actions.addPlayer}
+        divisionCount={session.divisionCount || 1}
       />
     );
   }
